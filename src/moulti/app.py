@@ -37,6 +37,25 @@ class Moulti(App):
 		("q", "quit", "Quit Moulti"),
 	]
 
+	def __init__(self):
+		self.init_security()
+		super().__init__()
+
+	def init_security(self):
+		def ids_from_env(env_var_name: str):
+			try:
+				return [int(xid) for xid in os.environ.get(env_var_name, '').split(',')]
+			except Exception:
+				return []
+
+		# By default, allow only the current uid to connect to Moulti:
+		self.allowed_uids = [os.getuid()]
+		self.allowed_gids = []
+
+		# Make this behaviour configurable through environment variables:
+		self.allowed_uids.extend(ids_from_env('MOULTI_ALLOWED_UID'))
+		self.allowed_gids.extend(ids_from_env('MOULTI_ALLOWED_GID'))
+
 	def compose(self) -> ComposeResult:
 		"""Create child widgets for the app."""
 		self.title_label = Label('Moulti', id='header')
@@ -218,6 +237,11 @@ class Moulti(App):
 		finally:
 			self.reply(connection, raddr, message, done=error is None, error=error)
 
+	def check_unix_credentials(self, socket):
+		_, uid, gid = get_unix_credentials(socket)
+		allowed = uid in self.allowed_uids or gid in self.allowed_gids
+		return allowed, uid, gid
+
 	@work(thread=True)
 	async def network_loop(self):
 		current_worker = get_current_worker()
@@ -245,8 +269,14 @@ class Moulti(App):
 
 
 		def accept(socket, mask):
-			connection, address = socket.accept()
-			self.debug(f'{getraddr(connection)}: accepted new connection')
+			connection, _ = socket.accept()
+			raddr = getraddr(connection)
+			self.debug(f'{raddr}: accepted new connection')
+			allowed, uid, gid = self.check_unix_credentials(connection)
+			if not allowed:
+				connection.close()
+				self.debug(f'{raddr}: closed connection: invalid Unix credentials {uid}:{gid}')
+				return
 			connection.setblocking(False)
 			server_selector.register(connection, selectors.EVENT_READ, read)
 

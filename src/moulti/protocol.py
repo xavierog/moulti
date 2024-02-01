@@ -43,6 +43,14 @@ def moulti_listen(bind=MOULTI_SOCKET, backlog=100, blocking=False):
 	except Exception as exc:
 		raise MoultiProtocolException(f'cannot listen on {to_printable(bind)} (with backlog={backlog} and blocking={blocking}): {exc}')
 
+def get_unix_credentials(socket):
+	import struct
+	# struct ucred is { pid_t, uid_t, gid_t }
+	struct_ucred = '3i'
+	unix_credentials = socket.getsockopt(socket_module.SOL_SOCKET, socket_module.SO_PEERCRED, struct.calcsize(struct_ucred))
+	pid, uid, gid = struct.unpack(struct_ucred, unix_credentials)
+	return pid, uid, gid
+
 def moulti_connect(address=MOULTI_SOCKET, bind=None):
 	client_socket = moulti_unix_socket()
 	client_socket.bind(bind if bind else f'\0moulti-client-{os.getpid()}.socket')

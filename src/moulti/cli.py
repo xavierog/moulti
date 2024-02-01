@@ -2,10 +2,10 @@ import sys
 import uuid
 from .protocol import *
 
-def init():
+def init(args: dict):
 	"""Start a new Moulti instance."""
 	from .app import main as init_moulti
-	init_moulti()
+	init_moulti(**args)
 
 def wait(verbose: bool = False, delay: int = 500, max_attempts: int = 0):
 	"""Wait until the Moulti instance is available.
@@ -76,6 +76,11 @@ def add_main_commands(subparsers):
 	# moulti init
 	init_parser = subparsers.add_parser('init', help='Start a new Moulti instance.')
 	init_parser.set_defaults(func=init)
+
+	# moulti run
+	run_parser = subparsers.add_parser('run', help='Start a new Moulti instance and run a command')
+	run_parser.set_defaults(func=init)
+	run_parser.add_argument('command', type=str, nargs='+', help='command to run along with its arguments')
 
 	# moulti wait
 	wait_parser = subparsers.add_parser('wait', help='Wait until the Moulti instance is available.')
@@ -157,9 +162,7 @@ def main():
 	args = vars(arg_parser.parse_args())
 	func = args.pop('func')
 	# Subtlety: func and args are not always used the same way:
-	if func == init:
-		init()
-	elif func == wait:
+	if func == wait:
 		wait(**args)
 	else:
 		func(args)

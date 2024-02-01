@@ -37,8 +37,9 @@ class Moulti(App):
 		("q", "quit", "Quit Moulti"),
 	]
 
-	def __init__(self):
+	def __init__(self, command=None):
 		self.init_security()
+		self.init_command = command
 		super().__init__()
 
 	def init_security(self):
@@ -68,6 +69,20 @@ class Moulti(App):
 
 	def on_ready(self):
 		self.network_loop()
+		if self.init_command is not None:
+			self.exec(self.init_command)
+
+	@work(thread=True)
+	def exec(self, command):
+		import subprocess
+		try:
+			environment = os.environ.copy()
+			environment['MOULTI_RUN'] = 'moulti'
+			self.debug(f'exec(): about to run {command}')
+			completed = subprocess.run(command, env=environment, stdin=subprocess.DEVNULL)
+			self.debug(f'exec(): {command} exited with RC {completed.returncode}')
+		except Exception as exc:
+			self.debug(f'exec(): error running {command}: {str(exc)}')
 
 	def all_steps(self):
 		return self.query('#steps_container Step')
@@ -297,8 +312,8 @@ class Moulti(App):
 		except Exception as exc:
 			self.debug(str(exc))
 
-def main():
-	reply = Moulti().run()
+def main(command=None):
+	reply = Moulti(command=command).run()
 	if reply is not None:
 		print(reply)
 

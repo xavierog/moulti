@@ -223,7 +223,10 @@ class Moulti(App):
 		current_worker = get_current_worker()
 
 		def getraddr(socket):
-			return socket.getpeername().decode("utf-8").replace('\0', '@') + ':fd' + str(socket.fileno())
+			raddr = socket.getpeername()
+			if raddr:
+				raddr = raddr.decode('utf-8').replace('\0', '@')
+			return raddr + ':fd' + str(socket.fileno())
 
 		def read(connection, mask):
 			raddr = getraddr(connection)

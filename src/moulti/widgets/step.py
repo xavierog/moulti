@@ -106,11 +106,26 @@ class Step(Static):
 			margin: 0;
 			border: none;
 		}
+		& CollapsibleTitle {
+			padding: 0;
+			width: 100%;
+		}
+		& CollapsibleTitle:hover {
+			background: $foreground 80%;
+		}
+		& CollapsibleTitle:focus {
+			background: initial;
+		}
 		/* Collapsible contents: */
 		& Contents {
 			/* Leave some space on each side of the contents: */
 			padding-left: 2 !important;
 			padding-right: 1 !important;
+		}
+	}
+	Step:focus, Step:focus-within {
+		& CollapsibleTitle {
+			text-style: bold;
 		}
 	}
 	"""

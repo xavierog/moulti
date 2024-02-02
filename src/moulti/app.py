@@ -167,10 +167,18 @@ class Moulti(App):
 				if data is not None:
 					# Buffer data to avoid queuing partial lines as, down the
 					# line, RichLog.write() only handles complete lines:
-					buffer.append(data)
-					if data.endswith('\n'):
+					# look for the position of \n from the end of the string :
+					eol = data.rfind('\n')
+					if eol == -1: # no \n found, buffer the whole string:
+						buffer.append(data)
+					else:
+						before = data[:eol]
+						after = data[eol+1:]
+						buffer.append(before)
 						self.call_from_thread(step.append, ''.join(buffer))
 						buffer.clear()
+						if after:
+							buffer.append(after)
 				else:
 					# Reached EOF: flush buffer and signal EOF:
 					if buffer:

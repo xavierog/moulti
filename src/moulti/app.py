@@ -88,7 +88,7 @@ class Moulti(App):
 		return self.query('#steps_container Step')
 
 	def init_debug(self):
-		self.debug_step = Step('_.moulti.debug', title='Console', classes='debug', min_height=5, max_height=15)
+		self.debug_step = Step('__moulti_debug', title='Console', classes='debug', min_height=5, max_height=15)
 		self.debug_step.styles.display = 'none'
 		self.debug_step.collapsible.collapsed = False
 

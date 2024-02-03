@@ -19,7 +19,7 @@ def timestamp():
 	timestr = f'{timestr}.{ms:03d} '
 	return timestr
 
-class MoultiMessageException:
+class MoultiMessageException(Exception):
 	pass
 
 class Moulti(App):

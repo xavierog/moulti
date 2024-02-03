@@ -192,7 +192,7 @@ class Moulti(App):
 
 	def step_from_message(self, message):
 		try:
-			return self.query_one('#step_' + str(message['id']))
+			return self.steps_container.query_one('#step_' + str(message['id']))
 		except Exception:
 			return None
 

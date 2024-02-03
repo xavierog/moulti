@@ -6,5 +6,4 @@ class VertScroll(VerticalScroll):
 	"vertical_scrollbar_visible" class when its vertical scrollbar is visible.
 	"""
 	def watch_show_vertical_scrollbar(self):
-		do = self.add_class if self.show_vertical_scrollbar else self.remove_class
-		do('vertical_scrollbar_visible')
+		self.set_class(self.show_vertical_scrollbar, 'vertical_scrollbar_visible')

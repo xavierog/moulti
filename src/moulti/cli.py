@@ -1,6 +1,7 @@
+# ruff: noqa: E501 Line too long
 import sys
 import uuid
-from .protocol import *
+from .protocol import moulti_connect, send_to_moulti, send_json_message, recv_json_message, PRINTABLE_MOULTI_SOCKET
 
 def init(args: dict):
 	"""Start a new Moulti instance."""
@@ -20,7 +21,7 @@ def wait(verbose: bool = False, delay: int = 500, max_attempts: int = 0):
 	while not connected:
 		try:
 			attempts += 1
-			with moulti_connect() as client_socket:
+			with moulti_connect():
 				connected = True
 				break
 		except Exception as exc:

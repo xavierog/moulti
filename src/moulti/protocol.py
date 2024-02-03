@@ -41,14 +41,15 @@ def moulti_listen(bind=MOULTI_SOCKET, backlog=100, blocking=False):
 		server_socket.setblocking(blocking)
 		return server_socket
 	except Exception as exc:
-		raise MoultiProtocolException(f'cannot listen on {to_printable(bind)} (with backlog={backlog} and blocking={blocking}): {exc}')
+		err = f'cannot listen on {to_printable(bind)} (with backlog={backlog} and blocking={blocking}): {exc}'
+		raise MoultiProtocolException(err)
 
 def get_unix_credentials(socket):
-	import struct
+	from struct import calcsize, unpack
 	# struct ucred is { pid_t, uid_t, gid_t }
 	struct_ucred = '3i'
-	unix_credentials = socket.getsockopt(socket_module.SOL_SOCKET, socket_module.SO_PEERCRED, struct.calcsize(struct_ucred))
-	pid, uid, gid = struct.unpack(struct_ucred, unix_credentials)
+	unix_credentials = socket.getsockopt(socket_module.SOL_SOCKET, socket_module.SO_PEERCRED, calcsize(struct_ucred))
+	pid, uid, gid = unpack(struct_ucred, unix_credentials)
 	return pid, uid, gid
 
 def moulti_connect(address=MOULTI_SOCKET, bind=None):
@@ -124,7 +125,7 @@ def data_to_message(data: bytes) -> dict:
 	except UnicodeDecodeError:
 		raise MoultiProtocolException(f'received non UTF-8 {len(data)}-byte line')
 	except JSONDecodeError:
-		raise MoultiProtocolException(f'received non-JSON message')
+		raise MoultiProtocolException('received non-JSON message')
 		return
 
 def message_to_data(message: dict) -> bytes:

@@ -1,4 +1,5 @@
-from .protocol import *
+from .protocol import moulti_listen, get_unix_credentials, send_json_message, recv_json_message
+from .protocol import MoultiConnectionClosedException, MoultiProtocolException
 from .widgets import VertScroll, Step
 import os
 from time import time_ns, localtime, strftime
@@ -6,7 +7,7 @@ from queue import Queue
 import selectors
 from textual import work
 from textual.app import App, ComposeResult
-from textual.widgets import Footer, Static, Label
+from textual.widgets import Footer, Label
 from textual.worker import get_current_worker
 
 def timestamp():
@@ -201,7 +202,7 @@ class Moulti(App):
 			self.reply(connection, raddr, message, done=False, error=f'no such step: {message.get("id")}')
 			return
 		if not file_descriptors:
-			self.reply(connection, raddr, message, done=False, error=f'missing file descriptor for pass operation')
+			self.reply(connection, raddr, message, done=False, error='missing file descriptor for pass operation')
 			return
 		# Set up a queue between two workers:
 		# - one that reads data from the file descriptor and replies to the client;
@@ -239,7 +240,8 @@ class Moulti(App):
 						call = (step.clear,)
 					elif action == 'delete':
 						if step.prevent_deletion:
-							err = f'cannot delete this step as {step.prevent_deletion} ongoing operations depend upon it'
+							err = 'cannot delete this step as '
+							err += f'{step.prevent_deletion} ongoing operations depend upon it'
 							raise MoultiMessageException(err)
 						call = (step.remove,)
 					elif action == 'update':

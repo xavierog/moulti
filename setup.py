@@ -2,13 +2,15 @@
 
 from setuptools import setup
 
+short_description = 'Moulti is a Terminal User Interface (TUI) that displays the results of any process involving'
+short_description += 'multiple steps.'
 with open('README.md', 'r') as readme:
 	long_description = readme.read()
 
 setup(
 	name='moulti',
 	version='1.0.0',
-	description='Moulti is a Terminal User Interface (TUI) that displays the results of any process involving multiple steps.',
+	description=short_description,
 	long_description=long_description,
 	long_description_content_type='text/markdown',
 	author='Xavier G.',

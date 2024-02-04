@@ -1,5 +1,6 @@
 import os
 import re
+from struct import calcsize, unpack
 from socket import socket as Socket, AF_UNIX, SOCK_STREAM, SOL_SOCKET, SO_PEERCRED, recv_fds, send_fds
 import json
 from json.decoder import JSONDecodeError
@@ -46,10 +47,9 @@ def moulti_listen(bind: str = MOULTI_SOCKET, backlog: int = 100, blocking: bool 
 		return server_socket
 	except Exception as exc:
 		err = f'cannot listen on {to_printable(bind)} (with backlog={backlog} and blocking={blocking}): {exc}'
-		raise MoultiProtocolException(err)
+		raise MoultiProtocolException(err) from exc
 
 def get_unix_credentials(socket: Socket) -> tuple[int, int, int]:
-	from struct import calcsize, unpack
 	# struct ucred is { pid_t, uid_t, gid_t }
 	struct_ucred = '3i'
 	unix_credentials = socket.getsockopt(SOL_SOCKET, SO_PEERCRED, calcsize(struct_ucred))
@@ -99,8 +99,8 @@ def read_tlv_data_from_socket(socket: Socket, max_fds: int = 1) -> tuple[str, by
 	except MoultiConnectionClosedException as mcce:
 		mcce.anomaly = mcce.expected_bytes != preamble_fixed_length
 		raise mcce
-	except UnicodeDecodeError:
-		raise MoultiProtocolException('non-ASCII preamble: {str(preamble)}')
+	except UnicodeDecodeError as ude:
+		raise MoultiProtocolException('non-ASCII preamble: {str(preamble)}') from ude
 	rem = re.match(preamble_regex, preamble)
 	if not rem:
 		raise MoultiProtocolException(f'invalid preamble: {preamble}')
@@ -126,11 +126,10 @@ def data_to_message(data: bytes) -> Message:
 		string = data.decode('utf-8')
 		message = json.loads(string)
 		return message
-	except UnicodeDecodeError:
-		raise MoultiProtocolException(f'received non UTF-8 {len(data)}-byte line')
-	except JSONDecodeError:
-		raise MoultiProtocolException('received non-JSON message')
-		return
+	except UnicodeDecodeError as ude:
+		raise MoultiProtocolException(f'received non UTF-8 {len(data)}-byte line') from ude
+	except JSONDecodeError as jde:
+		raise MoultiProtocolException('received non-JSON message') from jde
 
 def message_to_data(message: Message) -> bytes:
 	string = json.dumps(message)

@@ -10,7 +10,7 @@ class Step(Static):
 	Visually speaking, it is essentially a collapsible text area surrounded
 	with optional text lines.
 	"""
-	def __init__(self, id: 'str', **kwargs: str|int|bool):
+	def __init__(self, id: str, **kwargs: str|int|bool): # pylint: disable=redefined-builtin
 		self.collapsible = Collapsible(title=id)
 		self.top_label = Static('', classes='top_text')
 		self.log_widget = RichLog(highlight=False)

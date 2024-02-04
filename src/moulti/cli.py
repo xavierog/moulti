@@ -10,7 +10,7 @@ Args = dict[str, Any]
 
 def init(args: dict) -> None:
 	"""Start a new Moulti instance."""
-	from .app import main as init_moulti
+	from .app import main as init_moulti # pylint: disable=import-outside-toplevel
 	init_moulti(**args)
 
 def wait(verbose: bool = False, delay: int = 500, max_attempts: int = 0) -> None:
@@ -20,7 +20,7 @@ def wait(verbose: bool = False, delay: int = 500, max_attempts: int = 0) -> None
 		delay: number of milliseconds between two connection attempts
 		max_attempts: maximum number of attempts before giving up; 0 means "never give up"
 	"""
-	import time
+	import time # pylint: disable=import-outside-toplevel
 	connected = False
 	attempts = 0
 	while not connected:
@@ -54,7 +54,6 @@ def send_to_moulti_and_handle_reply(message: Message) -> None:
 
 def pass_stdin(args: Args) -> None:
 	"""Pass the stdin file descriptor to Moulti and inject everything read from it into a given step."""
-	import sys
 	moulti_socket = moulti_connect()
 	step_id = args['id']
 	# Clear the target step unless told not to through --append or --no-clear:
@@ -166,7 +165,7 @@ def main() -> None:
 	args = vars(arg_parser.parse_args())
 	func = args.pop('func')
 	# Subtlety: func and args are not always used the same way:
-	if func == wait:
+	if func == wait: # pylint: disable=comparison-with-callable
 		wait(**args)
 	else:
 		func(args)

@@ -1,6 +1,6 @@
 import os
 import selectors
-from typing import Any, cast
+from typing import Any, cast, Iterator
 from socket import socket as Socket
 from time import time_ns, localtime, strftime
 from queue import Queue
@@ -8,7 +8,6 @@ from textual import work
 from textual.app import App, ComposeResult
 from textual.widgets import Footer, Label
 from textual.worker import get_current_worker
-from textual.css.query import DOMQuery
 from .protocol import moulti_listen, get_unix_credentials, send_json_message, recv_json_message
 from .protocol import MoultiConnectionClosedException, MoultiProtocolException, Message, FDs
 from .widgets import VertScroll, Step
@@ -43,6 +42,8 @@ class Moulti(App):
 
 	def __init__(self, command: list[str]|None = None):
 		self.init_security()
+		self.init_widgets()
+		self.init_debug()
 		self.init_command = command
 		super().__init__()
 
@@ -61,14 +62,16 @@ class Moulti(App):
 		self.allowed_uids.extend(ids_from_env('MOULTI_ALLOWED_UID'))
 		self.allowed_gids.extend(ids_from_env('MOULTI_ALLOWED_GID'))
 
+	def init_widgets(self) -> None:
+		self.title_label = Label('Moulti', id='header')
+		self.steps_container = VertScroll(id='steps_container')
+		self.footer = Footer()
+
 	def compose(self) -> ComposeResult:
 		"""Create child widgets for the app."""
-		self.title_label = Label('Moulti', id='header')
 		yield self.title_label
-		self.steps_container = VertScroll(id='steps_container')
 		yield self.steps_container
-		yield Footer()
-		self.init_debug()
+		yield self.footer
 		yield self.debug_step
 
 	def on_ready(self) -> None:
@@ -78,18 +81,18 @@ class Moulti(App):
 
 	@work(thread=True)
 	def exec(self, command: list[str]) -> None:
-		import subprocess
+		import subprocess # pylint: disable=import-outside-toplevel
 		try:
 			environment = os.environ.copy()
 			environment['MOULTI_RUN'] = 'moulti'
 			self.logdebug(f'exec(): about to run {command}')
-			completed = subprocess.run(command, env=environment, stdin=subprocess.DEVNULL)
+			completed = subprocess.run(command, env=environment, stdin=subprocess.DEVNULL, check=False)
 			self.logdebug(f'exec(): {command} exited with RC {completed.returncode}')
 		except Exception as exc:
 			self.logdebug(f'exec(): error running {command}: {str(exc)}')
 
-	def all_steps(self) -> DOMQuery:
-		return self.query('#steps_container Step')
+	def all_steps(self) -> Iterator[Step]:
+		return cast(Iterator[Step], self.query('#steps_container Step').results())
 
 	def init_debug(self) -> None:
 		self.debug_step = Step('__moulti_debug', title='Console', classes='debug', min_height=5, max_height=15)
@@ -226,7 +229,8 @@ class Moulti(App):
 		command = message.get('command')
 		# Deal with special cases:
 		if command == 'pass':
-			return self.handle_pass_command(connection, raddr, message, file_descriptors)
+			self.handle_pass_command(connection, raddr, message, file_descriptors)
+			return
 		# Analyse the message to determine what to call or what error to return:
 		call: Any = ()
 		error = None
@@ -237,8 +241,7 @@ class Moulti(App):
 				if action == 'add':
 					if step:
 						raise MoultiMessageException(f'step {message.get("id")} already exists')
-					else:
-						call = (self.steps_container.mount, Step(**message))
+					call = (self.steps_container.mount, Step(**message))
 				else:
 					# All other actions require an existing step:
 					if not step:
@@ -288,7 +291,7 @@ class Moulti(App):
 				raddr = raddr.decode('utf-8').replace('\0', '@')
 			return raddr + ':fd' + str(socket.fileno())
 
-		def read(connection: Socket, mask: int) -> None:
+		def read(connection: Socket) -> None:
 			raddr = getraddr(connection)
 			try:
 				message, file_descriptors = recv_json_message(connection, max_fds=1)
@@ -304,7 +307,7 @@ class Moulti(App):
 			self.handle_message(connection, raddr, message, file_descriptors)
 
 
-		def accept(socket: Socket, mask: int) -> None:
+		def accept(socket: Socket) -> None:
 			connection, _ = socket.accept()
 			raddr = getraddr(connection)
 			self.logdebug(f'{raddr}: accepted new connection')
@@ -328,8 +331,8 @@ class Moulti(App):
 
 			while not current_worker.is_cancelled:
 				events = server_selector.select(1)
-				for key, mask in events:
-					key.data(key.fileobj, mask)
+				for key, _ in events:
+					key.data(key.fileobj)
 		except Exception as exc:
 			self.logdebug(str(exc))
 

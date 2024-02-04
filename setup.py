@@ -18,7 +18,6 @@ setup(
 	url='https://github.com/xavierog/moulti',
 	packages=['moulti'],
 	classifiers=[
-		# Implemented and tested with Python 3.11; unlikely to run with Python < 3.9 due to socket.send_fds/recv_fds
 		'Environment :: Console :: Curses',
 		'Intended Audience :: Developers',
 		'Intended Audience :: System Administrators',

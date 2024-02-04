@@ -30,8 +30,6 @@ class Moulti(App):
 	It is visually similar to https://github.com/dankilman/multiplex but unlike
 	it, moulti does not do anything until instructed to.
 	"""
-
-	CSS_PATH = 'moulti.css'
 	BINDINGS = [
 		("c", "toggle_debug", "Toggle console"),
 		("d", "toggle_dark", "Toggle dark mode"),
@@ -335,6 +333,40 @@ class Moulti(App):
 					key.data(key.fileobj)
 		except Exception as exc:
 			self.logdebug(str(exc))
+
+	DEFAULT_CSS = """
+	/* Styles inherited by all widgets: */
+	$scrollbar_background: #b2b2b2;
+	$scrollbar_inactive_bar: #686868;
+	$scrollbar_active_bar: $accent-darken-1;
+	Widget {
+		/* By default, in dark mode, scrollbars are not rendered clearly; enforce their colours: */
+		scrollbar-background: $scrollbar_background;
+		scrollbar-background-hover: $scrollbar_background;
+		scrollbar-background-active: $scrollbar_background;
+		scrollbar-color: $scrollbar_inactive_bar;
+		scrollbar-color-active: $scrollbar_active_bar;
+		scrollbar-color-hover: $scrollbar_active_bar;
+	}
+
+	/* One-line title at the top of the screen: */
+	#header {
+		text-align: center;
+		/* For the title to appear centered, the widget must occupy all available width: */
+		width: 100%;
+		background: $accent;
+		color: auto;
+	}
+
+	/* Leave a thin space between steps and their container's vertical scrollbar: */
+	#steps_container.vertical_scrollbar_visible > Widget {
+		margin-right: 1;
+	}
+	"""
+
+	# Allow end users to redefine Moulti's look and feel through an optional
+	# custom CSS set through an environment variable:
+	CSS_PATH = os.environ.get('MOULTI_CUSTOM_CSS')
 
 def main(command: list[str]|None = None) -> None:
 	reply = Moulti(command=command).run()

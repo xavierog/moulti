@@ -1,15 +1,19 @@
 import os
 import re
-import socket as socket_module
+from socket import socket as Socket, AF_UNIX, SOCK_STREAM, SOL_SOCKET, SO_PEERCRED, recv_fds, send_fds
 import json
 from json.decoder import JSONDecodeError
+from typing import Any
 
-def from_printable(socket_path):
+Message = dict[str, Any]
+FDs = list[int]
+
+def from_printable(socket_path: str) -> str:
 	if socket_path and socket_path[0] == '@':
 		socket_path = '\0' + socket_path[1:]
 	return socket_path
 
-def to_printable(socket_path):
+def to_printable(socket_path: str) -> str:
 	if socket_path and socket_path[0] == '\0':
 		socket_path = '@' + socket_path[1:]
 	return socket_path
@@ -22,18 +26,18 @@ class MoultiProtocolException(Exception):
 	pass
 
 class MoultiConnectionClosedException(Exception):
-	def __init__(self, expected_bytes=0):
+	def __init__(self, expected_bytes: int = 0):
 		self.expected_bytes = expected_bytes
 		self.anomaly = True
-	def __str__(self):
+	def __str__(self) -> str:
 		if self.anomaly:
 			return f'connection closed while expecting {self.expected_bytes} bytes'
 		return 'connection closed'
 
-def moulti_unix_socket():
-	return socket_module.socket(socket_module.AF_UNIX, socket_module.SOCK_STREAM, 0)
+def moulti_unix_socket() -> Socket:
+	return Socket(AF_UNIX, SOCK_STREAM, 0)
 
-def moulti_listen(bind=MOULTI_SOCKET, backlog=100, blocking=False):
+def moulti_listen(bind: str = MOULTI_SOCKET, backlog: int = 100, blocking: bool = False) -> Socket:
 	try:
 		server_socket = moulti_unix_socket()
 		server_socket.bind(bind)
@@ -44,21 +48,21 @@ def moulti_listen(bind=MOULTI_SOCKET, backlog=100, blocking=False):
 		err = f'cannot listen on {to_printable(bind)} (with backlog={backlog} and blocking={blocking}): {exc}'
 		raise MoultiProtocolException(err)
 
-def get_unix_credentials(socket):
+def get_unix_credentials(socket: Socket) -> tuple[int, int, int]:
 	from struct import calcsize, unpack
 	# struct ucred is { pid_t, uid_t, gid_t }
 	struct_ucred = '3i'
-	unix_credentials = socket.getsockopt(socket_module.SOL_SOCKET, socket_module.SO_PEERCRED, calcsize(struct_ucred))
+	unix_credentials = socket.getsockopt(SOL_SOCKET, SO_PEERCRED, calcsize(struct_ucred))
 	pid, uid, gid = unpack(struct_ucred, unix_credentials)
 	return pid, uid, gid
 
-def moulti_connect(address=MOULTI_SOCKET, bind=None):
+def moulti_connect(address: str = MOULTI_SOCKET, bind: str | None = None) -> Socket:
 	client_socket = moulti_unix_socket()
 	client_socket.bind(bind if bind else f'\0moulti-client-{os.getpid()}.socket')
 	client_socket.connect(address)
 	return client_socket
 
-def read_fixed_amount_from_socket(socket, amount: int):
+def read_fixed_amount_from_socket(socket: Socket, amount: int) -> bytes:
 	data = bytes()
 	if amount <= 0:
 		return data
@@ -70,7 +74,7 @@ def read_fixed_amount_from_socket(socket, amount: int):
 		amount -= len(new_data)
 	return data
 
-def write_fixed_amount_to_socket(socket, data: bytes):
+def write_fixed_amount_to_socket(socket: Socket, data: bytes) -> None:
 	if not data:
 		return
 	to_send = len(data)
@@ -80,15 +84,15 @@ def write_fixed_amount_to_socket(socket, data: bytes):
 		to_send -= just_sent
 		sent += just_sent
 
-def read_tlv_data_from_socket(socket, max_fds=1):
+def read_tlv_data_from_socket(socket: Socket, max_fds: int = 1) -> tuple[str, bytes, FDs]:
 	# This is a simple text-based TLV (type-length-value) protocol.
 	# preamble examples: ":JSON:0000000002048:" ":TXT_:0000000002048:"
 	preamble_regex = r'^:[A-Z_]{4}:[0-9]{13}:$'
 	preamble_fixed_length = 20
 
-	file_descriptors = []
+	file_descriptors: FDs = []
 	if max_fds > 0:
-		_, file_descriptors, _, _ = socket_module.recv_fds(socket, 0, max_fds)
+		_, file_descriptors, _, _ = recv_fds(socket, 0, max_fds)
 
 	try:
 		preamble = read_fixed_amount_from_socket(socket, preamble_fixed_length).decode('ascii')
@@ -107,17 +111,17 @@ def read_tlv_data_from_socket(socket, max_fds=1):
 
 	return data_type, read_fixed_amount_from_socket(socket, data_length), file_descriptors
 
-def write_tlv_data_to_socket(socket, data: bytes, data_type: str = 'JSON', fds=None):
+def write_tlv_data_to_socket(socket: Socket, data: bytes, data_type: str = 'JSON', fds: FDs|None = None) -> None:
 	data_type = data_type + '____'
 	data_length = len(data)
 	preamble = f':{data_type[0:4]}:{data_length:013}:'.encode('ascii')
 	if fds:
-		socket_module.send_fds(socket, [preamble], [fd.fileno() for fd in fds])
+		send_fds(socket, [preamble], fds)
 	else:
 		write_fixed_amount_to_socket(socket, preamble)
 	write_fixed_amount_to_socket(socket, data)
 
-def data_to_message(data: bytes) -> dict:
+def data_to_message(data: bytes) -> Message:
 	try:
 		string = data.decode('utf-8')
 		message = json.loads(string)
@@ -128,22 +132,22 @@ def data_to_message(data: bytes) -> dict:
 		raise MoultiProtocolException('received non-JSON message')
 		return
 
-def message_to_data(message: dict) -> bytes:
+def message_to_data(message: Message) -> bytes:
 	string = json.dumps(message)
 	data = string.encode('utf-8')
 	return data
 
-def send_json_message(socket, message, fds=None):
+def send_json_message(socket: Socket, message: Message, fds: FDs | None = None) -> None:
 	data = message_to_data(message)
 	write_tlv_data_to_socket(socket, data, 'JSON', fds)
 
-def recv_json_message(socket, max_fds=1):
+def recv_json_message(socket: Socket, max_fds: int = 1) -> tuple[Message, FDs]:
 	data_type, data, file_descriptors = read_tlv_data_from_socket(socket, max_fds)
 	if data_type != 'JSON':
 		raise MoultiProtocolException('received non-JSON message')
 	return data_to_message(data), file_descriptors
 
-def send_to_moulti(message, wait_for_reply=True):
+def send_to_moulti(message: Message, wait_for_reply: bool = True) -> Message | None:
 	with moulti_connect() as moulti_socket:
 		send_json_message(moulti_socket, message)
 		if wait_for_reply:

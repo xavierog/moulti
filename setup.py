@@ -24,7 +24,7 @@ setup(
 		'Intended Audience :: System Administrators',
 		'License :: OSI Approved :: MIT License',
 		'Operating System :: POSIX :: Linux', # moulti was never tested outside Linux
-		'Programming Language :: Python :: 3 :: Only', 
+		'Programming Language :: Python :: 3 :: Only',
 		'Topic :: System :: Logging',
 		'Topic :: Utilities',
 	],

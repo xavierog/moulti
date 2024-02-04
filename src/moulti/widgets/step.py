@@ -1,5 +1,8 @@
+from textual.app import ComposeResult
 from textual.widgets import Static, RichLog, Collapsible
 from rich.text import Text
+
+ANSI_ESCAPE_SEQUENCE = '\x1b'
 
 class Step(Static):
 	"""
@@ -7,7 +10,7 @@ class Step(Static):
 	Visually speaking, it is essentially a collapsible text area surrounded
 	with optional text lines.
 	"""
-	def __init__(self, id, **kwargs):
+	def __init__(self, id: 'str', **kwargs: str|int|bool):
 		self.collapsible = Collapsible(title=id)
 		self.top_label = Static('', classes='top_text')
 		self.log_widget = RichLog(highlight=False)
@@ -22,35 +25,37 @@ class Step(Static):
 		# This attribute is meant to prevent deletion of a step while content
 		# is being appended to it:
 		self.prevent_deletion = 0
-		super().__init__(id='step_' + id, classes=kwargs.get('classes', ''))
 
-	def compose(self):
+		step_classes = str(kwargs.get('classes', ''))
+		super().__init__(id='step_' + id, classes=step_classes)
+
+	def compose(self) -> ComposeResult:
 		with self.collapsible:
 			yield self.top_label
 			yield self.log_widget
 			yield self.bottom_label
 
-	def on_mount(self):
-		self.update(self.init_kwargs)
+	def on_mount(self) -> None:
+		self.update_properties(self.init_kwargs)
 
-	def update(self, kwargs):
+	def update_properties(self, kwargs: dict[str, str|int|bool]) -> None:
 		if 'classes' in kwargs:
-			self.classes = kwargs['classes']
+			self.classes = str(kwargs['classes'])
 		if 'title' in kwargs:
-			self.collapsible.title = kwargs['title'] if kwargs['title'] else self.id[5:]
+			self.collapsible.title = str(kwargs['title']) if kwargs['title'] else str(self.id)[5:]
 		if 'collapsed' in kwargs:
 			self.collapsible.collapsed = bool(kwargs['collapsed'])
 		if 'top_text' in kwargs:
-			self.top_text = kwargs['top_text']
+			self.top_text = str(kwargs['top_text'])
 			self.top_label.update(self.top_text)
 		self.top_label.styles.display = 'block' if self.top_text else 'none'
 		if 'bottom_text' in kwargs:
-			self.bottom_text = kwargs['bottom_text']
+			self.bottom_text = str(kwargs['bottom_text'])
 			self.bottom_label.update(self.bottom_text)
 		self.bottom_label.styles.display = 'block' if self.bottom_text else 'none'
 		if 'text' in kwargs:
 			self.clear()
-			self.append(kwargs['text'])
+			self.append(str(kwargs['text']))
 		if 'min_height' in kwargs:
 			self.min_height = int(kwargs['min_height'])
 		if 'max_height' in kwargs:
@@ -58,15 +63,19 @@ class Step(Static):
 		self.log_widget.styles.min_height = self.min_height
 		self.log_widget.styles.max_height = self.max_height if self.max_height > 0 else None
 
-	def clear(self, unused=None):
+	def clear(self) -> None:
 		self.log_widget.clear()
 
-	def append(self, text):
+	def append(self, text: str) -> None:
+		# RichLog does not handle partial lines and thus always adds a trailing \n; therefore, we must strip one (and
+		# only one) trailing \n, if present:
 		if text and text[-1] == '\n':
 			text = text[:-1]
-		if '\x1b' in text:
-			text = Text.from_ansi(text)
-		self.log_widget.write(text)
+		# Deal with colored text; the text_to_write variable is made necessary by mypy.
+		text_to_write: str | Text = text
+		if ANSI_ESCAPE_SEQUENCE in text:
+			text_to_write = Text.from_ansi(text)
+		self.log_widget.write(text_to_write)
 
 	DEFAULT_CSS = """
 	$step_default: $primary;

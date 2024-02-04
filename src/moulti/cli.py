@@ -1,14 +1,19 @@
 # ruff: noqa: E501 Line too long
 import sys
 import uuid
-from .protocol import moulti_connect, send_to_moulti, send_json_message, recv_json_message, PRINTABLE_MOULTI_SOCKET
+from argparse import ArgumentParser, BooleanOptionalAction, _SubParsersAction
+from .protocol import moulti_connect, send_to_moulti, send_json_message, recv_json_message
+from .protocol import Message, PRINTABLE_MOULTI_SOCKET
+from typing import Any, cast
 
-def init(args: dict):
+Args = dict[str, Any]
+
+def init(args: dict) -> None:
 	"""Start a new Moulti instance."""
 	from .app import main as init_moulti
 	init_moulti(**args)
 
-def wait(verbose: bool = False, delay: int = 500, max_attempts: int = 0):
+def wait(verbose: bool = False, delay: int = 500, max_attempts: int = 0) -> None:
 	"""Wait until the Moulti instance is available.
 	Args:
 		verbose: if True, output the reason why each connection attempt failed
@@ -33,21 +38,21 @@ def wait(verbose: bool = False, delay: int = 500, max_attempts: int = 0):
 			time.sleep(delay / 1000.0)
 	sys.exit(0 if connected else 1)
 
-def handle_reply(reply):
+def handle_reply(reply: Message) -> None:
 	success = reply.get('done') is True
 	if not success:
 		fallback = 'alas, no error message was provided.'
 		print('Something went wrong: ' + reply.get('error', fallback))
 	sys.exit(0 if success else 1)
 
-def send_to_moulti_and_handle_reply(message):
+def send_to_moulti_and_handle_reply(message: Message) -> None:
 	# Setting a message id yields smaller replies as the server does not have
 	# to send the original data again:
 	message = {'msgid': str(uuid.uuid4()), **message}
-	reply = send_to_moulti(message)
+	reply = cast(dict[str, Any], send_to_moulti(message))
 	handle_reply(reply)
 
-def pass_stdin(args):
+def pass_stdin(args: Args) -> None:
 	"""Pass the stdin file descriptor to Moulti and inject everything read from it into a given step."""
 	import sys
 	moulti_socket = moulti_connect()
@@ -57,7 +62,7 @@ def pass_stdin(args):
 		send_json_message(moulti_socket, {'command': 'step', 'action': 'clear', 'id': step_id})
 		reply, _ = recv_json_message(moulti_socket, 0)
 	pass_message = {'command': 'pass', 'id': step_id, 'read_size': args['read_size']}
-	send_json_message(moulti_socket, pass_message, [sys.stdin])
+	send_json_message(moulti_socket, pass_message, [sys.stdin.fileno()])
 	# At this stage, the remote Moulti process has the file descriptor and is
 	# expected to read lines from it. On our side, we need to remain up &
 	# running, otherwise the line-emitting process gets a SIGPIPE.
@@ -69,11 +74,11 @@ def pass_stdin(args):
 
 set_options = step_add = step_delete = step_clear = step_append = send_to_moulti_and_handle_reply
 
-def step_update(args):
+def step_update(args: Args) -> None:
 	no_none_args = {k:v for (k,v) in args.items() if v is not None}
 	send_to_moulti_and_handle_reply(no_none_args)
 
-def add_main_commands(subparsers):
+def add_main_commands(subparsers: _SubParsersAction) -> None:
 	# moulti init
 	init_parser = subparsers.add_parser('init', help='Start a new Moulti instance.')
 	init_parser.set_defaults(func=init)
@@ -95,7 +100,7 @@ def add_main_commands(subparsers):
 	set_parser.set_defaults(func=set_options, command='set')
 	set_parser.add_argument('--title', '-t', type=str, help='title displayed at the top of the screen')
 
-def add_pass_command(subparsers):
+def add_pass_command(subparsers: _SubParsersAction) -> None:
 	# moulti pass
 	pass_parser = subparsers.add_parser('pass', help='Pass standard input to an existing Moulti step')
 	pass_parser.set_defaults(func=pass_stdin)
@@ -103,8 +108,7 @@ def add_pass_command(subparsers):
 	pass_parser.add_argument('--append', '--no-clear', '-a', dest='append', action='store_true', help='do not clear the target step')
 	pass_parser.add_argument('--read-size', '-rs', dest='read_size', type=int, default=64*1024, help='read size')
 
-def add_step_options(parser, none=False):
-	from argparse import BooleanOptionalAction
+def add_step_options(parser: ArgumentParser, none: bool = False) -> None:
 	"""Options common to step add (with actual default values) and step update (with None default values)."""
 	parser.add_argument('--collapsed', action=BooleanOptionalAction, default=None if none else False, help='whether to collapse the step')
 	parser.add_argument('--title', type=str, default=None, help='step title, always visible')
@@ -115,7 +119,7 @@ def add_step_options(parser, none=False):
 	parser.add_argument('--max-height', '-Mh', type=int, default=None if none else 25, help='maximum content height')
 	parser.add_argument('--classes', '-c', type=str, default=None if none else 'standard', help='maximum content height')
 
-def add_step_commands(step_subparsers):
+def add_step_commands(step_subparsers: _SubParsersAction) -> None:
 	# moulti step add
 	step_add_parser = step_subparsers.add_parser('add', help='Add a new step to Moulti.')
 	step_add_parser.set_defaults(func=step_add, command='step', action='add')
@@ -144,9 +148,8 @@ def add_step_commands(step_subparsers):
 	step_append_parser.add_argument('id', type=str, help='unique identifier')
 	step_append_parser.add_argument('text', type=str, nargs='+', help='strings to append')
 
-def build_arg_parser():
-	import argparse
-	arg_parser = argparse.ArgumentParser(prog='moulti', description='step-by-step logs')
+def build_arg_parser() -> ArgumentParser:
+	arg_parser = ArgumentParser(prog='moulti', description='step-by-step logs')
 	subparsers = arg_parser.add_subparsers(required=True)
 	# moulti init, moulti wait:
 	add_main_commands(subparsers)
@@ -158,7 +161,7 @@ def build_arg_parser():
 	add_pass_command(subparsers)
 	return arg_parser
 
-def main():
+def main() -> None:
 	arg_parser = build_arg_parser()
 	args = vars(arg_parser.parse_args())
 	func = args.pop('func')

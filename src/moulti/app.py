@@ -82,11 +82,11 @@ class Moulti(App):
 		try:
 			environment = os.environ.copy()
 			environment['MOULTI_RUN'] = 'moulti'
-			self.debug(f'exec(): about to run {command}')
+			self.logdebug(f'exec(): about to run {command}')
 			completed = subprocess.run(command, env=environment, stdin=subprocess.DEVNULL)
-			self.debug(f'exec(): {command} exited with RC {completed.returncode}')
+			self.logdebug(f'exec(): {command} exited with RC {completed.returncode}')
 		except Exception as exc:
-			self.debug(f'exec(): error running {command}: {str(exc)}')
+			self.logdebug(f'exec(): error running {command}: {str(exc)}')
 
 	def all_steps(self) -> DOMQuery:
 		return self.query('#steps_container Step')
@@ -96,7 +96,7 @@ class Moulti(App):
 		self.debug_step.styles.display = 'none'
 		self.debug_step.collapsible.collapsed = False
 
-	def debug(self, line: str) -> None:
+	def logdebug(self, line: str) -> None:
 		line = timestamp() + line
 		worker = get_current_worker()
 		if worker is None:
@@ -135,10 +135,10 @@ class Moulti(App):
 				message = {'msgid': msgid, **kwargs}
 			else:
 				message = {**message, **kwargs}
-			self.debug(f'{raddr}: <= message={message}')
+			self.logdebug(f'{raddr}: <= message={message}')
 			send_json_message(connection, message)
 		except Exception as exc:
-			self.debug(f'{raddr}: reply(): kwargs={kwargs}: {exc}')
+			self.logdebug(f'{raddr}: reply(): kwargs={kwargs}: {exc}')
 
 	@work(thread=True)
 	async def append_from_file_descriptor_to_queue(
@@ -162,7 +162,7 @@ class Moulti(App):
 				queue.put_nowait(None)
 		except Exception as exc:
 			error = str(exc)
-			self.debug(f'{raddr}: pass: {error}')
+			self.logdebug(f'{raddr}: pass: {error}')
 		self.reply(connection, raddr, message, done=error is None, error=error)
 
 	@work(thread=True)
@@ -196,7 +196,7 @@ class Moulti(App):
 						self.call_from_thread(step.append, ''.join(buffer))
 					break
 		except Exception as exc:
-			self.debug(f'append_from_queue_to_step: {exc}')
+			self.logdebug(f'append_from_queue_to_step: {exc}')
 		finally:
 			step.prevent_deletion -= 1
 
@@ -295,23 +295,23 @@ class Moulti(App):
 			except MoultiConnectionClosedException as mcce:
 				server_selector.unregister(connection)
 				connection.close()
-				self.debug(f'{raddr}: {mcce}')
+				self.logdebug(f'{raddr}: {mcce}')
 				return
 			except MoultiProtocolException as mpe:
-				self.debug(f'{raddr}: {mpe}')
+				self.logdebug(f'{raddr}: {mpe}')
 				return
-			self.debug(f'{raddr}: => message={message} file_descriptors={file_descriptors}')
+			self.logdebug(f'{raddr}: => message={message} file_descriptors={file_descriptors}')
 			self.handle_message(connection, raddr, message, file_descriptors)
 
 
 		def accept(socket: Socket, mask: int) -> None:
 			connection, _ = socket.accept()
 			raddr = getraddr(connection)
-			self.debug(f'{raddr}: accepted new connection')
+			self.logdebug(f'{raddr}: accepted new connection')
 			allowed, uid, gid = self.check_unix_credentials(connection)
 			if not allowed:
 				connection.close()
-				self.debug(f'{raddr}: closed connection: invalid Unix credentials {uid}:{gid}')
+				self.logdebug(f'{raddr}: closed connection: invalid Unix credentials {uid}:{gid}')
 				return
 			connection.setblocking(False)
 			server_selector.register(connection, selectors.EVENT_READ, read)
@@ -331,7 +331,7 @@ class Moulti(App):
 				for key, mask in events:
 					key.data(key.fileobj, mask)
 		except Exception as exc:
-			self.debug(str(exc))
+			self.logdebug(str(exc))
 
 def main(command: list[str]|None = None) -> None:
 	reply = Moulti(command=command).run()

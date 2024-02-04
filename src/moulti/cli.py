@@ -1,10 +1,10 @@
 # ruff: noqa: E501 Line too long
 import sys
 import uuid
+from typing import Any, cast
 from argparse import ArgumentParser, BooleanOptionalAction, _SubParsersAction
 from .protocol import moulti_connect, send_to_moulti, send_json_message, recv_json_message
 from .protocol import Message, PRINTABLE_MOULTI_SOCKET
-from typing import Any, cast
 
 Args = dict[str, Any]
 

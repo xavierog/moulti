@@ -1,17 +1,17 @@
-from .protocol import moulti_listen, get_unix_credentials, send_json_message, recv_json_message
-from .protocol import MoultiConnectionClosedException, MoultiProtocolException, Message, FDs
-from .widgets import VertScroll, Step
 import os
+import selectors
+from typing import Any, cast
+from socket import socket as Socket
 from time import time_ns, localtime, strftime
 from queue import Queue
-import selectors
 from textual import work
 from textual.app import App, ComposeResult
 from textual.widgets import Footer, Label
 from textual.worker import get_current_worker
 from textual.css.query import DOMQuery
-from typing import Any, cast
-from socket import socket as Socket
+from .protocol import moulti_listen, get_unix_credentials, send_json_message, recv_json_message
+from .protocol import MoultiConnectionClosedException, MoultiProtocolException, Message, FDs
+from .widgets import VertScroll, Step
 
 def timestamp() -> str:
 	timestamp_ns = time_ns()

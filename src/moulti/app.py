@@ -155,7 +155,12 @@ class Moulti(App):
 		try:
 			# Read lines from the given file descriptor:
 			with os.fdopen(file_desc, encoding='utf-8', errors='surrogateescape') as text_io:
-				read_size = int(message.get('read_size', 16 * 4*1024))
+				# Syscall-wise, Python will read(fd, buffer, count) where count = max(8192, read_size) - read_bytes.
+				# But it will NOT return anything unless it has reached the hinted read size.
+				# Out of the box, Moulti should strive to display lines as soon as possible, hence the default value of
+				# 1. It remains possible to specify a larger value, e.g. when one knows there are going to be many
+				# lines over a short timespan, e.g. "find / -ls".
+				read_size = int(message.get('read_size', 1))
 				while data := text_io.read(read_size):
 					if current_worker.is_cancelled:
 						break

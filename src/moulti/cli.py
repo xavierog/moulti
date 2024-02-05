@@ -105,7 +105,7 @@ def add_pass_command(subparsers: _SubParsersAction) -> None:
 	pass_parser.set_defaults(func=pass_stdin)
 	pass_parser.add_argument('id', type=str, help='unique identifier')
 	pass_parser.add_argument('--append', '--no-clear', '-a', dest='append', action='store_true', help='do not clear the target step')
-	pass_parser.add_argument('--read-size', '-rs', dest='read_size', type=int, default=64*1024, help='read size')
+	pass_parser.add_argument('--read-size', '-rs', dest='read_size', type=int, default=1, help='read size')
 
 def add_step_options(parser: ArgumentParser, none: bool = False) -> None:
 	"""Options common to step add (with actual default values) and step update (with None default values)."""

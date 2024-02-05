@@ -29,6 +29,8 @@ class Step(Static):
 		step_classes = str(kwargs.get('classes', ''))
 		super().__init__(id='step_' + id, classes=step_classes)
 
+		self.color = ''
+
 	def compose(self) -> ComposeResult:
 		with self.collapsible:
 			yield self.top_label
@@ -65,17 +67,36 @@ class Step(Static):
 
 	def clear(self) -> None:
 		self.log_widget.clear()
+		self.color = ''
 
 	def append(self, text: str) -> None:
 		# RichLog does not handle partial lines and thus always adds a trailing \n; therefore, we must strip one (and
 		# only one) trailing \n, if present:
 		if text and text[-1] == '\n':
 			text = text[:-1]
+		# If necessary, prepend the ANSI escape code for the color inherited from the last line:
+		if self.color:
+			text = self.color + text
 		# Deal with colored text; the text_to_write variable is made necessary by mypy.
 		text_to_write: str | Text = text
 		if ANSI_ESCAPE_SEQUENCE in text:
 			text_to_write = Text.from_ansi(text)
+			self.color = Step.next_line_color(text, text_to_write)
 		self.log_widget.write(text_to_write)
+
+	@classmethod
+	def next_line_color(cls, string: str, text: Text) -> str:
+		return '' if string.endswith('\x1b[0m') else Step.last_character_color(text)
+
+	@classmethod
+	def last_character_color(cls, text: Text) -> str:
+		# If the last span (if any) covers the last character...
+		if text.spans and text.spans[-1].end == len(text):
+			# ... return the ANSI escape code for its color:
+			style = text.spans[-1].style
+			assert not isinstance(style, str) # prevent calling render() on str
+			return style.render('_').split('_')[0]
+		return ''
 
 	DEFAULT_CSS = """
 	$step_default: $primary;

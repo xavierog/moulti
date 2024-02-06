@@ -32,8 +32,8 @@ class MoultiConnectionClosedException(Exception):
 		self.anomaly = True
 	def __str__(self) -> str:
 		if self.anomaly:
-			return f'connection closed while expecting {self.expected_bytes} bytes'
-		return 'connection closed'
+			return f'connection closed by peer while expecting {self.expected_bytes} bytes'
+		return 'connection closed by peer'
 
 def moulti_unix_socket() -> Socket:
 	return Socket(AF_UNIX, SOCK_STREAM, 0)

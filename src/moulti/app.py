@@ -305,10 +305,10 @@ class Moulti(App):
 				raddr = getraddr(connection)
 				try:
 					message, file_descriptors = recv_json_message(connection, max_fds=1)
-				except MoultiConnectionClosedException as mcce:
+				except (MoultiConnectionClosedException, ConnectionResetError) as exc:
 					server_selector.unregister(connection)
 					connection.close()
-					self.logdebug(f'{raddr}: read: {mcce}')
+					self.logdebug(f'{raddr}: read: closed connection; cause: {exc}')
 					return
 				except MoultiProtocolException as mpe:
 					self.logdebug(f'{raddr}: read: {mpe}')

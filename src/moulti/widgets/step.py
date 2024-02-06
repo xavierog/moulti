@@ -1,6 +1,7 @@
 from textual.app import ComposeResult
-from textual.widgets import Static, RichLog, Collapsible
+from textual.widgets import Static, Collapsible
 from rich.text import Text
+from .moultilog import MoultiLog
 
 ANSI_ESCAPE_SEQUENCE = '\x1b'
 
@@ -13,7 +14,7 @@ class Step(Static):
 	def __init__(self, id: str, **kwargs: str|int|bool): # pylint: disable=redefined-builtin
 		self.collapsible = Collapsible(title=id)
 		self.top_label = Static('', classes='top_text')
-		self.log_widget = RichLog(highlight=False)
+		self.log_widget = MoultiLog(highlight=False)
 		self.bottom_label = Static('', classes='bottom_text')
 
 		self.top_text = ''
@@ -110,25 +111,24 @@ class Step(Static):
 		height: auto;
 		background: $step_default;
 		color: auto;
-		& RichLog {
-			height: auto;
+		& MoultiLog {
 			scrollbar-corner-color: $step_default;
 		}
 		&.success {
 			background: $step_success;
-			& RichLog { scrollbar-corner-color: $step_success; }
+			& MoultiLog { scrollbar-corner-color: $step_success; }
 		}
 		&.warning {
 			background: $step_warning;
-			& RichLog { scrollbar-corner-color: $step_warning; }
+			& MoultiLog { scrollbar-corner-color: $step_warning; }
 		}
 		&.error {
 			background: $step_error;
-			& RichLog { scrollbar-corner-color: $step_error; }
+			& MoultiLog { scrollbar-corner-color: $step_error; }
 		}
 		&.debug {
 			background: $step_debug;
-			& RichLog { scrollbar-corner-color: $step_debug; }
+			& MoultiLog { scrollbar-corner-color: $step_debug; }
 		}
 		/* Compact design: no padding, no margins, no borders: */
 		& Collapsible {

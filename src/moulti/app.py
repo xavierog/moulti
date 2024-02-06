@@ -300,32 +300,40 @@ class Moulti(App):
 			return raddr + ':fd' + str(socket.fileno())
 
 		def read(connection: Socket) -> None:
-			raddr = getraddr(connection)
+			raddr = None
 			try:
-				message, file_descriptors = recv_json_message(connection, max_fds=1)
-			except MoultiConnectionClosedException as mcce:
-				server_selector.unregister(connection)
-				connection.close()
-				self.logdebug(f'{raddr}: {mcce}')
-				return
-			except MoultiProtocolException as mpe:
-				self.logdebug(f'{raddr}: {mpe}')
-				return
-			self.logdebug(f'{raddr}: => message={message} file_descriptors={file_descriptors}')
-			self.handle_message(connection, raddr, message, file_descriptors)
+				raddr = getraddr(connection)
+				try:
+					message, file_descriptors = recv_json_message(connection, max_fds=1)
+				except MoultiConnectionClosedException as mcce:
+					server_selector.unregister(connection)
+					connection.close()
+					self.logdebug(f'{raddr}: read: {mcce}')
+					return
+				except MoultiProtocolException as mpe:
+					self.logdebug(f'{raddr}: read: {mpe}')
+					return
+				self.logdebug(f'{raddr}: => message={message} file_descriptors={file_descriptors}')
+				self.handle_message(connection, raddr, message, file_descriptors)
+			except Exception as exc:
+				self.logdebug(f'{raddr}: read: {exc}')
 
 
 		def accept(socket: Socket) -> None:
-			connection, _ = socket.accept()
-			raddr = getraddr(connection)
-			self.logdebug(f'{raddr}: accepted new connection')
-			allowed, uid, gid = self.check_unix_credentials(connection)
-			if not allowed:
-				connection.close()
-				self.logdebug(f'{raddr}: closed connection: invalid Unix credentials {uid}:{gid}')
-				return
-			connection.setblocking(False)
-			server_selector.register(connection, selectors.EVENT_READ, read)
+			raddr = None
+			try:
+				connection, _ = socket.accept()
+				raddr = getraddr(connection)
+				self.logdebug(f'{raddr}: accept: accepted new connection')
+				allowed, uid, gid = self.check_unix_credentials(connection)
+				if not allowed:
+					connection.close()
+					self.logdebug(f'{raddr}: accept: closed connection: invalid Unix credentials {uid}:{gid}')
+					return
+				connection.setblocking(False)
+				server_selector.register(connection, selectors.EVENT_READ, read)
+			except Exception as exc:
+				self.logdebug(f'{raddr}: accept: {exc}')
 
 		try:
 			server_socket = moulti_listen()

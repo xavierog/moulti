@@ -4,10 +4,11 @@ from typing import Any, cast, Iterator
 from socket import socket as Socket
 from time import time_ns, localtime, strftime
 from queue import Queue
+from threading import get_ident
 from textual import work
 from textual.app import App, ComposeResult
 from textual.widgets import Footer, Label
-from textual.worker import get_current_worker
+from textual.worker import get_current_worker, NoActiveWorker
 from .protocol import moulti_listen, get_unix_credentials, send_json_message, recv_json_message
 from .protocol import MoultiConnectionClosedException, MoultiProtocolException, Message, FDs
 from .widgets import VertScroll, Step
@@ -99,11 +100,15 @@ class Moulti(App):
 
 	def logdebug(self, line: str) -> None:
 		line = timestamp() + line
-		worker = get_current_worker()
-		if worker is None:
+		if self._thread_id == get_ident():
 			self.debug_step.append(line)
-		elif worker and not worker.is_cancelled:
-			self.call_from_thread(self.debug_step.append, line)
+		else:
+			try:
+				worker = get_current_worker()
+			except NoActiveWorker:
+				worker = None
+			if worker and not worker.is_cancelled:
+				self.call_from_thread(self.debug_step.append, line)
 
 	def action_toggle_debug(self) -> None:
 		"""Toggle the debug console."""

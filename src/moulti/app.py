@@ -84,11 +84,11 @@ class Moulti(App):
 		try:
 			environment = os.environ.copy()
 			environment['MOULTI_RUN'] = 'moulti'
-			self.logdebug(f'exec(): about to run {command}')
+			self.logdebug(f'exec: about to run {command}')
 			completed = subprocess.run(command, env=environment, stdin=subprocess.DEVNULL, check=False)
-			self.logdebug(f'exec(): {command} exited with RC {completed.returncode}')
+			self.logdebug(f'exec: {command} exited with return code {completed.returncode}')
 		except Exception as exc:
-			self.logdebug(f'exec(): error running {command}: {str(exc)}')
+			self.logdebug(f'exec: error running {command}: {exc}')
 
 	def all_steps(self) -> Iterator[Step]:
 		return cast(Iterator[Step], self.query('#steps_container Step').results())
@@ -144,7 +144,7 @@ class Moulti(App):
 			self.logdebug(f'{raddr}: <= message={message}')
 			send_json_message(connection, message)
 		except Exception as exc:
-			self.logdebug(f'{raddr}: reply(): kwargs={kwargs}: {exc}')
+			self.logdebug(f'{raddr}: reply: kwargs={kwargs}: {exc}')
 
 	@work(thread=True)
 	async def append_from_file_descriptor_to_queue(
@@ -350,7 +350,7 @@ class Moulti(App):
 				for key, _ in events:
 					key.data(key.fileobj)
 		except Exception as exc:
-			self.logdebug(str(exc))
+			self.logdebug(f'network loop: {exc}')
 
 	DEFAULT_CSS = """
 	/* Styles inherited by all widgets: */

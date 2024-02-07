@@ -1,5 +1,6 @@
 import os
 import re
+import pwd
 from struct import calcsize, unpack
 from socket import socket as Socket, AF_UNIX, SOCK_STREAM, SOL_SOCKET, SO_PEERCRED, recv_fds, send_fds
 import json
@@ -8,6 +9,11 @@ from typing import Any
 
 Message = dict[str, Any]
 FDs = list[int]
+
+def default_moulti_socket_path() -> str:
+	uid = os.getuid()
+	username = pwd.getpwuid(uid).pw_name
+	return f'@moulti-{username}.socket'
 
 def from_printable(socket_path: str) -> str:
 	if socket_path and socket_path[0] == '@':
@@ -19,8 +25,7 @@ def to_printable(socket_path: str) -> str:
 		socket_path = '@' + socket_path[1:]
 	return socket_path
 
-
-PRINTABLE_MOULTI_SOCKET = os.environ.get('MOULTI_SOCKET_PATH', '@moulti.socket')
+PRINTABLE_MOULTI_SOCKET = os.environ.get('MOULTI_SOCKET_PATH') or default_moulti_socket_path()
 MOULTI_SOCKET = from_printable(PRINTABLE_MOULTI_SOCKET)
 
 class MoultiProtocolException(Exception):

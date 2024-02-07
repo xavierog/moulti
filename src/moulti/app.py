@@ -76,6 +76,8 @@ class Moulti(App):
 
 	def on_ready(self) -> None:
 		self.network_loop()
+
+	def network_loop_is_ready(self) -> None:
 		if self.init_command is not None:
 			self.exec(self.init_command)
 
@@ -348,6 +350,7 @@ class Moulti(App):
 			server_selector = selectors.DefaultSelector()
 			server_selector.register(server_socket, selectors.EVENT_READ, accept)
 
+			self.network_loop_is_ready()
 			while not current_worker.is_cancelled:
 				events = server_selector.select(1)
 				for key, _ in events:

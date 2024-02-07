@@ -16,7 +16,7 @@ setup(
 	author='Xavier G.',
 	author_email='xavier.moulti@kindwolf.org',
 	url='https://github.com/xavierog/moulti',
-	packages=['moulti'],
+	packages=['moulti', 'moulti.widgets'],
 	classifiers=[
 		'Environment :: Console :: Curses',
 		'Intended Audience :: Developers',

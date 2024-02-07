@@ -1,6 +1,5 @@
 # ruff: noqa: E501 Line too long
 import sys
-import uuid
 from typing import Any, cast
 from argparse import ArgumentParser, BooleanOptionalAction, _SubParsersAction
 from .protocol import moulti_connect, send_to_moulti, send_json_message, recv_json_message
@@ -46,9 +45,6 @@ def handle_reply(reply: Message) -> None:
 	sys.exit(0 if success else 1)
 
 def send_to_moulti_and_handle_reply(message: Message) -> None:
-	# Setting a message id yields smaller replies as the server does not have
-	# to send the original data again:
-	message = {'msgid': str(uuid.uuid4()), **message}
 	reply = cast(dict[str, Any], send_to_moulti(message))
 	handle_reply(reply)
 

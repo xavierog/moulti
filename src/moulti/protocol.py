@@ -1,6 +1,7 @@
 import os
 import re
 import pwd
+import uuid
 from struct import calcsize, unpack
 from socket import socket as Socket, AF_UNIX, SOCK_STREAM, SOL_SOCKET, SO_PEERCRED, recv_fds, send_fds
 import json
@@ -148,9 +149,13 @@ def message_to_data(message: Message) -> bytes:
 	data = string.encode('utf-8')
 	return data
 
-def send_json_message(socket: Socket, message: Message, fds: FDs | None = None) -> None:
+def send_json_message(socket: Socket, message: Message, fds: FDs | None = None) -> str:
+	# Setting a message id yields smaller replies as the server does not have to send the original data again:
+	if 'msgid' not in message:
+		message = {'msgid': str(uuid.uuid4()), **message}
 	data = message_to_data(message)
 	write_tlv_data_to_socket(socket, data, 'JSON', fds)
+	return message['msgid']
 
 def recv_json_message(socket: Socket, max_fds: int = 1) -> tuple[Message, FDs]:
 	data_type, data, file_descriptors = read_tlv_data_from_socket(socket, max_fds)
@@ -160,8 +165,10 @@ def recv_json_message(socket: Socket, max_fds: int = 1) -> tuple[Message, FDs]:
 
 def send_to_moulti(message: Message, wait_for_reply: bool = True) -> Message | None:
 	with moulti_connect() as moulti_socket:
-		send_json_message(moulti_socket, message)
+		msgid = send_json_message(moulti_socket, message)
 		if wait_for_reply:
 			reply, _ = recv_json_message(moulti_socket, 0)
+			if msgid in reply and reply['msgid'] != msgid:
+				raise MoultiProtocolException('expected message id {msgid} but received {reply["msgid"]}')
 			return reply
 	return None

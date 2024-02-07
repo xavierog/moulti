@@ -157,14 +157,18 @@ def build_arg_parser() -> ArgumentParser:
 	return arg_parser
 
 def main() -> None:
-	arg_parser = build_arg_parser()
-	args = vars(arg_parser.parse_args())
-	func = args.pop('func')
-	# Subtlety: func and args are not always used the same way:
-	if func == wait: # pylint: disable=comparison-with-callable
-		wait(**args)
-	else:
-		func(args)
+	try:
+		arg_parser = build_arg_parser()
+		args = vars(arg_parser.parse_args())
+		func = args.pop('func')
+		# Subtlety: func and args are not always used the same way:
+		if func == wait: # pylint: disable=comparison-with-callable
+			wait(**args)
+		else:
+			func(args)
+	except KeyboardInterrupt:
+		print('')
+		sys.exit(1)
 
 if __name__ == '__main__':
 	main()

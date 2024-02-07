@@ -115,8 +115,8 @@ def add_step_options(parser: ArgumentParser, none: bool = False) -> None:
 	parser.add_argument('--top-text', '-tt', type=str, default=None if none else '', help='line of text displayed above the content')
 	parser.add_argument('--bottom-text', '-bt', type=str, default=None if none else '', help='line of text displayed below the content')
 	parser.add_argument('--min-height', '-mh', type=int, default=None if none else  1, help='minimum content height')
-	parser.add_argument('--max-height', '-Mh', type=int, default=None if none else 25, help='maximum content height')
-	parser.add_argument('--classes', '-c', type=str, default=None if none else 'standard', help='maximum content height')
+	parser.add_argument('--max-height', '-Mh', type=int, default=None if none else 25, help='maximum content height; 0 to disable')
+	parser.add_argument('--classes', '-c', type=str, default=None if none else 'standard', help='step class (color): standard, error, warning, success')
 
 def add_step_commands(step_subparsers: _SubParsersAction) -> None:
 	# moulti step add

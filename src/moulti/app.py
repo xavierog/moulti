@@ -9,6 +9,7 @@ from textual import work
 from textual.app import App, ComposeResult
 from textual.widgets import Footer, Label
 from textual.worker import get_current_worker, NoActiveWorker
+from .protocol import PRINTABLE_MOULTI_SOCKET
 from .protocol import moulti_listen, get_unix_credentials, send_json_message, recv_json_message
 from .protocol import MoultiConnectionClosedException, MoultiProtocolException, Message, FDs
 from .widgets import VertScroll, Step
@@ -84,6 +85,7 @@ class Moulti(App):
 		try:
 			environment = os.environ.copy()
 			environment['MOULTI_RUN'] = 'moulti'
+			environment['MOULTI_SOCKET_PATH'] = PRINTABLE_MOULTI_SOCKET
 			self.logdebug(f'exec: about to run {command}')
 			completed = subprocess.run(command, env=environment, stdin=subprocess.DEVNULL, check=False)
 			self.logdebug(f'exec: {command} exited with return code {completed.returncode}')

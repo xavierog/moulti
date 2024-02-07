@@ -9,7 +9,7 @@ from textual import work
 from textual.app import App, ComposeResult
 from textual.widgets import Footer, Label
 from textual.worker import get_current_worker, NoActiveWorker
-from .protocol import PRINTABLE_MOULTI_SOCKET
+from .protocol import PRINTABLE_MOULTI_SOCKET, clean_socket
 from .protocol import moulti_listen, get_unix_credentials, send_json_message, recv_json_message
 from .protocol import MoultiConnectionClosedException, MoultiProtocolException, Message, FDs
 from .widgets import VertScroll, Step
@@ -342,6 +342,7 @@ class Moulti(App):
 		except Exception as exc:
 			# A Moulti instance is useless if it cannot listen:
 			self.exit(f'Fatal: {exc}')
+			return
 
 		try:
 			server_selector = selectors.DefaultSelector()
@@ -353,6 +354,8 @@ class Moulti(App):
 					key.data(key.fileobj)
 		except Exception as exc:
 			self.logdebug(f'network loop: {exc}')
+		finally:
+			clean_socket(PRINTABLE_MOULTI_SOCKET)
 
 	DEFAULT_CSS = """
 	/* Styles inherited by all widgets: */

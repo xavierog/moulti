@@ -54,6 +54,13 @@ def moulti_listen(bind: str = MOULTI_SOCKET, backlog: int = 100, blocking: bool 
 		err = f'cannot listen on {to_printable(bind)} (with backlog={backlog} and blocking={blocking}): {exc}'
 		raise MoultiProtocolException(err) from exc
 
+def clean_socket(socket_path: str = PRINTABLE_MOULTI_SOCKET) -> None:
+	if not socket_path.startswith('@'):
+		try:
+			os.unlink(socket_path)
+		except FileNotFoundError:
+			pass
+
 def get_unix_credentials(socket: Socket) -> tuple[int, int, int]:
 	# struct ucred is { pid_t, uid_t, gid_t }
 	struct_ucred = '3i'

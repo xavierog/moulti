@@ -1,1 +1,8 @@
-textual
+bpython
+build
+mypy
+pylint
+ruff
+textual-dev
+textual>=0.47
+twine

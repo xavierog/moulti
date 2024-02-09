@@ -32,7 +32,7 @@ setup(
 	license='MIT',
 	keywords=['cli', 'tui', 'curses', 'terminal', 'multiplex', 'script', 'output', 'steps', 'textual', 'collapsible'],
 	package_dir={'': 'src'},
-	install_requires=['textual'],
+	install_requires=['textual>=0.47'],
 	entry_points={
 		'console_scripts': [
 			'moulti = moulti.cli:main'

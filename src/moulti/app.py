@@ -10,8 +10,9 @@ from textual.app import App, ComposeResult
 from textual.widgets import Footer, Label
 from textual.worker import get_current_worker, NoActiveWorker
 from .protocol import PRINTABLE_MOULTI_SOCKET, clean_socket
-from .protocol import moulti_listen, get_unix_credentials, send_json_message, recv_json_message
+from .protocol import moulti_listen, get_unix_credentials, send_json_message
 from .protocol import MoultiConnectionClosedException, MoultiProtocolException, Message, FDs
+from .protocol import MoultiTLVReader, data_to_message, getraddr
 from .widgets import VertScroll, Step
 
 def timestamp() -> str:
@@ -297,31 +298,28 @@ class Moulti(App):
 	async def network_loop(self) -> None:
 		current_worker = get_current_worker()
 
-		def getraddr(socket: Socket) -> str:
-			raddr = socket.getpeername()
-			if raddr:
-				raddr = raddr.decode('utf-8').replace('\0', '@')
-			return raddr + ':fd' + str(socket.fileno())
-
-		def read(connection: Socket) -> None:
-			raddr = None
+		def read(tlv_reader: MoultiTLVReader) -> None:
+			raddr = tlv_reader.raddr
 			try:
-				raddr = getraddr(connection)
 				try:
-					message, file_descriptors = recv_json_message(connection, max_fds=1)
-				except (MoultiConnectionClosedException, ConnectionResetError) as exc:
-					server_selector.unregister(connection)
-					connection.close()
+					# Read whatever there is to read; if a complete TLV message is received, calls got_tlv, which calls
+					# handle_message, which calls reply().
+					tlv_reader.read()
+				except (MoultiProtocolException, MoultiConnectionClosedException, ConnectionResetError) as exc:
+					server_selector.unregister(tlv_reader.socket)
+					tlv_reader.socket.close()
 					self.logdebug(f'{raddr}: read: closed connection; cause: {exc}')
 					return
-				except MoultiProtocolException as mpe:
-					self.logdebug(f'{raddr}: read: {mpe}')
-					return
-				self.logdebug(f'{raddr}: => message={message} file_descriptors={file_descriptors}')
-				self.handle_message(connection, raddr, message, file_descriptors)
 			except Exception as exc:
 				self.logdebug(f'{raddr}: read: {exc}')
 
+		def got_tlv(socket: Socket, raddr: str, data_type: str, data: bytes, file_descriptors: FDs) -> None:
+			if data_type == 'JSON':
+				message = data_to_message(data)
+				self.logdebug(f'{raddr}: => {message=} {file_descriptors=}')
+				self.handle_message(socket, raddr, message, file_descriptors)
+			else:
+				raise MoultiProtocolException(f'cannot handle {data_type} {len(data)}-byte message')
 
 		def accept(socket: Socket) -> None:
 			raddr = None
@@ -335,7 +333,8 @@ class Moulti(App):
 					self.logdebug(f'{raddr}: accept: closed connection: invalid Unix credentials {uid}:{gid}')
 					return
 				connection.setblocking(False)
-				server_selector.register(connection, selectors.EVENT_READ, read)
+				tlv_reader = MoultiTLVReader(connection, raddr, got_tlv, self.logdebug)
+				server_selector.register(connection, selectors.EVENT_READ, tlv_reader)
 			except Exception as exc:
 				self.logdebug(f'{raddr}: accept: {exc}')
 
@@ -354,7 +353,10 @@ class Moulti(App):
 			while not current_worker.is_cancelled:
 				events = server_selector.select(1)
 				for key, _ in events:
-					key.data(key.fileobj)
+					if isinstance(key.data, MoultiTLVReader):
+						read(key.data)
+					elif callable(key.data):
+						key.data(key.fileobj)
 		except Exception as exc:
 			self.logdebug(f'network loop: {exc}')
 		finally:

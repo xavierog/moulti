@@ -6,10 +6,12 @@ from struct import calcsize, unpack
 from socket import socket as Socket, AF_UNIX, SOCK_STREAM, SOL_SOCKET, SO_PEERCRED, recv_fds, send_fds
 import json
 from json.decoder import JSONDecodeError
-from typing import Any
+from typing import Any, Callable
 
 Message = dict[str, Any]
 FDs = list[int]
+TLVCallback = Callable[[Socket, str, str, bytes, FDs], None]
+LogCallback = Callable[[str], None]
 
 def default_moulti_socket_path() -> str:
 	uid = os.getuid()
@@ -33,9 +35,9 @@ class MoultiProtocolException(Exception):
 	pass
 
 class MoultiConnectionClosedException(Exception):
-	def __init__(self, expected_bytes: int = 0):
+	def __init__(self, expected_bytes: int = 0, anomaly: bool = True):
 		self.expected_bytes = expected_bytes
-		self.anomaly = True
+		self.anomaly = anomaly
 	def __str__(self) -> str:
 		if self.anomaly:
 			return f'connection closed by peer while expecting {self.expected_bytes} bytes'
@@ -75,10 +77,39 @@ def moulti_connect(address: str = MOULTI_SOCKET, bind: str | None = None) -> Soc
 	client_socket.connect(address)
 	return client_socket
 
+def getraddr(socket: Socket) -> str:
+	"""
+	Return the remote address of the given socket.
+	"""
+	raddr = socket.getpeername()
+	if raddr:
+		raddr = raddr.decode('utf-8').replace('\0', '@')
+	return raddr + ':fd' + str(socket.fileno())
+
+# This is a simple text-based TLV (type-length-value) protocol.
+# preamble examples: ":JSON:0000000002048:" ":TXT_:0000000002048:"
+PREAMBLE_FIXED_LENGTH = 20
+PREAMBLE_REGEX = r'^:[A-Z_]{4}:[0-9]{13}:$'
+
+def parse_preamble(preamble_data: bytes) -> tuple[str, int]:
+	"""
+	Parse a Moulti TLV preamble; return type and length or raise
+	MoultiProtocolException.
+	"""
+	try:
+		preamble = preamble_data.decode('ascii')
+	except UnicodeDecodeError as ude:
+		raise MoultiProtocolException('non-ASCII preamble: {str(preamble)}') from ude
+	if not re.match(PREAMBLE_REGEX, preamble):
+		raise MoultiProtocolException(f'invalid preamble: {preamble}')
+	data_type = preamble[1:5].rstrip('_')
+	if not data_type:
+		raise MoultiProtocolException(f'invalid data type: {preamble[1:5]}')
+	data_length = int(preamble[6:19])
+	return data_type, data_length
+
 def read_fixed_amount_from_socket(socket: Socket, amount: int) -> bytes:
 	data = bytes()
-	if amount <= 0:
-		return data
 	while amount > 0:
 		new_data = socket.recv(amount)
 		if not new_data:
@@ -98,30 +129,16 @@ def write_fixed_amount_to_socket(socket: Socket, data: bytes) -> None:
 		sent += just_sent
 
 def read_tlv_data_from_socket(socket: Socket, max_fds: int = 1) -> tuple[str, bytes, FDs]:
-	# This is a simple text-based TLV (type-length-value) protocol.
-	# preamble examples: ":JSON:0000000002048:" ":TXT_:0000000002048:"
-	preamble_regex = r'^:[A-Z_]{4}:[0-9]{13}:$'
-	preamble_fixed_length = 20
-
 	file_descriptors: FDs = []
 	if max_fds > 0:
 		_, file_descriptors, _, _ = recv_fds(socket, 0, max_fds)
 
 	try:
-		preamble = read_fixed_amount_from_socket(socket, preamble_fixed_length).decode('ascii')
+		preamble = read_fixed_amount_from_socket(socket, PREAMBLE_FIXED_LENGTH)
 	except MoultiConnectionClosedException as mcce:
-		mcce.anomaly = mcce.expected_bytes != preamble_fixed_length
+		mcce.anomaly = mcce.expected_bytes != PREAMBLE_FIXED_LENGTH
 		raise mcce
-	except UnicodeDecodeError as ude:
-		raise MoultiProtocolException('non-ASCII preamble: {str(preamble)}') from ude
-	rem = re.match(preamble_regex, preamble)
-	if not rem:
-		raise MoultiProtocolException(f'invalid preamble: {preamble}')
-	data_type = preamble[1:5].rstrip('_')
-	if not data_type:
-		raise MoultiProtocolException(f'invalid data type: {preamble[1:5]}')
-	data_length = int(preamble[6:19])
-
+	data_type, data_length = parse_preamble(preamble)
 	return data_type, read_fixed_amount_from_socket(socket, data_length), file_descriptors
 
 def write_tlv_data_to_socket(socket: Socket, data: bytes, data_type: str = 'JSON', fds: FDs|None = None) -> None:
@@ -172,3 +189,74 @@ def send_to_moulti(message: Message, wait_for_reply: bool = True) -> Message | N
 				raise MoultiProtocolException('expected message id {msgid} but received {reply["msgid"]}')
 			return reply
 	return None
+
+class MoultiTLVReader:
+	"""
+	Helper that reads TLV data from a given socket each time read() is called.
+	Each time a complete TLV dataset has been read, call a given callback.
+	"""
+	# pylint: disable=attribute-defined-outside-init
+	def __init__(
+		self,
+		socket: Socket,
+		raddr: str,
+		callback: TLVCallback,
+		log_callback: LogCallback|None = None,
+		max_fds: int = 1
+	):
+		self.socket = socket
+		self.raddr = raddr
+		self.callback = callback
+		self.log_callback = log_callback
+		self.max_fds = max_fds
+		self.reset()
+
+	def reset(self) -> None:
+		self.recv_fds_done = False
+		self.file_descriptors: FDs = []
+
+		self.recv_preamble_done = False
+		self.preamble_data = bytes()
+		self.data_type = ''
+		self.data_length = 0
+		self.data_value = bytes()
+
+	def log(self, line: str) -> None:
+		if self.log_callback:
+			self.log_callback(line)
+
+	def got_complete_tlv(self) -> None:
+		data_type, data, file_descriptors = self.data_type, self.data_value, self.file_descriptors
+		self.reset()
+		self.callback(self.socket, self.raddr, data_type, data, file_descriptors)
+
+	def read(self) -> None:
+		try:
+			# Read file descriptors:
+			if self.max_fds > 0 and not self.recv_fds_done:
+				_, self.file_descriptors, _, _ = recv_fds(self.socket, 0, self.max_fds)
+				self.recv_fds_done = True
+			# Read preamble:
+			if not self.recv_preamble_done:
+				amount = PREAMBLE_FIXED_LENGTH - len(self.preamble_data)
+				while amount > 0:
+					new_data = self.socket.recv(amount)
+					if not new_data:
+						# If we notice the client closed its connection here, it may be normal:
+						anomaly = amount != PREAMBLE_FIXED_LENGTH
+						raise MoultiConnectionClosedException(amount, anomaly=anomaly)
+					self.preamble_data += new_data
+					amount -= len(new_data)
+				self.data_type, self.data_length = parse_preamble(self.preamble_data)
+				self.recv_preamble_done = True
+			# Read data:
+			while self.data_length > 0:
+				new_data = self.socket.recv(self.data_length)
+				if not new_data:
+					raise MoultiConnectionClosedException(self.data_length)
+				self.data_value += new_data
+				self.data_length -= len(new_data)
+			self.got_complete_tlv()
+		except BlockingIOError:
+			# It turns out there is nothing (left) to read; better luck next read().
+			return

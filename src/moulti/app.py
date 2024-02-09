@@ -7,6 +7,7 @@ from queue import Queue
 from threading import get_ident
 from textual import work
 from textual.app import App, ComposeResult
+from textual.dom import BadIdentifier
 from textual.widgets import Footer, Label
 from textual.worker import get_current_worker, NoActiveWorker
 from .protocol import PRINTABLE_MOULTI_SOCKET, clean_socket
@@ -254,6 +255,8 @@ class Moulti(App):
 				if action == 'add':
 					if step:
 						raise MoultiMessageException(f'step {message.get("id")} already exists')
+					if 'id' not in message:
+						raise MoultiMessageException('missing step id')
 					call = (self.steps_container.mount, Step(**message))
 				else:
 					# All other actions require an existing step:
@@ -280,12 +283,11 @@ class Moulti(App):
 					call = (self.title_label.update, str(message['title']))
 			else:
 				raise MoultiMessageException('unknown command {command}')
-		except MoultiMessageException as mme:
-			error = str(mme)
-		# At this stage, the analysis is complete; perform the required action and reply accordingly:
-		else:
+			# At this stage, the analysis is complete; perform the required action and reply accordingly:
 			if call:
 				self.call_from_thread(*call)
+		except (BadIdentifier, MoultiMessageException) as exc:
+			error = str(exc)
 		finally:
 			self.reply(connection, raddr, message, done=error is None, error=error)
 

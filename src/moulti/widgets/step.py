@@ -43,7 +43,7 @@ class Step(Static):
 
 	def update_properties(self, kwargs: dict[str, str|int|bool]) -> None:
 		if 'classes' in kwargs:
-			self.classes = str(kwargs['classes'])
+			self.set_classes(str(kwargs['classes']))
 		if 'title' in kwargs:
 			self.collapsible.title = str(kwargs['title']) if kwargs['title'] else str(self.id)[5:]
 		if 'collapsed' in kwargs:

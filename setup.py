@@ -2,8 +2,10 @@
 
 from setuptools import setup
 
-short_description = 'Moulti is a Terminal User Interface (TUI) that displays the results of any process involving'
-short_description += 'multiple steps.'
+short_description = 'Moulti is a CLI-driven Terminal User Interface (TUI) that enables you to assign the numerous '
+short_description += 'lines emitted by your scripts to "steps", i.e. visual, collapsible blocks featuring their own '
+short_description += 'title and color.'
+
 with open('README.md', 'r') as readme:
 	long_description = readme.read()
 
@@ -28,7 +30,7 @@ setup(
 		'Topic :: Utilities',
 	],
 	license='MIT',
-	keywords=['cli', 'tui', 'curses', 'terminal', 'multiplex', 'script', 'output', 'steps'],
+	keywords=['cli', 'tui', 'curses', 'terminal', 'multiplex', 'script', 'output', 'steps', 'textual', 'collapsible'],
 	package_dir={'': 'src'},
 	install_requires=['textual'],
 	entry_points={

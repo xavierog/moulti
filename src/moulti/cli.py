@@ -1,11 +1,17 @@
 # ruff: noqa: E501 Line too long
 import sys
 from typing import Any, cast
-from argparse import ArgumentParser, BooleanOptionalAction, _SubParsersAction
+from argparse import ArgumentParser, BooleanOptionalAction, _SubParsersAction, ArgumentTypeError
 from .protocol import moulti_connect, send_to_moulti, send_json_message, recv_json_message
 from .protocol import Message, PRINTABLE_MOULTI_SOCKET
 
 Args = dict[str, Any]
+
+def pint(value: str) -> int:
+	integer_value = int(value)
+	if integer_value < 0:
+		raise ArgumentTypeError('expected a positive integer')
+	return integer_value
 
 def init(args: dict) -> None:
 	"""Start a new Moulti instance."""
@@ -87,8 +93,8 @@ def add_main_commands(subparsers: _SubParsersAction) -> None:
 	wait_parser = subparsers.add_parser('wait', help='Wait until the Moulti instance is available.')
 	wait_parser.set_defaults(func=wait)
 	wait_parser.add_argument('--verbose', '-v', action='store_true', help='if True, output the reason why each connection attempt failed')
-	wait_parser.add_argument('--delay', '-d', type=int, default=500, help='number of milliseconds between two connection attempts')
-	wait_parser.add_argument('--max-attempts', '-m', type=int, default=0, help='maximum number of attempts before giving up; 0 means "never give up"')
+	wait_parser.add_argument('--delay', '-d', type=pint, default=500, help='number of milliseconds between two connection attempts')
+	wait_parser.add_argument('--max-attempts', '-m', type=pint, default=0, help='maximum number of attempts before giving up; 0 means "never give up"')
 
 	# moulti set
 	set_parser = subparsers.add_parser('set', help='Set Moulti options')
@@ -101,7 +107,7 @@ def add_pass_command(subparsers: _SubParsersAction) -> None:
 	pass_parser.set_defaults(func=pass_stdin)
 	pass_parser.add_argument('id', type=str, help='unique identifier')
 	pass_parser.add_argument('--append', '--no-clear', '-a', dest='append', action='store_true', help='do not clear the target step')
-	pass_parser.add_argument('--read-size', '-rs', dest='read_size', type=int, default=1, help='read size')
+	pass_parser.add_argument('--read-size', '-rs', dest='read_size', type=pint, default=1, help='read size')
 
 def add_step_options(parser: ArgumentParser, none: bool = False) -> None:
 	"""Options common to step add (with actual default values) and step update (with None default values)."""
@@ -110,8 +116,8 @@ def add_step_options(parser: ArgumentParser, none: bool = False) -> None:
 	parser.add_argument('--text', '-t', type=str, default=None if none else '', help='content')
 	parser.add_argument('--top-text', '-tt', type=str, default=None if none else '', help='line of text displayed above the content')
 	parser.add_argument('--bottom-text', '-bt', type=str, default=None if none else '', help='line of text displayed below the content')
-	parser.add_argument('--min-height', '-mh', type=int, default=None if none else  1, help='minimum content height')
-	parser.add_argument('--max-height', '-Mh', type=int, default=None if none else 25, help='maximum content height; 0 to disable')
+	parser.add_argument('--min-height', '-mh', type=pint, default=None if none else  1, help='minimum content height')
+	parser.add_argument('--max-height', '-Mh', type=pint, default=None if none else 25, help='maximum content height; 0 to disable')
 	parser.add_argument('--classes', '-c', type=str, default=None if none else 'standard', help='step class (color): standard, error, warning, success')
 
 def add_step_commands(step_subparsers: _SubParsersAction) -> None:

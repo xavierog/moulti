@@ -139,11 +139,13 @@ with moulti_connect() as moulti_socket:
     add_step_msg = {'command': 'step', 'action': 'add', 'id': 'python', 'title': f'{filepath}:', 'collapsed': False}
     send_json_message(moulti_socket, add_step_msg)
     recv_json_message(moulti_socket)
-    with open(filepath) as passwd_fd:
-        pass_fs_msg = {'command': 'pass', 'id': 'python'}
-        send_json_message(moulti_socket, pass_fs_msg, [passwd_fd.fileno()])
+    with open(filepath) as filedesc:
+        pass_fd_msg = {'command': 'pass', 'id': 'python'}
+        send_json_message(moulti_socket, pass_fd_msg, [filedesc.fileno()])
         recv_json_message(moulti_socket)
 ```
+
+Warning: Moulti is a young project and currently offers no guarantee whatsoever regarding the stability and availability of Python modules and functions.
 
 ## Multiple ways to fill a step
 

@@ -13,7 +13,7 @@ Moulti requires Python ≥ 3.10 and Textual ≥ 0.47.
 
 ## Installation
 
-Moulti is available as a Python package on PYPI and can thus be installed using `pip` or, more conveniently, `pipx`:
+Moulti is available as a Python package on PyPI and can thus be installed using `pip` or, more conveniently, `pipx`:
 
 ```shell
 pipx install moulti

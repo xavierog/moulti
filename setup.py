@@ -3,8 +3,7 @@
 from setuptools import setup
 
 short_description = 'Moulti is a CLI-driven Terminal User Interface (TUI) that enables you to assign the numerous '
-short_description += 'lines emitted by your scripts to "steps", i.e. visual, collapsible blocks featuring their own '
-short_description += 'title and color.'
+short_description += 'lines emitted by your scripts to visual, collapsible blocks called steps.'
 
 with open('README.md', 'r') as readme:
 	long_description = readme.read()

@@ -329,11 +329,14 @@ class Moulti(App):
 				connection, _ = socket.accept()
 				raddr = getraddr(connection)
 				self.logdebug(f'{raddr}: accept: accepted new connection')
-				allowed, uid, gid = self.check_unix_credentials(connection)
-				if not allowed:
-					connection.close()
-					self.logdebug(f'{raddr}: accept: closed connection: invalid Unix credentials {uid}:{gid}')
-					return
+				# Check Unix credentials (uid/gid) if and only if Moulti listens on an abstract socket.
+				# Regular sockets are protected by file permissions.
+				if server_socket_is_abstract:
+					allowed, uid, gid = self.check_unix_credentials(connection)
+					if not allowed:
+						connection.close()
+						self.logdebug(f'{raddr}: accept: closed connection: invalid Unix credentials {uid}:{gid}')
+						return
 				connection.setblocking(False)
 				tlv_reader = MoultiTLVReader(connection, raddr, got_tlv, self.logdebug)
 				server_selector.register(connection, selectors.EVENT_READ, tlv_reader)
@@ -341,7 +344,7 @@ class Moulti(App):
 				self.logdebug(f'{raddr}: accept: {exc}')
 
 		try:
-			server_socket = moulti_listen()
+			server_socket, server_socket_is_abstract = moulti_listen()
 		except Exception as exc:
 			# A Moulti instance is useless if it cannot listen:
 			self.exit(f'Fatal: {exc}')

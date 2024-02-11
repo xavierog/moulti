@@ -1,9 +1,10 @@
 import os
 import re
+import sys
 import pwd
 import uuid
 from struct import calcsize, unpack
-from socket import socket as Socket, AF_UNIX, SOCK_STREAM, SOL_SOCKET, SO_PEERCRED, recv_fds, send_fds
+from socket import socket as Socket, AF_UNIX, SOCK_STREAM, SOL_SOCKET, recv_fds, send_fds
 import json
 from json.decoder import JSONDecodeError
 from typing import Any, Callable
@@ -13,10 +14,50 @@ FDs = list[int]
 TLVCallback = Callable[[Socket, str, str, bytes, FDs], None]
 LogCallback = Callable[[str], None]
 
-def default_moulti_socket_path() -> str:
+def abstract_unix_sockets_supported() -> bool:
+	# Windows seems to support abstract Unix sockets but remains out of scope for the time being.
+	# Consequently, assume only Linux supports abstract Unix sockets:
+	return sys.platform == 'linux'
+
+def run_dir() -> str:
+	# This mess is *exactly* why we prefer abstract Unix sockets:
+	if 'XDG_RUNTIME_DIR' in os.environ:
+		return os.environ['XDG_RUNTIME_DIR']
+	our_directory = 'moulti'
+	if 'XDG_CACHE_HOME' in os.environ:
+		return os.path.join(os.environ['XDG_CACHE_HOME'], our_directory)
+	caches = os.path.expanduser('~/Library/Caches')
+	if os.path.isdir(caches):
+		return os.path.join(caches, our_directory)
+	return os.path.join(os.path.expanduser('~/.cache'), our_directory)
+	# Fallback on /tmp would have brought security implications (e.g. umask).
+
+def current_username() -> str:
 	uid = os.getuid()
-	username = pwd.getpwuid(uid).pw_name
-	return f'@moulti-{username}.socket'
+	return pwd.getpwuid(uid).pw_name
+
+def current_instance() -> str:
+	return os.environ.get('MOULTI_INSTANCE') or 'default'
+
+def make_socket_path(filename: str, abstract: bool, dirpath: str|None = None, printable: bool = True) -> str:
+	if abstract:
+		return ('@' if printable else '\0') + filename
+	return os.path.join(dirpath or run_dir(), filename)
+
+def default_moulti_socket_path() -> str:
+	username = current_username()
+	instance = current_instance()
+	socket_filename = f'moulti-{username}-{instance}.socket'
+	return make_socket_path(socket_filename, abstract_unix_sockets_supported())
+
+def moulti_bind_path(abstract: bool) -> str:
+	username = current_username()
+	pid = os.getpid()
+	socket_filename = f'moulti-client-{username}-{pid}.socket'
+	return make_socket_path(socket_filename, abstract, printable=False)
+
+def is_abstract_socket(socket_path: str) -> bool:
+	return bool(socket_path and socket_path[0] == '\0')
 
 def from_printable(socket_path: str) -> str:
 	if socket_path and socket_path[0] == '@':
@@ -24,7 +65,7 @@ def from_printable(socket_path: str) -> str:
 	return socket_path
 
 def to_printable(socket_path: str) -> str:
-	if socket_path and socket_path[0] == '\0':
+	if is_abstract_socket(socket_path):
 		socket_path = '@' + socket_path[1:]
 	return socket_path
 
@@ -46,13 +87,16 @@ class MoultiConnectionClosedException(Exception):
 def moulti_unix_socket() -> Socket:
 	return Socket(AF_UNIX, SOCK_STREAM, 0)
 
-def moulti_listen(bind: str = MOULTI_SOCKET, backlog: int = 100, blocking: bool = False) -> Socket:
+def moulti_listen(bind: str = MOULTI_SOCKET, backlog: int = 100, blocking: bool = False) -> tuple[Socket, bool]:
 	try:
 		server_socket = moulti_unix_socket()
+		abstract = is_abstract_socket(bind)
+		if not abstract:
+			os.makedirs(os.path.dirname(bind), exist_ok=True)
 		server_socket.bind(bind)
 		server_socket.listen(backlog)
 		server_socket.setblocking(blocking)
-		return server_socket
+		return server_socket, abstract
 	except Exception as exc:
 		err = f'cannot listen on {to_printable(bind)} (with backlog={backlog} and blocking={blocking}): {exc}'
 		raise MoultiProtocolException(err) from exc
@@ -67,13 +111,19 @@ def clean_socket(socket_path: str = PRINTABLE_MOULTI_SOCKET) -> None:
 def get_unix_credentials(socket: Socket) -> tuple[int, int, int]:
 	# struct ucred is { pid_t, uid_t, gid_t }
 	struct_ucred = '3i'
+	from socket import SO_PEERCRED # pylint: disable=import-outside-toplevel
 	unix_credentials = socket.getsockopt(SOL_SOCKET, SO_PEERCRED, calcsize(struct_ucred))
 	pid, uid, gid = unpack(struct_ucred, unix_credentials)
 	return pid, uid, gid
 
 def moulti_connect(address: str = MOULTI_SOCKET, bind: str | None = None) -> Socket:
 	client_socket = moulti_unix_socket()
-	client_socket.bind(bind if bind else f'\0moulti-client-{os.getpid()}.socket')
+	abstract = is_abstract_socket(address)
+	final_bind = bind or moulti_bind_path(abstract)
+	client_socket.bind(final_bind)
+	if not is_abstract_socket(final_bind):
+		# As a pure client, we do not actually need to keep our socket file:
+		clean_socket(final_bind)
 	client_socket.connect(address)
 	return client_socket
 

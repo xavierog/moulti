@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-export MOULTI_SOCKET_PATH="@moulti-$(whoami)-social-preview.socket"
+export MOULTI_INSTANCE='social-preview'
 [ "${MOULTI_RUN}" ] || exec moulti run "$0" "$@"
 moulti wait
 moulti step add title --title='This is a Moulti [italic]step[/]' --top-text='It was made using [yellow1 bold]moulti step add[/] and shall display MOULTI:' --bottom-text='Neat, eh? I made it with [yellow1 bold]toilet -f mono12 --metal[/]'

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-export MOULTI_SOCKET_PATH="@moulti-$(whoami)-moulti-python-checks.socket"
+export MOULTI_INSTANCE='moulti-python-checks'
 source examples/moulti-functions.bash
 [ "${MOULTI_RUN}" ] || exec moulti run "$0" "$@"
 

@@ -97,8 +97,8 @@ A simple Moulti-based bash script makes use of two new commands:
 ```bash
 #!/usr/bin/env bash
 
-# Use a specific socket to prevent conflicts:
-export MOULTI_SOCKET_PATH='@my-first-script-with-moulti.socket'
+# Name the Moulti instance to prevent conflicts:
+export MOULTI_INSTANCE='my-first-script-with-moulti'
 # If not done already, start a Moulti instance and have it re-execute this script:
 [ "${MOULTI_RUN}" ] || exec moulti run "$0" "$@"
 # Ensure the Moulti instance is reachable:
@@ -225,7 +225,8 @@ The constant scrolling resumes when you hit the `End` key.
 
 ## Environment variables
 
-- `MOULTI_SOCKET_PATH`: taken into account by both the instance and the CLI; defaults to @moulti-*yourusername*.socket, i.e. an abstract Unix Domain Socket named after your Unix user.
+- `MOULTI_INSTANCE`: name of your Moulti instance; defaults to `default`; taken into account by the instanc to compute the default value of `MOULTI_SOCKET_PATH`.
+- `MOULTI_SOCKET_PATH`: path to the network socket that Moulti should listen/connect to; taken into account by both the instance and the CLI; if not specified, Moulti defaults to a platform-specific value that reflects your username and `MOULTI_INSTANCE`; examples: `@moulti-bob-test-instance.socket`, `/run/user/1000/moulti-bob-test-instance.socket`.
 - `MOULTI_ALLOWED_UID`: by default, Moulti only accepts commands from the user (uid) that launched the Moulti instance; setting this environment variable beforehand makes it accept arbitrary uids; example:
   ```shell
   export MOULTI_ALLOWED_UID="1001,1002,5000,$(id -u alice),$(id -u bob)"

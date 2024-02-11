@@ -31,9 +31,9 @@ def wait(verbose: bool = False, delay: int = 500, max_attempts: int = 0) -> None
 	while not connected:
 		try:
 			attempts += 1
-			with moulti_connect():
-				connected = True
-				break
+			send_to_moulti({'command': 'ping'})
+			connected = True
+			break
 		except Exception as exc:
 			if verbose:
 				print(f'Connection #{attempts} to {PRINTABLE_MOULTI_SOCKET}: {exc}')

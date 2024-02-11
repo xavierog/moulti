@@ -281,6 +281,8 @@ class Moulti(App):
 			elif command == 'set':
 				if 'title' in message:
 					call = (self.title_label.update, str(message['title']))
+			elif command == 'ping':
+				call = ()
 			else:
 				raise MoultiMessageException('unknown command {command}')
 			# At this stage, the analysis is complete; perform the required action and reply accordingly:

@@ -1,5 +1,7 @@
 import os
+import asyncio
 import selectors
+from concurrent.futures import ThreadPoolExecutor
 from typing import Any, cast, Iterator
 from socket import socket as Socket
 from time import time_ns, localtime, strftime
@@ -69,6 +71,18 @@ class Moulti(App):
 		self.steps_container = VertScroll(id='steps_container')
 		self.footer = Footer()
 
+	def init_threads(self) -> None:
+		try:
+			max_pass = max(1, int(os.environ['MOULTI_PASS_CONCURRENCY']))
+		except (KeyError, ValueError):
+			max_pass = 20
+		default_threads = 2 # network_loop() + exec()
+		threads_per_pass = 2 # Each "moulti pass" command spawns 2 threads -- cf handle_pass_command()
+		thread_count = default_threads + threads_per_pass * max_pass
+		moulti_executor = ThreadPoolExecutor(max_workers=thread_count, thread_name_prefix='moulti')
+		asyncio.get_running_loop().set_default_executor(moulti_executor)
+		self.logdebug(f'allow up to {thread_count} threads for up to {max_pass} concurrent "moulti pass" commands')
+
 	def compose(self) -> ComposeResult:
 		"""Create child widgets for the app."""
 		yield self.title_label
@@ -77,6 +91,7 @@ class Moulti(App):
 		yield self.debug_step
 
 	def on_ready(self) -> None:
+		self.init_threads()
 		self.network_loop()
 
 	def network_loop_is_ready(self) -> None:

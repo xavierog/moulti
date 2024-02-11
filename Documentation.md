@@ -238,6 +238,7 @@ The constant scrolling resumes when you hit the `End` key.
   moulti init
   ```
 - `MOULTI_CUSTOM_CSS`: filepath (either absolute or relative) to a custom TCSS file; see "How to define my own step classes ?"
+- `MOULTI_PASS_CONCURRENCY`: define how many concurrent "moulti pass" commands is acceptable; defaults to 20.
 - `MOULTI_RUN`: do NOT define this environment variable; it is set by the Moulti instance when it runs a script, e.g. `moulti run my_script.bash`
 - `TERM`: per se, Moulti does nothing with this environment variable. However, `$TERM` has a strong influence on the behavior and visual aspect of curses applications and Moulti is no exception. Your mileage may vary but, overall, it seems `TERM=xterm-256color` frequently fix things.
 

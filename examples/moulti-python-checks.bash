@@ -20,7 +20,7 @@ function pylint {
 	disable=(
 		broad-exception-caught
 		missing-{function,class,module}-docstring
-		too-many-{instance-attributes,arguments,branches,public-methods}
+		too-many-{instance-attributes,arguments,branches,public-methods,statements}
 	)
 	local IFS=,
 	command pylint \

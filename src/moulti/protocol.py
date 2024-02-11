@@ -81,9 +81,13 @@ def getraddr(socket: Socket) -> str:
 	"""
 	Return the remote address of the given socket.
 	"""
-	raddr = socket.getpeername()
-	if raddr:
-		raddr = raddr.decode('utf-8').replace('\0', '@')
+	try:
+		raddr = socket.getpeername()
+	except OSError as ose:
+		raddr = f'unknown/errno={ose.errno}'
+	if not isinstance(raddr, str):
+		raddr = raddr.decode('utf-8')
+	raddr = raddr.replace('\0', '@')
 	return raddr + ':fd' + str(socket.fileno())
 
 # This is a simple text-based TLV (type-length-value) protocol.

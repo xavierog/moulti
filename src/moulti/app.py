@@ -366,6 +366,8 @@ class Moulti(App):
 			# A Moulti instance is useless if it cannot listen:
 			self.exit(f'Fatal: {exc}')
 			return
+		socket_type = "abstract socket" if server_socket_is_abstract else "socket"
+		self.logdebug(f'listening on {socket_type} {PRINTABLE_MOULTI_SOCKET}')
 
 		try:
 			server_selector = selectors.DefaultSelector()

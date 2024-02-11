@@ -227,12 +227,12 @@ The constant scrolling resumes when you hit the `End` key.
 
 - `MOULTI_INSTANCE`: name of your Moulti instance; defaults to `default`; taken into account by the instanc to compute the default value of `MOULTI_SOCKET_PATH`.
 - `MOULTI_SOCKET_PATH`: path to the network socket that Moulti should listen/connect to; taken into account by both the instance and the CLI; if not specified, Moulti defaults to a platform-specific value that reflects your username and `MOULTI_INSTANCE`; examples: `@moulti-bob-test-instance.socket`, `/run/user/1000/moulti-bob-test-instance.socket`.
-- `MOULTI_ALLOWED_UID`: by default, Moulti only accepts commands from the user (uid) that launched the Moulti instance; setting this environment variable beforehand makes it accept arbitrary uids; example:
+- `MOULTI_ALLOWED_UID`: abstract sockets (i.e. Linux) only! By default, Moulti only accepts commands from the user (uid) that launched the Moulti instance; setting this environment variable beforehand makes it accept arbitrary uids; example:
   ```shell
   export MOULTI_ALLOWED_UID="1001,1002,5000,$(id -u alice),$(id -u bob)"
   moulti init
   ```
-- `MOULTI_ALLOWED_GID`: by default, Moulti only accepts commands from the user (uid) that launched the Moulti instance; setting this environment variable beforehand makes it accept arbitrary gids; example:
+- `MOULTI_ALLOWED_GID`: abstract sockets (i.e. Linux) only! By default, Moulti only accepts commands from the user (uid) that launched the Moulti instance; setting this environment variable beforehand makes it accept arbitrary gids; example:
   ```shell
   export MOULTI_ALLOWED_GID=141
   moulti init

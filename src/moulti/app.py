@@ -2,7 +2,7 @@ import os
 import asyncio
 import selectors
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any, cast, Iterator
+from typing import Any, Iterator
 from socket import socket as Socket
 from time import time_ns, localtime, strftime
 from queue import Queue
@@ -112,7 +112,7 @@ class Moulti(App):
 			self.logdebug(f'exec: error running {command}: {exc}')
 
 	def all_steps(self) -> Iterator[Step]:
-		return cast(Iterator[Step], self.query('#steps_container Step').results())
+		return self.query('#steps_container Step').results(Step)
 
 	def init_debug(self) -> None:
 		self.debug_step = Step('__moulti_debug', title='Console', classes='debug', min_height=5, max_height=15)
@@ -234,8 +234,7 @@ class Moulti(App):
 
 	def step_from_message(self, message: Message) -> None | Step:
 		try:
-			step = self.steps_container.query_one('#step_' + str(message['id']))
-			return cast(Step, step)
+			return self.steps_container.query_one('#step_' + str(message['id']), Step)
 		except Exception:
 			return None
 

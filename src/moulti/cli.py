@@ -47,7 +47,8 @@ def handle_reply(reply: Message) -> None:
 	success = reply.get('done') is True
 	if not success:
 		fallback = 'alas, no error message was provided.'
-		print('Something went wrong: ' + reply.get('error', fallback))
+		error_message = reply.get('error', fallback)
+		sys.stderr.write(f'Something went wrong: {error_message}\n')
 	sys.exit(0 if success else 1)
 
 def send_to_moulti_and_handle_reply(message: Message) -> None:

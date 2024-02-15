@@ -17,10 +17,6 @@ class Step(AbstractStep):
 		self.min_height = 1
 		self.max_height = 25
 
-		# This attribute is meant to prevent deletion of a step while content
-		# is being appended to it:
-		self.prevent_deletion = 0
-
 		super().__init__(id='step_' + id, **kwargs)
 
 		self.color = ''

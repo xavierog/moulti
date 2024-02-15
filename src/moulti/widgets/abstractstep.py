@@ -13,6 +13,10 @@ class AbstractStep(Static):
 		self.top_text = ''
 		self.bottom_text = ''
 
+		# This attribute is meant to prevent deletion of a step while content
+		# is being appended to it:
+		self.prevent_deletion = 0
+
 		self.init_kwargs = kwargs
 
 		step_classes = str(kwargs.get('classes', ''))

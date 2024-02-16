@@ -1,4 +1,4 @@
-# ruff: noqa: F401 imported but unused
-from .vertscroll import VertScroll
-from .step import Step
-from .moultilog import MoultiLog
+# List of moulti.widgets.* modules that provide non-abstract widgets that can be shown in Moulti.
+WIDGET_MODULES = [
+	'step',
+]

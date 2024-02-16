@@ -1,3 +1,4 @@
+from typing import Any
 from textual.app import ComposeResult
 from textual.widgets import Static, Collapsible
 
@@ -5,7 +6,7 @@ class AbstractStep(Static):
 	"""
 	This is the base class for all components end users may wish to add to Moulti.
 	"""
-	def __init__(self, id: str, **kwargs: str|int|bool): # pylint: disable=redefined-builtin
+	def __init__(self, id: str, **kwargs: Any): # pylint: disable=redefined-builtin
 		self.collapsible = Collapsible(title=id)
 		self.top_label = Static('', classes='top_text')
 		self.bottom_label = Static('', classes='bottom_text')

@@ -16,7 +16,10 @@ from .protocol import PRINTABLE_MOULTI_SOCKET, clean_socket
 from .protocol import moulti_listen, get_unix_credentials, send_json_message
 from .protocol import MoultiConnectionClosedException, MoultiProtocolException, Message, FDs
 from .protocol import MoultiTLVReader, data_to_message, getraddr
-from .widgets import VertScroll, Step
+from .widgets.tui import MoultiWidgets
+from .widgets.vertscroll import VertScroll
+from .widgets.abstractstep.tui import AbstractStep
+from .widgets.step.tui import Step
 
 def timestamp() -> str:
 	timestamp_ns = time_ns()
@@ -92,6 +95,8 @@ class Moulti(App):
 
 	def on_ready(self) -> None:
 		self.init_threads()
+		widget_list = ' '.join(MoultiWidgets.registry().keys())
+		self.logdebug(f'known widgets: {widget_list}')
 		self.network_loop()
 
 	def network_loop_is_ready(self) -> None:
@@ -111,8 +116,8 @@ class Moulti(App):
 		except Exception as exc:
 			self.logdebug(f'exec: error running {command}: {exc}')
 
-	def all_steps(self) -> Iterator[Step]:
-		return self.query('#steps_container Step').results(Step)
+	def all_steps(self) -> Iterator[AbstractStep]:
+		return self.query('#steps_container AbstractStep').results(AbstractStep)
 
 	def init_debug(self) -> None:
 		self.debug_step = Step('__moulti_debug', title='Console', classes='debug', min_height=5, max_height=15)
@@ -232,9 +237,9 @@ class Moulti(App):
 		finally:
 			step.prevent_deletion -= 1
 
-	def step_from_message(self, message: Message) -> None | Step:
+	def step_from_message(self, message: Message) -> None | AbstractStep:
 		try:
-			return self.steps_container.query_one('#step_' + str(message['id']), Step)
+			return self.steps_container.query_one('#step_' + str(message['id']), AbstractStep)
 		except Exception:
 			return None
 
@@ -254,44 +259,57 @@ class Moulti(App):
 		self.append_from_file_descriptor_to_queue(file_descriptors[0], queue, connection, raddr, message)
 
 	def handle_message(self, connection: Socket, raddr: str, message: Message, file_descriptors: FDs) -> None:
-		command = message.get('command')
+		command = str(message.get('command'))
 		# Deal with special cases:
 		if command == 'pass':
 			self.handle_pass_command(connection, raddr, message, file_descriptors)
 			return
 		# Analyse the message to determine what to call or what error to return:
+		finally_reply = True
 		call: Any = ()
 		error = None
 		try:
-			if command == 'step':
+			command_class = MoultiWidgets.command_to_class(command)
+			if command_class is not None:
 				step = self.step_from_message(message)
-				action = message.get('action')
+				action = str(message.get('action'))
+				# add/update/delete actions are considered common/standard and are thus handled here:
 				if action == 'add':
 					if step:
-						raise MoultiMessageException(f'step {message.get("id")} already exists')
+						raise MoultiMessageException(f'id {message.get("id")} already in use')
 					if 'id' not in message:
-						raise MoultiMessageException('missing step id')
-					call = (self.steps_container.mount, Step(**message))
+						raise MoultiMessageException('missing id')
+					call = (self.steps_container.mount, command_class(**message))
 				else:
 					# All other actions require an existing step:
 					if not step:
-						raise MoultiMessageException(f'no such step: {message.get("id")}')
-					if action == 'append':
-						if 'text' not in message:
-							raise MoultiMessageException('missing text for append operation')
-						call = (step.append, '\n'.join(message['text']))
-					elif action == 'clear':
-						call = (step.clear,)
+						raise MoultiMessageException(f'unknown id: {message.get("id")}')
+					if action == 'update':
+						call = (step.update_properties, message)
 					elif action == 'delete':
 						if step.prevent_deletion:
-							err = 'cannot delete this step as '
-							err += f'{step.prevent_deletion} ongoing operations depend upon it'
+							err = 'cannot proceed with deletion as '
+							err += f'{step.prevent_deletion} ongoing operations prevent it'
 							raise MoultiMessageException(err)
 						call = (step.remove,)
-					elif action == 'update':
-						call = (step.update_properties, message)
 					else:
-						raise MoultiMessageException('unknown action {action}')
+						# For actions other than add/update/delete, the widget class is expected to provide a
+						# "cli_action_{action}" method:
+						method_name = f'cli_action_{action.replace("-", "_")}'
+						method = getattr(step, method_name, False)
+						if not callable(method):
+							raise MoultiMessageException('unknown action {action}')
+						# Provide the method with helper functions that abstract away app/network-specific stuff:
+						def reply(**kwargs: Any) -> None:
+							self.reply(connection, raddr, message, **kwargs)
+						def debug(line: str) -> None:
+							self.logdebug(f'{raddr}: {line}')
+						helpers = {'reply': reply, 'debug': debug}
+						# The method is expected to return a tuple (callable + arguments):
+						call = method(message, helpers)
+						# An empty tuple means the method chose to handle everything, reply included:
+						if not call:
+							finally_reply = False
 			elif command == 'set':
 				if 'title' in message:
 					call = (self.title_label.update, str(message['title']))
@@ -303,9 +321,12 @@ class Moulti(App):
 			if call:
 				self.call_from_thread(*call)
 		except (BadIdentifier, MoultiMessageException) as exc:
+			# If we catch an exception, then we systematically assume we should handle the reply:
+			finally_reply = True
 			error = str(exc)
 		finally:
-			self.reply(connection, raddr, message, done=error is None, error=error)
+			if finally_reply:
+				self.reply(connection, raddr, message, done=error is None, error=error)
 
 	def check_unix_credentials(self, socket: Socket) -> tuple[bool, int, int]:
 		_, uid, gid = get_unix_credentials(socket)

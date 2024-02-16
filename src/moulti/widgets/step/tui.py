@@ -1,7 +1,8 @@
+from typing import Any
 from textual.app import ComposeResult
 from rich.text import Text
-from .abstractstep import AbstractStep
-from .moultilog import MoultiLog
+from ..abstractstep.tui import AbstractStep
+from ..moultilog import MoultiLog
 
 ANSI_ESCAPE_SEQUENCE = '\x1b'
 
@@ -20,6 +21,15 @@ class Step(AbstractStep):
 		super().__init__(id='step_' + id, **kwargs)
 
 		self.color = ''
+
+	def cli_action_append(self, kwargs: dict[str, Any], helpers: dict[str, Any]) -> tuple:
+		if 'text' not in kwargs:
+			helpers['reply'](done=False, error='missing text for append operation')
+			return ()
+		return self.append, '\n'.join(kwargs['text'])
+
+	def cli_action_clear(self, _kwargs: dict[str, str|int|bool], _helpers: dict[str, Any]) -> tuple:
+		return self.clear, # pylint: disable=trailing-comma-tuple
 
 	def subcompose(self) -> ComposeResult:
 		yield self.log_widget
@@ -88,3 +98,4 @@ class Step(AbstractStep):
 		}
 	}
 	"""
+MoultiWidgetClass = Step

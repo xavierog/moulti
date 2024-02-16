@@ -22,6 +22,8 @@ setup(
 		'moulti.widgets',
 		'moulti.widgets.abstractstep',
 		'moulti.widgets.step',
+		'moulti.widgets.abstractquestion',
+		'moulti.widgets.buttonquestion',
 	],
 	classifiers=[
 		'Environment :: Console :: Curses',

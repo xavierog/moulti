@@ -5,7 +5,6 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Iterator
 from socket import socket as Socket
 from time import time_ns, localtime, strftime
-from queue import Queue
 from threading import get_ident
 from textual import work
 from textual.app import App, ComposeResult
@@ -172,98 +171,18 @@ class Moulti(App):
 		except Exception as exc:
 			self.logdebug(f'{raddr}: reply: kwargs={kwargs}: {exc}')
 
-	@work(thread=True)
-	async def append_from_file_descriptor_to_queue(
-		self,
-		file_desc: int,
-		queue: Queue,
-		connection: Socket,
-		raddr: str,
-		message: Message
-	) -> None:
-		current_worker = get_current_worker()
-		error = None
-		try:
-			# Read lines from the given file descriptor:
-			with os.fdopen(file_desc, encoding='utf-8', errors='surrogateescape') as text_io:
-				# Syscall-wise, Python will read(fd, buffer, count) where count = max(8192, read_size) - read_bytes.
-				# But it will NOT return anything unless it has reached the hinted read size.
-				# Out of the box, Moulti should strive to display lines as soon as possible, hence the default value of
-				# 1. It remains possible to specify a larger value, e.g. when one knows there are going to be many
-				# lines over a short timespan, e.g. "find / -ls".
-				read_size = int(message.get('read_size', 1))
-				while data := text_io.read(read_size):
-					if current_worker.is_cancelled:
-						break
-					queue.put_nowait(data)
-				queue.put_nowait(None)
-		except Exception as exc:
-			error = str(exc)
-			self.logdebug(f'{raddr}: pass: {error}')
-		self.reply(connection, raddr, message, done=error is None, error=error)
-
-	@work(thread=True)
-	async def append_from_queue_to_step(self, queue: Queue, step: Step) -> None:
-		current_worker = get_current_worker()
-		step.prevent_deletion += 1
-		try:
-			buffer = []
-			while True:
-				if current_worker.is_cancelled:
-					break
-				data = queue.get()
-				if data is not None:
-					# Buffer data to avoid queuing partial lines as, down the
-					# line, RichLog.write() only handles complete lines:
-					# look for the position of \n from the end of the string :
-					eol = data.rfind('\n')
-					if eol == -1: # no \n found, buffer the whole string:
-						buffer.append(data)
-					else:
-						before = data[:eol]
-						after = data[eol+1:]
-						buffer.append(before)
-						self.call_from_thread(step.append, ''.join(buffer))
-						buffer.clear()
-						if after:
-							buffer.append(after)
-				else:
-					# Reached EOF: flush buffer and signal EOF:
-					if buffer:
-						self.call_from_thread(step.append, ''.join(buffer))
-					break
-		except Exception as exc:
-			self.logdebug(f'append_from_queue_to_step: {exc}')
-		finally:
-			step.prevent_deletion -= 1
-
 	def step_from_message(self, message: Message) -> None | AbstractStep:
 		try:
 			return self.steps_container.query_one('#step_' + str(message['id']), AbstractStep)
 		except Exception:
 			return None
 
-	def handle_pass_command(self, connection: Socket, raddr: str, message: Message, file_descriptors: FDs) -> None:
-		step = self.step_from_message(message)
-		if not step:
-			self.reply(connection, raddr, message, done=False, error=f'no such step: {message.get("id")}')
-			return
-		if not file_descriptors:
-			self.reply(connection, raddr, message, done=False, error='missing file descriptor for pass operation')
-			return
-		# Set up a queue between two workers:
-		# - one that reads data from the file descriptor and replies to the client;
-		# - one that appends lines to the step.
-		queue: Queue = Queue()
-		self.append_from_queue_to_step(queue, step)
-		self.append_from_file_descriptor_to_queue(file_descriptors[0], queue, connection, raddr, message)
-
 	def handle_message(self, connection: Socket, raddr: str, message: Message, file_descriptors: FDs) -> None:
 		command = str(message.get('command'))
-		# Deal with special cases:
+		# "moulti pass" is a special case that actually means "moulti step pass":
 		if command == 'pass':
-			self.handle_pass_command(connection, raddr, message, file_descriptors)
-			return
+			command = 'step'
+			message['command'], message['action'] = command, message['command']
 		# Analyse the message to determine what to call or what error to return:
 		finally_reply = True
 		call: Any = ()
@@ -304,7 +223,7 @@ class Moulti(App):
 							self.reply(connection, raddr, message, **kwargs)
 						def debug(line: str) -> None:
 							self.logdebug(f'{raddr}: {line}')
-						helpers = {'reply': reply, 'debug': debug}
+						helpers = {'reply': reply, 'debug': debug, 'file_descriptors': file_descriptors}
 						# The method is expected to return a tuple (callable + arguments):
 						call = method(message, helpers)
 						# An empty tuple means the method chose to handle everything, reply included:
@@ -316,7 +235,7 @@ class Moulti(App):
 			elif command == 'ping':
 				call = ()
 			else:
-				raise MoultiMessageException('unknown command {command}')
+				raise MoultiMessageException(f'unknown command {command}')
 			# At this stage, the analysis is complete; perform the required action and reply accordingly:
 			if call:
 				self.call_from_thread(*call)

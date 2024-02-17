@@ -1,5 +1,9 @@
+import os
+from queue import Queue
 from typing import Any
+from textual import work
 from textual.app import ComposeResult
+from textual.worker import get_current_worker
 from rich.text import Text
 from ..abstractstep.tui import AbstractStep
 from ..moultilog import MoultiLog
@@ -78,6 +82,82 @@ class Step(AbstractStep):
 			assert not isinstance(style, str) # prevent calling render() on str
 			return style.render('_').split('_')[0]
 		return ''
+
+	def cli_action_pass(self, kwargs: dict[str, str|int|bool], helpers: dict[str, Any]) -> tuple:
+		if not helpers['file_descriptors']:
+			helpers['reply'](done=False, error='missing file descriptor for pass operation')
+			return ()
+		# Set up a queue between two workers:
+		# - one that reads data from the file descriptor and replies to the client;
+		# - one that appends lines to the step.
+		queue: Queue = Queue()
+		self.append_from_queue(queue, helpers)
+		self.append_from_file_descriptor_to_queue(queue, kwargs, helpers)
+		return ()
+
+	@work(thread=True)
+	async def append_from_file_descriptor_to_queue(
+		self,
+		queue: Queue,
+		kwargs: dict[str, Any],
+		helpers: dict[str, Any],
+	) -> None:
+		current_worker = get_current_worker()
+		error = None
+		try:
+			file_desc = helpers['file_descriptors'][0]
+			# Read lines from the given file descriptor:
+			with os.fdopen(file_desc, encoding='utf-8', errors='surrogateescape') as text_io:
+				# Syscall-wise, Python will read(fd, buffer, count) where count = max(8192, read_size) - read_bytes.
+				# But it will NOT return anything unless it has reached the hinted read size.
+				# Out of the box, Moulti should strive to display lines as soon as possible, hence the default value of
+				# 1. It remains possible to specify a larger value, e.g. when one knows there are going to be many
+				# lines over a short timespan, e.g. "find / -ls".
+				read_size = int(kwargs.get('read_size', 1))
+				while data := text_io.read(read_size):
+					if current_worker.is_cancelled:
+						break
+					queue.put_nowait(data)
+				queue.put_nowait(None)
+		except Exception as exc:
+			error = str(exc)
+			helpers['debug'](f'pass: {error}')
+		helpers['reply'](done=error is None, error=error)
+
+	@work(thread=True)
+	async def append_from_queue(self, queue: Queue, helpers: dict[str, Any]) -> None:
+		current_worker = get_current_worker()
+		self.prevent_deletion += 1
+		try:
+			buffer = []
+			while True:
+				if current_worker.is_cancelled:
+					break
+				data = queue.get()
+				if data is not None:
+					# Buffer data to avoid queuing partial lines as, down the
+					# line, RichLog.write() only handles complete lines:
+					# look for the position of \n from the end of the string :
+					eol = data.rfind('\n')
+					if eol == -1: # no \n found, buffer the whole string:
+						buffer.append(data)
+					else:
+						before = data[:eol]
+						after = data[eol+1:]
+						buffer.append(before)
+						self.app.call_from_thread(self.append, ''.join(buffer))
+						buffer.clear()
+						if after:
+							buffer.append(after)
+				else:
+					# Reached EOF: flush buffer and signal EOF:
+					if buffer:
+						self.app.call_from_thread(self.append, ''.join(buffer))
+					break
+		except Exception as exc:
+			helpers['debug'](f'append_from_queue: {exc}')
+		finally:
+			self.prevent_deletion -= 1
 
 	DEFAULT_CSS = AbstractStep.DEFAULT_COLORS + """
 	Step {

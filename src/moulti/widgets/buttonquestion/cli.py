@@ -1,4 +1,4 @@
-from argparse import ArgumentParser, _SubParsersAction
+from argparse import _SubParsersAction
 from moulti.helpers import send_to_moulti_and_handle_reply, send_no_none_to_moulti_and_handle_reply
 from ..abstractquestion.cli import add_abstractquestion_options, question_get_answer
 

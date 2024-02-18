@@ -203,6 +203,8 @@ class Moulti(App):
 					# All other actions require an existing step:
 					if not step:
 						raise MoultiMessageException(f'unknown id: {message.get("id")}')
+					if not isinstance(step, command_class):
+						raise MoultiMessageException(f'{message.get("id")} is not a {command}')
 					if action == 'update':
 						call = (step.update_properties, message)
 					elif action == 'delete':

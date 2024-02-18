@@ -10,7 +10,7 @@ with open('README.md', 'r') as readme:
 
 setup(
 	name='moulti',
-	version='1.1.0',
+	version='1.2.0',
 	description=short_description,
 	long_description=long_description,
 	long_description_content_type='text/markdown',
@@ -31,7 +31,8 @@ setup(
 		'Intended Audience :: Developers',
 		'Intended Audience :: System Administrators',
 		'License :: OSI Approved :: MIT License',
-		'Operating System :: POSIX :: Linux', # moulti was never tested outside Linux
+		'Operating System :: POSIX :: Linux',
+		'Operating System :: MacOS :: MacOS X',
 		'Programming Language :: Python :: 3 :: Only',
 		'Topic :: System :: Logging',
 		'Topic :: Utilities',

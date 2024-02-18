@@ -22,7 +22,7 @@ class Step(AbstractStep):
 		self.min_height = 1
 		self.max_height = 25
 
-		super().__init__(id='step_' + id, **kwargs)
+		super().__init__(id=id, **kwargs)
 
 		self.color = ''
 

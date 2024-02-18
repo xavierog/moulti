@@ -21,7 +21,7 @@ class AbstractStep(Static):
 		self.init_kwargs = kwargs
 
 		step_classes = str(kwargs.get('classes', ''))
-		super().__init__(id=id, classes=step_classes)
+		super().__init__(id='step_' + id, classes=step_classes)
 
 	def subcompose(self) -> ComposeResult:
 		return []

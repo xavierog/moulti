@@ -14,7 +14,7 @@ class ButtonQuestion(AbstractQuestion):
 	This widget represents an interactive question in a script, program or process.
 	"""
 	def __init__(self, id: str, **kwargs: Any): # pylint: disable=redefined-builtin
-		super().__init__(id='step_' + id, **kwargs)
+		super().__init__(id=id, **kwargs)
 		self.buttons = []
 		for value, classes, label in self.init_kwargs.get('button', DEFAULT_BUTTONS):
 			self.buttons.append(Button(label, variant=classes, name=value))

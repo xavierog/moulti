@@ -19,7 +19,7 @@ moulti wait --max-attempts=120
 moulti_type set --title 'Moulti demo: Debian upgrade'
 sleep 0.5
 
-STEP_COLLAPSE_ON_SUCCESS=2
+STEP_COLLAPSE_ON_SUCCESS=
 STEP_ID=apt_update moulti_exec apt update
 
 # Display the list of upgradable packages:

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 export TERM=xterm-256color
-[ "${MOULTI_RUN}" ] || exec moulti run "$0" "$@"
+[ "${MOULTI_RUN}" ] || exec moulti run -- "$0" "$@"
 
 # We could use apt-get BUT there is no equivalent to apt list --upgradable.
 function apt {

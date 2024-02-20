@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 export MOULTI_INSTANCE='moulti-python-checks'
 source examples/moulti-functions.bash
-[ "${MOULTI_RUN}" ] || exec moulti run "$0" "$@"
+[ "${MOULTI_RUN}" ] || exec moulti run -- "$0" "$@"
 
 moulti step add versions --title='Versions' --bottom-text=' '
 {

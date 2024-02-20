@@ -100,7 +100,7 @@ A simple Moulti-based bash script makes use of two new commands:
 # Name the Moulti instance to prevent conflicts:
 export MOULTI_INSTANCE='my-first-script-with-moulti'
 # If not done already, start a Moulti instance and have it re-execute this script:
-[ "${MOULTI_RUN}" ] || exec moulti run "$0" "$@"
+[ "${MOULTI_RUN}" ] || exec moulti run -- "$0" "$@"
 # Ensure the Moulti instance is reachable:
 moulti wait
 moulti step add step_1 --title='First step'
@@ -300,7 +300,7 @@ The constant scrolling resumes when you hit the `End` key.
 
 ### Environment variables set by the Moulti instance
 
-These variables are set by the Moulti instance when it runs a script, e.g. `moulti run my_script.bash`:
+These variables are set by the Moulti instance when it runs a script, e.g. `moulti run -- my_script.bash`:
 
 - `MOULTI_RUN`: its value is irrelevant but its mere presence means your script should NOT try to spawn a new Moulti instance.
 - `MOULTI_INSTANCE_PID`: process id of the Moulti instance, in case your script needs to act upon the Moulti process itself.

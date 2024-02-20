@@ -56,7 +56,7 @@ Distribution packages are of course welcome.
    ![step 6](https://xavier.kindwolf.org/p/moulti/doc/img/quickstart-step06.png)
 7. That syntax we used to turn the command red is called "Rich markup"; its BBcode-like syntax is described [here](https://rich.readthedocs.io/en/stable/markup.html#syntax), the list of available colors is [there](https://rich.readthedocs.io/en/stable/appendix/colors.html#appendix-colors) and styles that typically work fine in a *modern* terminal emulator are: `blink` `bold` `conceal` `italic` `overline` `reverse` `strike` `underline` `underline2`.
    Try them all at once:
-   ```
+   ```shell
    moulti step update my_step --bottom-text='[blink]blink[/] [bold]bold[/] [conceal]conceal[/] [italic]italic[/] [overline]overline[/] [reverse]reverse[/] [strike]strike[/] [underline]underline[/] [underline2]underline2[/] [blue]blue[/] [on yellow1]on yellow1[/] [blue on yellow1]blue on yellow1[/]'
    ```
    ![step 7](https://xavier.kindwolf.org/p/moulti/doc/img/quickstart-step07.png)
@@ -68,7 +68,11 @@ Distribution packages are of course welcome.
 8. And of course, you can add *multiple* such steps:
    ```shell
    for class in warning error standard; do
-       moulti step add "${class}_example" --classes="${class}" --title="${class^} step" --text="This is a step with class '${class}'." --bottom-text=' '
+       moulti step add "${class}_example" \
+           --classes="${class}" \
+           --title="${class^} step" \
+           --text="This is a step with class '${class}'." \
+           --bottom-text=' '
    done
    ```
    ![step 8](https://xavier.kindwolf.org/p/moulti/doc/img/quickstart-step08.png)
@@ -221,7 +225,7 @@ Per se, Moulti does not:
 - number lines (use e.g. `nl -ba` or `cat -n`)
 - timestamp lines (use e.g. `ts '%FT%T%z'` from the `moreutils` package)
 - strip colors from input (use e.g. `ansi2txt` from [colorized-logs](https://github.com/kilobyte/colorized-logs))
-- perform syntax highlighting (use e.g. `bat` / `batcat`)
+- perform syntax highlighting (use e.g. `bat` / `batcat` or `rich`)
 - wrap lines (use e.g. `fold`)
 - distinguish stdout from stderr (it reads a single stream anyway; use e.g. `stderred`)
 - tweak the buffering policy of other processes (use e.g. `stdbuf` and do not forget `grep --line-buffered`)

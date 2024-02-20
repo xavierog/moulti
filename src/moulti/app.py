@@ -19,6 +19,7 @@ from .widgets.tui import MoultiWidgets
 from .widgets.vertscroll import VertScroll
 from .widgets.abstractstep.tui import AbstractStep
 from .widgets.step.tui import Step
+from .widgets.quitdialog import QuitDialog
 
 def timestamp() -> str:
 	timestamp_ns = time_ns()
@@ -161,6 +162,14 @@ class Moulti(App):
 		"""Collapse all steps."""
 		for step in self.all_steps():
 			step.collapsible.collapsed = True
+
+	async def action_quit(self) -> None:
+		"""Quit Moulti."""
+		if self.init_command is not None and self.init_command_running:
+			message = 'The command passed to "moulti run" is still running.'
+			self.push_screen(QuitDialog(message))
+			return
+		await super().action_quit()
 
 	def reply(self, connection: Socket, raddr: str, message: dict[str, Any], **kwargs: Any) -> None:
 		try:

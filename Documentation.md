@@ -303,6 +303,7 @@ The constant scrolling resumes when you hit the `End` key.
 These variables are set by the Moulti instance when it runs a script, e.g. `moulti run my_script.bash`:
 
 - `MOULTI_RUN`: its value is irrelevant but its mere presence means your script should NOT try to spawn a new Moulti instance.
+- `MOULTI_INSTANCE_PID`: process id of the Moulti instance, in case your script needs to act upon the Moulti process itself.
 - `MOULTI_SOCKET_PATH`: described in the previous section; the Moulti instance explicitly sets this variable to ensure your script can connect to it.
 
 ### Other environment variables

@@ -109,6 +109,7 @@ class Moulti(App):
 			environment = os.environ.copy()
 			environment['MOULTI_RUN'] = 'moulti'
 			environment['MOULTI_SOCKET_PATH'] = PRINTABLE_MOULTI_SOCKET
+			environment['MOULTI_INSTANCE_PID'] = str(os.getpid())
 			self.logdebug(f'exec: about to run {command}')
 			completed = subprocess.run(command, env=environment, stdin=subprocess.DEVNULL, check=False)
 			self.logdebug(f'exec: {command} exited with return code {completed.returncode}')

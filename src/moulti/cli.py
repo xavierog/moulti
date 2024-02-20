@@ -1,6 +1,7 @@
 # ruff: noqa: E501 Line too long
 import sys
 from argparse import ArgumentParser, _SubParsersAction
+from . import __version__ as moulti_version
 from .helpers import pint, send_to_moulti_and_handle_reply
 from .protocol import send_to_moulti, PRINTABLE_MOULTI_SOCKET
 from .widgets.cli import add_cli_arguments
@@ -59,6 +60,7 @@ def add_main_commands(subparsers: _SubParsersAction) -> None:
 
 def build_arg_parser() -> ArgumentParser:
 	arg_parser = ArgumentParser(prog='moulti', description='step-by-step logs')
+	arg_parser.add_argument('--version', action='version', version=moulti_version)
 	subparsers = arg_parser.add_subparsers(required=True)
 	# moulti init, moulti wait:
 	add_main_commands(subparsers)

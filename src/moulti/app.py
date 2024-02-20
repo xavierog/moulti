@@ -81,7 +81,7 @@ class Moulti(App):
 		except (KeyError, ValueError):
 			max_pass = 20
 		default_threads = 2 # network_loop() + exec()
-		threads_per_pass = 2 # Each "moulti pass" command spawns 2 threads -- cf handle_pass_command()
+		threads_per_pass = 2 # Each "moulti pass" command spawns 2 threads -- cf Step.cli_action_pass()
 		thread_count = default_threads + threads_per_pass * max_pass
 		moulti_executor = ThreadPoolExecutor(max_workers=thread_count, thread_name_prefix='moulti')
 		asyncio.get_running_loop().set_default_executor(moulti_executor)

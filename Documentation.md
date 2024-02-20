@@ -281,6 +281,8 @@ The constant scrolling resumes when you hit the `End` key.
 
 ## Environment variables
 
+### Environment variables you may set
+
 - `MOULTI_INSTANCE`: name of your Moulti instance; defaults to `default`; taken into account by the instance to compute the default value of `MOULTI_SOCKET_PATH`.
 - `MOULTI_SOCKET_PATH`: path to the network socket that Moulti should listen/connect to; taken into account by both the instance and the CLI; if not specified, Moulti defaults to a platform-specific value that reflects your username and `MOULTI_INSTANCE`; examples: `@moulti-bob-test-instance.socket`, `/run/user/1000/moulti-bob-test-instance.socket`.
 - `MOULTI_ALLOWED_UID`: abstract sockets (i.e. Linux) only! By default, Moulti only accepts commands from the user (uid) that launched the Moulti instance; setting this environment variable beforehand makes it accept arbitrary uids; example:
@@ -293,9 +295,18 @@ The constant scrolling resumes when you hit the `End` key.
   export MOULTI_ALLOWED_GID=141
   moulti init
   ```
-- `MOULTI_CUSTOM_CSS`: filepath (either absolute or relative) to a custom TCSS file; see "How to define my own step classes ?"
+- `MOULTI_CUSTOM_CSS`: absolute filepath to a custom TCSS file; see "How to define my own step classes ?"
 - `MOULTI_PASS_CONCURRENCY`: define how many concurrent "moulti pass" commands is acceptable; defaults to 20.
-- `MOULTI_RUN`: do NOT define this environment variable; it is set by the Moulti instance when it runs a script, e.g. `moulti run my_script.bash`
+
+### Environment variables set by the Moulti instance
+
+These variables are set by the Moulti instance when it runs a script, e.g. `moulti run my_script.bash`:
+
+- `MOULTI_RUN`: its value is irrelevant but its mere presence means your script should NOT try to spawn a new Moulti instance.
+- `MOULTI_SOCKET_PATH`: described in the previous section; the Moulti instance explicitly sets this variable to ensure your script can connect to it.
+
+### Other environment variables
+
 - `TERM`: per se, Moulti does nothing with this environment variable. However, `$TERM` has a strong influence on the behavior and visual aspect of curses applications and Moulti is no exception. Your mileage may vary but, overall, it seems `TERM=xterm-256color` frequently fix things.
 
 ## How to define my own step classes ?

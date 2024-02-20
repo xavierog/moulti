@@ -51,6 +51,7 @@ class Moulti(App):
 		self.init_widgets()
 		self.init_debug()
 		self.init_command = command
+		self.init_command_running = False
 		super().__init__()
 
 	def init_security(self) -> None:
@@ -106,6 +107,7 @@ class Moulti(App):
 	def exec(self, command: list[str]) -> None:
 		import subprocess # pylint: disable=import-outside-toplevel
 		try:
+			self.init_command_running = True
 			environment = os.environ.copy()
 			environment['MOULTI_RUN'] = 'moulti'
 			environment['MOULTI_SOCKET_PATH'] = PRINTABLE_MOULTI_SOCKET
@@ -115,6 +117,8 @@ class Moulti(App):
 			self.logdebug(f'exec: {command} exited with return code {completed.returncode}')
 		except Exception as exc:
 			self.logdebug(f'exec: error running {command}: {exc}')
+		finally:
+			self.init_command_running = False
 
 	def all_steps(self) -> Iterator[AbstractStep]:
 		return self.query('#steps_container AbstractStep').results(AbstractStep)

@@ -121,6 +121,35 @@ moulti step add step_2 --title='Second step'
 
 In practice, it makes sense to heavily leverage shell functions, such as those available in [moulti-functions.bash](examples/moulti-functions.bash).
 
+### moulti run: dealing with stdin, stdout, stderr
+
+Script launched through "moulti run":
+
+- have their standard input (stdin, file descriptor #0) redirected to `/dev/null`;
+- inherit the standard and error outputs (stdout and stderr, file descriptors #1 and #2) from Moulti (e.g. `/dev/pts/42`);
+- should not try to `read` from stdin;
+- should either refrain from writing to stdout/stderr or...
+- should redirect stdout/stderr to a suitable destination.
+
+Possible approaches in bash:
+
+```bash
+# Discard stdout and stderr entirely:
+exec > /dev/null 2>&1
+
+# Log stdout and stderr to a custom log file:
+exec > custom.log 2>&1
+
+# Pass stdout and stderr to a dedicated Moulti step:
+moulti step add main_script_output
+exec > >(moulti pass main_script_output) 2>&1
+
+# Pass stdout and stderr to a dedicated Moulti step but keep a copy in a custom log file:
+moulti step add main_script_output
+exec > >(tee --append custom.log | moulti pass main_script_output) 2>&1
+```
+
+
 ## Python scripting
 
 Python scripting may be achieved by importing the `moulti.protocol` module and getting some inspiration from the `moulti.cli` module.

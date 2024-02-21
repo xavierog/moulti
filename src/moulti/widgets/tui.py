@@ -40,3 +40,10 @@ class MoultiWidgets:
 		if not cls._registry:
 			cls.register_all_widget_modules()
 		return cls._registry.get(command)
+
+	@classmethod
+	def class_to_command(cls, widget_class: type[AbstractStep]) -> str | None:
+		for command, moulti_widget_class in cls._registry.items():
+			if moulti_widget_class == widget_class:
+				return command
+		return None

@@ -1,4 +1,5 @@
 import os
+import time
 import asyncio
 import selectors
 from concurrent.futures import ThreadPoolExecutor
@@ -53,6 +54,9 @@ class Moulti(App):
 		self.init_debug()
 		self.init_command = command
 		self.init_command_running = False
+		self.exit_first_policy = ''
+		"""What to do when "moulti run" must exit before the process it launched? 'terminate' terminates the process,
+		any other value leaves it running in the background."""
 		super().__init__()
 
 	def init_security(self) -> None:
@@ -106,6 +110,7 @@ class Moulti(App):
 
 	@work(thread=True)
 	def exec(self, command: list[str]) -> None:
+		worker = get_current_worker()
 		import subprocess # pylint: disable=import-outside-toplevel
 		try:
 			self.init_command_running = True
@@ -114,11 +119,24 @@ class Moulti(App):
 			environment['MOULTI_SOCKET_PATH'] = PRINTABLE_MOULTI_SOCKET
 			environment['MOULTI_INSTANCE_PID'] = str(os.getpid())
 			self.logdebug(f'exec: about to run {command}')
-			completed = subprocess.run(command, env=environment, stdin=subprocess.DEVNULL, check=False)
-			self.logdebug(f'exec: {command} exited with return code {completed.returncode}')
+			# Not using 'with' because that waits for the process to exit; pylint: disable=consider-using-with
+			process = subprocess.Popen(command, env=environment, stdin=subprocess.DEVNULL)
+			self.logdebug(f'exec: {command} launched with PID {process.pid}')
+			returncode = None
+			while not worker.is_cancelled:
+				returncode = process.poll() # non-blocking wait(), e.g. wait4(process.pid, result_addr, WNOHANG, NULL)
+				if returncode is not None:
+					self.init_command_running = False
+					self.logdebug(f'exec: {command} exited with return code {returncode}')
+					break
+				time.sleep(0.5)
+			if returncode is None:
+				self.logdebug(f'exec: {command} is still running (PID {process.pid}) but Moulti is about to exit')
+				if self.exit_first_policy == 'terminate':
+					process.terminate()
+				# else just leave the process running in the background and exit.
 		except Exception as exc:
 			self.logdebug(f'exec: error running {command}: {exc}')
-		finally:
 			self.init_command_running = False
 
 	def all_steps(self) -> Iterator[AbstractStep]:
@@ -170,6 +188,11 @@ class Moulti(App):
 			self.push_screen(QuitDialog(message))
 			return
 		await super().action_quit()
+
+	def on_quit_dialog_exit_request(self, exit_request: QuitDialog.ExitRequest) -> None:
+		"""Exit Moulti, as instructed by the Quit Dialog."""
+		self.exit_first_policy = exit_request.exit_first_policy
+		self.exit()
 
 	def reply(self, connection: Socket, raddr: str, message: dict[str, Any], **kwargs: Any) -> None:
 		try:

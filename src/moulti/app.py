@@ -229,7 +229,7 @@ class Moulti(App):
 			# Create an "opener" function that opens files relatively to the export directory:
 			export_dir_fd = os.open(export_dirpath, 0)
 			def opener(path: str, flags: int) -> int:
-				return os.open(path, flags, dir_fd=export_dir_fd)
+				return os.open(path, flags, mode=0o666, dir_fd=export_dir_fd)
 			# Proceed with the export itself:
 			saved_steps = self.save_steps(opener)
 			self.save_properties(opener, ('0'*len(str(saved_steps))) + '-')

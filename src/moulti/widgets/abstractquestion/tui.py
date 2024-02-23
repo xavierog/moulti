@@ -50,6 +50,11 @@ class AbstractQuestion(AbstractStep):
 		if 'text' in kwargs:
 			self.question_label.update(str(kwargs['text']))
 
+	def export_properties(self) -> dict[str, Any]:
+		prop = super().export_properties()
+		prop['text'] = str(self.question_label.renderable)
+		return prop
+
 	def disable(self) -> None:
 		for widget in self.collapsible.query('Collapsible > Contents').results():
 			widget.disabled = True

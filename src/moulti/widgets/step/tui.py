@@ -50,6 +50,12 @@ class Step(AbstractStep):
 		self.log_widget.styles.min_height = self.min_height
 		self.log_widget.styles.max_height = self.max_height if self.max_height > 0 else None
 
+	def export_properties(self) -> dict[str, Any]:
+		prop = super().export_properties()
+		prop['min_height'] = self.min_height
+		prop['max_height'] = self.max_height
+		return prop
+
 	def clear(self) -> None:
 		self.log_widget.clear()
 		self.color = ''

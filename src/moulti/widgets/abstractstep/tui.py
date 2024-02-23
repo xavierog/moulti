@@ -57,6 +57,16 @@ class AbstractStep(Static):
 			self.bottom_label.update(self.bottom_text)
 		self.bottom_label.styles.display = 'block' if self.bottom_text else 'none'
 
+	def export_properties(self) -> dict[str, Any]:
+		prop: dict[str, Any] = {}
+		prop['id'] = self.title_from_id()
+		prop['classes'] = ' '.join(self.classes)
+		prop['title'] = self.collapsible.title
+		prop['collapsed'] = self.collapsible.collapsed
+		prop['top_text'] = self.top_text
+		prop['bottom_text'] = self.bottom_text
+		return prop
+
 	DEFAULT_COLORS = """
 	$step_default: $primary;
 	$step_success: ansi_bright_green;

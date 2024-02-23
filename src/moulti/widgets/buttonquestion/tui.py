@@ -28,6 +28,12 @@ class ButtonQuestion(AbstractQuestion):
 		if answer is not None:
 			self.got_answer(answer)
 
+	def export_properties(self) -> dict[str, Any]:
+		prop = super().export_properties()
+		# Buttons cannot be updated so we can simply export the value found in init_kwargs:
+		prop['button'] = self.init_kwargs.get('button', DEFAULT_BUTTONS)
+		return prop
+
 	DEFAULT_CSS = """
 		Static.buttons {
 			layout: horizontal;

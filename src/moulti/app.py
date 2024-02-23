@@ -142,6 +142,11 @@ class Moulti(App):
 	def all_steps(self) -> Iterator[AbstractStep]:
 		return self.query('#steps_container AbstractStep').results(AbstractStep)
 
+	def export_properties(self) -> dict[str, Any]:
+		prop = {}
+		prop['title'] = str(self.title_label.renderable)
+		return prop
+
 	def init_debug(self) -> None:
 		self.debug_step = Step('__moulti_debug', title='Console', classes='debug', min_height=5, max_height=15)
 		self.debug_step.styles.display = 'none'

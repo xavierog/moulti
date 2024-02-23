@@ -36,4 +36,14 @@ class InputQuestion(AbstractQuestion):
 		if 'restrict' in kwargs:
 			self.input.restrict = None if not kwargs['restrict'] else str(kwargs['restrict'])
 
+	def export_properties(self) -> dict[str, Any]:
+		prop = super().export_properties()
+		prop['placeholder'] = str(self.input.placeholder)
+		# Do NOT export the value if the input field is in "password mode":
+		prop['value'] = str(self.input.value) if not self.input.password else '*'*len(self.input.value)
+		prop['password'] = bool(self.input.password)
+		prop['max_length'] = 0 if self.input.max_length is None else self.input.max_length
+		prop['restrict'] = '' if self.input.restrict is None else self.input.restrict
+		return prop
+
 MoultiWidgetClass = InputQuestion

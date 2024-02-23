@@ -65,6 +65,7 @@ class Moulti(App):
 		Lock that ensures Moulti does not generate multiple exports of the current instance at a time.
 		"""
 		super().__init__()
+		self.dark = os.environ.get('MOULTI_MODE', 'dark') != 'light'
 
 	def init_security(self) -> None:
 		def ids_from_env(env_var_name: str) -> list[int]:

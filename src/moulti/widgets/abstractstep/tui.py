@@ -1,4 +1,5 @@
-from typing import Any
+import json
+from typing import Any, Callable
 from textual.app import ComposeResult
 from textual.widgets import Static, Collapsible
 
@@ -66,6 +67,12 @@ class AbstractStep(Static):
 		prop['top_text'] = self.top_text
 		prop['bottom_text'] = self.bottom_text
 		return prop
+
+	def save(self, opener: Callable[[str, int], int], filename: str, extra_properties: dict[str, Any]) -> None:
+		properties = {**extra_properties, **self.export_properties()}
+		with open(filename + '.properties.json', 'w', encoding='utf-8', opener=opener) as properties_filedesc:
+			json.dump(properties, properties_filedesc, indent=4)
+			properties_filedesc.write('\n')
 
 	DEFAULT_COLORS = """
 	$step_default: $primary;

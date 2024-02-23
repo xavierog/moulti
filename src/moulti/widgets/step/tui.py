@@ -1,6 +1,6 @@
 import os
 from queue import Queue
-from typing import Any
+from typing import Any, Callable
 from textual import work
 from textual.app import ComposeResult
 from textual.worker import get_current_worker
@@ -55,6 +55,12 @@ class Step(AbstractStep):
 		prop['min_height'] = self.min_height
 		prop['max_height'] = self.max_height
 		return prop
+
+	def save(self, opener: Callable[[str, int], int], filename: str, extra_properties: dict[str, Any]) -> None:
+		super().save(opener, filename, extra_properties)
+		filename = filename + '.contents.log'
+		with open(filename, 'w', encoding='utf-8', errors='surrogateescape', opener=opener) as contents_filedesc:
+			self.log_widget.to_file(contents_filedesc)
 
 	def clear(self) -> None:
 		self.log_widget.clear()

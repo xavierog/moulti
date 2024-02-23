@@ -1,18 +1,20 @@
 import os
+import json
 import time
 import asyncio
+import datetime
 import selectors
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any, Iterator
+from typing import Any, Callable, Iterator
 from socket import socket as Socket
 from time import time_ns, localtime, strftime
-from threading import get_ident
+from threading import get_ident, Lock
 from textual import work
 from textual.app import App, ComposeResult
 from textual.dom import BadIdentifier
 from textual.widgets import Footer, Label
 from textual.worker import get_current_worker, NoActiveWorker
-from .protocol import PRINTABLE_MOULTI_SOCKET, clean_socket
+from .protocol import PRINTABLE_MOULTI_SOCKET, clean_socket, current_instance
 from .protocol import moulti_listen, get_unix_credentials, send_json_message
 from .protocol import MoultiConnectionClosedException, MoultiProtocolException, Message, FDs
 from .protocol import MoultiTLVReader, data_to_message, getraddr
@@ -41,10 +43,11 @@ class Moulti(App):
 	it, moulti does not do anything until instructed to.
 	"""
 	BINDINGS = [
+		("s", "save", "Save"),
 		("c", "toggle_debug", "Toggle console"),
-		("d", "toggle_dark", "Toggle dark mode"),
 		("x", "expand_all", "Expand all"),
 		("o", "collapse_all", "Collapse all"),
+		("d", "toggle_dark", "Toggle dark mode"),
 		("q", "quit", "Quit Moulti"),
 	]
 
@@ -57,6 +60,10 @@ class Moulti(App):
 		self.exit_first_policy = ''
 		"""What to do when "moulti run" must exit before the process it launched? 'terminate' terminates the process,
 		any other value leaves it running in the background."""
+		self.save_lock = Lock()
+		"""
+		Lock that ensures Moulti does not generate multiple exports of the current instance at a time.
+		"""
 		super().__init__()
 
 	def init_security(self) -> None:
@@ -198,6 +205,67 @@ class Moulti(App):
 		"""Exit Moulti, as instructed by the Quit Dialog."""
 		self.exit_first_policy = exit_request.exit_first_policy
 		self.exit()
+
+	@work(thread=True)
+	def action_save(self) -> None:
+		"""
+		Export everything currently shown by the instance as a bunch of files in a directory.
+		"""
+		if not self.save_lock.acquire(blocking=False): # pylint: disable=consider-using-with
+			self.logdebug('save: this instance is already being saved.')
+			summary = 'This instance is already being saved.'
+			self.notify(summary, title='One at a time!', severity='warning')
+			return
+		export_dir_fd = None
+		try:
+			# Determine where to create the export directory:
+			basepath = os.environ.get('MOULTI_SAVE_PATH') or '.'
+			# Determine what to name the export directory:
+			iso_8601_date = datetime.datetime.now().isoformat().replace(":", "-")
+			export_dirname = f'{current_instance()}-{iso_8601_date}'
+			export_dirpath = os.path.join(basepath, export_dirname)
+			# Create the export directory:
+			os.makedirs(export_dirpath)
+			# Create an "opener" function that opens files relatively to the export directory:
+			export_dir_fd = os.open(export_dirpath, 0)
+			def opener(path: str, flags: int) -> int:
+				return os.open(path, flags, dir_fd=export_dir_fd)
+			# Proceed with the export itself:
+			saved_steps = self.save_steps(opener)
+			self.save_properties(opener, ('0'*len(str(saved_steps))) + '-')
+			# Notify users:
+			summary = f'{saved_steps} steps successfully saved\nDir: {basepath}\nSubdir: {export_dirname}'
+			self.notify(summary, title='Saved!')
+		except Exception as exc:
+			self.logdebug(f'save: failed: {exc}')
+			summary = 'An error occurred during saving.\nRefer to the console for more details.'
+			self.notify(summary, title='Save failed!', severity='error')
+		finally:
+			self.save_lock.release()
+			if export_dir_fd is not None:
+				os.close(export_dir_fd)
+
+	def save_properties(self, opener: Callable[[str,int], int], filename_prefix: str = '') -> None:
+		filename = filename_prefix + 'instance.properties.json'
+		extra_properties = {'command': 'set'}
+		with open(filename, 'w', encoding='utf-8', errors='surrogateescape', opener=opener) as instance_file_desc:
+			json.dump({**extra_properties, **self.export_properties()}, instance_file_desc, indent=4)
+			instance_file_desc.write('\n')
+
+	def save_steps(self, opener: Callable[[str,int], int]) -> int:
+		# Fetch a list of all steps to export them:
+		steps = list(self.all_steps())
+		# Filenames are numbered from 0 to n; how many characters do we need to write n?
+		number_prefix_length = len(str(len(steps)))
+		step_index = 0
+		for step_index, step in enumerate(steps, start=1):
+			command = MoultiWidgets.class_to_command(type(step))
+			if command is None:
+				continue
+			extra_properties = {'command': command, 'action': 'add'}
+			filename = f'{step_index:0{number_prefix_length}d}-{step.title_from_id()}'
+			step.save(opener, filename, extra_properties)
+		return step_index
 
 	def reply(self, connection: Socket, raddr: str, message: dict[str, Any], **kwargs: Any) -> None:
 		try:

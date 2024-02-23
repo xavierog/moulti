@@ -179,10 +179,6 @@ class Moulti(App):
 		else:
 			self.debug_step.styles.display = 'none'
 
-	def action_toggle_dark(self) -> None:
-		"""Toggle dark mode."""
-		self.dark = not self.dark
-
 	def action_expand_all(self) -> None:
 		"""Expand all steps."""
 		for step in self.all_steps():

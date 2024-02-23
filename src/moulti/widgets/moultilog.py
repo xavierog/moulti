@@ -1,5 +1,7 @@
-from typing import Any
+from typing import Any, Generator
 from typing_extensions import Self
+from rich.console import Console
+from rich.style import Style
 from textual.events import MouseScrollUp
 from textual.geometry import Size
 from textual.widgets import RichLog
@@ -52,6 +54,25 @@ class MoultiLog(RichLog):
 		"""Turn auto_scroll on again as soon as users hit the End key."""
 		self.auto_scroll = True
 		super().action_scroll_end(*args, **kwargs)
+
+	def _render_strips(self) -> Generator:
+		"""
+		Our own variant of Strip.render() that does NOT forget to output unstyled segments.
+		"""
+		color_system = Console()._color_system # pylint: disable=protected-access
+		style_render = Style.render
+		for strip in self.lines:
+			yield ''.join([
+				text
+				if style is None
+				else style_render(style, text, color_system=color_system)
+				for text, style, _ in strip._segments # pylint: disable=protected-access
+			])
+
+	def to_file(self, file_descriptor: Any) -> None:
+		for line in self._render_strips():
+			file_descriptor.write(line)
+			file_descriptor.write('\n')
 
 	DEFAULT_CSS = """
 	MoultiLog {

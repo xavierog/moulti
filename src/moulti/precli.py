@@ -16,3 +16,4 @@ If you are still getting this message, feel free to report this issue.
 	sys.exit(1)
 
 from .cli import main # pylint: disable=wrong-import-position; multiple import statements fail on Microsoft Windows
+assert bool(main) # main will be called by the console_scripts wrapper; this makes all linters happy.

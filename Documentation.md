@@ -9,7 +9,10 @@ This document assumes:
 
 ## Technical requirements (abridged)
 
-Moulti requires Python ≥ 3.10 and Textual ≥ 0.47.
+Moulti requires:
+- Linux, BSD or MacOS
+- Python ≥ 3.10
+- Textual ≥ 0.47
 
 ## Installation
 
@@ -423,6 +426,11 @@ MOULTI_CUSTOM_CSS=/path/to/moulti-custom.tcss moulti init
 Caution: if the `MOULTI_CUSTOM_CSS` environment variable is set, the path it indicates must exist and point to a syntactically valid TCSS file or the Moulti instance will crash.
 
 ## Technical requirements (unabridged)
+
+Moulti requires a Unix-friendly operating system. Specifically, it requires an operating system that implements `AF_UNIX`+`SOCK_STREAM` local network sockets.
+Microsoft Windows does implement such sockets but the Python interpreter does not expose this feature to applications yet.
+Progress on this matter ought to happen through [Python issue #77589](https://github.com/python/cpython/issues/77589).
+Once this issue is resolved, porting Moulti to Microsoft Windows should become possible.
 
 Moulti requires Python ≥ 3.10 because:
 

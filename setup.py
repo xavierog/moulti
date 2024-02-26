@@ -43,7 +43,7 @@ setup(
 	install_requires=['textual>=0.47'],
 	entry_points={
 		'console_scripts': [
-			'moulti = moulti.cli:main'
+			'moulti = moulti.precli:main'
 		]
 	},
 )

@@ -15,7 +15,8 @@ TLVCallback = Callable[[Socket, str, str, bytes, FDs], None]
 LogCallback = Callable[[str], None]
 
 def abstract_unix_sockets_supported() -> bool:
-	# Windows seems to support abstract Unix sockets but remains out of scope for the time being.
+	# According to https://github.com/microsoft/WSL/issues/4240#issuecomment-620805115 :
+	# > "Windows implementation of AF_UNIX does not support abstract sockets"
 	# Consequently, assume only Linux supports abstract Unix sockets:
 	return sys.platform == 'linux'
 

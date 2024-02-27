@@ -79,6 +79,17 @@ class AbstractStep(Static):
 			json.dump(properties, properties_filedesc, indent=4)
 			properties_filedesc.write('\n')
 
+	def notify_copy_to_clipboard(self, result: bool, explanation: str) -> None:
+		step_index = self.index()
+		title = f'Step #{step_index} copied!' if result else f'Failed to copy step #{step_index}'
+		if explanation:
+			message = explanation
+		elif result:
+			message = f'Step #{step_index} copied to clipboard'
+		else:
+			message = f'Could not copy step #{step_index} to clipboard'
+		self.app.notify(message, title=title, severity='information' if result else 'error')
+
 	DEFAULT_COLORS = """
 	$step_default: $primary;
 	$step_success: ansi_bright_green;

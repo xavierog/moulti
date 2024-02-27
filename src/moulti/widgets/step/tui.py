@@ -70,15 +70,7 @@ class Step(AbstractStep):
 
 	def action_to_clipboard(self, keep_styles: bool = True) -> None:
 		result, explanation = self.log_widget.to_clipboard(keep_styles)
-		step_index = self.index()
-		title = f'Step #{step_index} copied!' if result else f'Failed to copy step #{step_index}'
-		if explanation:
-			message = explanation
-		elif result:
-			message = f'Step #{step_index} copied to clipboard'
-		else:
-			message = f'Could not copy step #{step_index} to clipboard'
-		self.app.notify(message, title=title, severity='information' if result else 'error')
+		self.notify_copy_to_clipboard(result, explanation)
 
 	def clear(self) -> None:
 		self.log_widget.clear()

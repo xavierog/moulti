@@ -16,6 +16,12 @@ class Step(AbstractStep):
 	Visually speaking, it is essentially a collapsible text area surrounded
 	with optional text lines.
 	"""
+
+	BINDINGS = [
+		("c", "to_clipboard(False)", "Copy"),
+		("w", "to_clipboard(True)", "With colors"),
+	]
+
 	def __init__(self, id: str, **kwargs: str|int|bool): # pylint: disable=redefined-builtin
 		self.log_widget = MoultiLog(highlight=False)
 
@@ -61,6 +67,18 @@ class Step(AbstractStep):
 		filename = filename + '.contents.log'
 		with open(filename, 'w', encoding='utf-8', errors='surrogateescape', opener=opener) as contents_filedesc:
 			self.log_widget.to_file(contents_filedesc)
+
+	def action_to_clipboard(self, keep_styles: bool = True) -> None:
+		result, explanation = self.log_widget.to_clipboard(keep_styles)
+		step_index = self.index()
+		title = f'Step #{step_index} copied!' if result else f'Failed to copy step #{step_index}'
+		if explanation:
+			message = explanation
+		elif result:
+			message = f'Step #{step_index} copied to clipboard'
+		else:
+			message = f'Could not copy step #{step_index} to clipboard'
+		self.app.notify(message, title=title, severity='information' if result else 'error')
 
 	def clear(self) -> None:
 		self.log_widget.clear()

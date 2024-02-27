@@ -44,7 +44,7 @@ class Moulti(App):
 	"""
 	BINDINGS = [
 		("s", "save", "Save"),
-		("c", "toggle_debug", "Toggle console"),
+		("n", "toggle_debug", "Toggle console"),
 		("x", "expand_all", "Expand all"),
 		("o", "collapse_all", "Collapse all"),
 		("d", "toggle_dark", "Toggle dark mode"),

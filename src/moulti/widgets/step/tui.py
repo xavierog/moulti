@@ -68,9 +68,13 @@ class Step(AbstractStep):
 		with open(filename, 'w', encoding='utf-8', errors='surrogateescape', opener=opener) as contents_filedesc:
 			self.log_widget.to_file(contents_filedesc)
 
-	def action_to_clipboard(self, keep_styles: bool = True) -> None:
-		result, explanation = self.log_widget.to_clipboard(keep_styles)
-		self.notify_copy_to_clipboard(result, explanation)
+	@AbstractStep.copy_to_clipboard
+	def action_to_clipboard(self, keep_styles: bool = True) -> tuple[bool, str, str]:
+		lines = list(self.log_widget.to_lines(keep_styles))
+		lines_count = len(lines)
+		lines.append('') # add an extra \n
+		data = '\n'.join(lines)
+		return True, data, f'copied {lines_count} lines, {len(data)} characters to clipboard'
 
 	def clear(self) -> None:
 		self.log_widget.clear()

@@ -1,6 +1,5 @@
 from typing import Any, Generator
 from typing_extensions import Self
-from pyperclip import copy # type: ignore
 from rich.console import Console
 from rich.style import Style
 from textual.events import MouseScrollUp
@@ -56,7 +55,7 @@ class MoultiLog(RichLog):
 		self.auto_scroll = True
 		super().action_scroll_end(*args, **kwargs)
 
-	def _render_strips(self, keep_styles: bool = True) -> Generator:
+	def to_lines(self, keep_styles: bool = True) -> Generator:
 		"""
 		Our own variant of Strip.render() that does NOT forget to output unstyled segments.
 		"""
@@ -75,20 +74,9 @@ class MoultiLog(RichLog):
 				yield strip.text
 
 	def to_file(self, file_descriptor: Any) -> None:
-		for line in self._render_strips():
+		for line in self.to_lines():
 			file_descriptor.write(line)
 			file_descriptor.write('\n')
-
-	def to_clipboard(self, keep_styles: bool = True) -> tuple[bool, str]:
-		try:
-			contents = list(self._render_strips(keep_styles))
-			lines = len(contents)
-			contents.append('') # add an extra \n
-			data = '\n'.join(contents)
-			copy(data)
-			return True, f'copied {lines} lines, {len(data)} characters to clipboard'
-		except Exception as exc:
-			return False, str(exc)
 
 	DEFAULT_CSS = """
 	MoultiLog {

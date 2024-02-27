@@ -79,7 +79,7 @@ class MoultiLog(RichLog):
 			file_descriptor.write(line)
 			file_descriptor.write('\n')
 
-	def to_clipboard(self, keep_styles: bool = True) -> tuple[bool|None, str]:
+	def to_clipboard(self, keep_styles: bool = True) -> tuple[bool, str]:
 		try:
 			contents = list(self._render_strips(keep_styles))
 			lines = len(contents)

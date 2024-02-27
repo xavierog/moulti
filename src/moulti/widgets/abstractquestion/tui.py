@@ -55,6 +55,9 @@ class AbstractQuestion(AbstractStep):
 		prop['text'] = str(self.question_label.renderable)
 		return prop
 
+	def question(self) -> str:
+		return str(self.question_label.renderable)
+
 	def disable(self) -> None:
 		for widget in self.collapsible.query('Collapsible > Contents').results():
 			widget.disabled = True

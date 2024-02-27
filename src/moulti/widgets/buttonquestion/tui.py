@@ -13,6 +13,12 @@ class ButtonQuestion(AbstractQuestion):
 	"""
 	This widget represents an interactive question in a script, program or process.
 	"""
+
+	BINDINGS = [
+		("c", "to_clipboard(False)", "Copy"),
+		("w", "to_clipboard(True)", "With question"),
+	]
+
 	def __init__(self, id: str, **kwargs: Any): # pylint: disable=redefined-builtin
 		super().__init__(id=id, **kwargs)
 		self.buttons = []
@@ -33,6 +39,13 @@ class ButtonQuestion(AbstractQuestion):
 		# Buttons cannot be updated so we can simply export the value found in init_kwargs:
 		prop['button'] = self.init_kwargs.get('button', DEFAULT_BUTTONS)
 		return prop
+
+	@AbstractQuestion.copy_to_clipboard
+	def action_to_clipboard(self, with_question: bool = False) -> tuple[bool, str, str]:
+		if self.answer is None:
+			return False, '', 'Answer not available yet'
+		data = f'Q: {self.question()}\nA: {self.answer}\n' if with_question else self.answer
+		return True, data, ''
 
 	DEFAULT_CSS = """
 		Static.buttons {

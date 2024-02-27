@@ -2,6 +2,7 @@ bpython
 build
 mypy
 pylint
+pyperclip
 ruff
 textual-dev
 textual>=0.47

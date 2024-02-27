@@ -1,5 +1,6 @@
 from typing import Any, Generator
 from typing_extensions import Self
+from pyperclip import copy # type: ignore
 from rich.console import Console
 from rich.style import Style
 from textual.events import MouseScrollUp
@@ -77,6 +78,17 @@ class MoultiLog(RichLog):
 		for line in self._render_strips():
 			file_descriptor.write(line)
 			file_descriptor.write('\n')
+
+	def to_clipboard(self, keep_styles: bool = True) -> tuple[bool|None, str]:
+		try:
+			contents = list(self._render_strips(keep_styles))
+			lines = len(contents)
+			contents.append('') # add an extra \n
+			data = '\n'.join(contents)
+			copy(data)
+			return True, f'copied {lines} lines, {len(data)} characters to clipboard'
+		except Exception as exc:
+			return False, str(exc)
 
 	DEFAULT_CSS = """
 	MoultiLog {

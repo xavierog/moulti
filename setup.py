@@ -40,7 +40,7 @@ setup(
 	license='MIT',
 	keywords=['cli', 'tui', 'curses', 'terminal', 'multiplex', 'script', 'output', 'steps', 'textual', 'collapsible'],
 	package_dir={'': 'src'},
-	install_requires=['textual>=0.47'],
+	install_requires=['textual>=0.47', 'pyperclip'],
 	entry_points={
 		'console_scripts': [
 			'moulti = moulti.precli:main'

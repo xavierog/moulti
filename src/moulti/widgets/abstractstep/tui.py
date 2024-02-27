@@ -1,5 +1,6 @@
 import json
 from typing import Any, Callable
+from pyperclip import copy # type: ignore
 from textual.app import ComposeResult
 from textual.widgets import Static, Collapsible
 
@@ -89,6 +90,18 @@ class AbstractStep(Static):
 		else:
 			message = f'Could not copy step #{step_index} to clipboard'
 		self.app.notify(message, title=title, severity='information' if result else 'error')
+
+	@staticmethod
+	def copy_to_clipboard(func: Callable) -> Callable:
+		def wrapper(self: AbstractStep, *args: Any, **kwargs: Any) -> None:
+			try:
+				result, data, explanation = func(self, *args, **kwargs)
+				if result:
+					copy(data)
+			except Exception as exc:
+				result, explanation = False, str(exc)
+			self.notify_copy_to_clipboard(result, explanation)
+		return wrapper
 
 	DEFAULT_COLORS = """
 	$step_default: $primary;

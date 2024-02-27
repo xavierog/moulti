@@ -7,6 +7,12 @@ class InputQuestion(AbstractQuestion):
 	"""
 	This widget represents an interactive question in a script, program or process.
 	"""
+
+	BINDINGS = [
+		("c", "to_clipboard(False)", "Copy"),
+		("w", "to_clipboard(True)", "With question"),
+	]
+
 	def __init__(self, id: str, **kwargs: Any): # pylint: disable=redefined-builtin
 		super().__init__(id=id, **kwargs)
 		self.input = Input()
@@ -45,5 +51,11 @@ class InputQuestion(AbstractQuestion):
 		prop['max_length'] = 0 if self.input.max_length is None else self.input.max_length
 		prop['restrict'] = '' if self.input.restrict is None else self.input.restrict
 		return prop
+
+	@AbstractQuestion.copy_to_clipboard
+	def action_to_clipboard(self, with_question: bool = False) -> tuple[bool, str, str]:
+		answer = self.input.value
+		data = f'Q: {self.question()}\nA: {answer}\n' if with_question else answer
+		return True, data, ''
 
 MoultiWidgetClass = InputQuestion

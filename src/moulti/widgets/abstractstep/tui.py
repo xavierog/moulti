@@ -42,6 +42,11 @@ class AbstractStep(Static):
 			return self_id
 		return self_id.split('_', 1)[1]
 
+	def index(self) -> int:
+		if self.parent is not None:
+			return self.parent.children.index(self) + 1
+		return -1
+
 	def update_properties(self, kwargs: dict[str, str|int|bool]) -> None:
 		if 'classes' in kwargs:
 			self.set_classes(str(kwargs['classes']))

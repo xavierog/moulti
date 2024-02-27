@@ -44,11 +44,11 @@ class Moulti(App):
 	"""
 	BINDINGS = [
 		("s", "save", "Save"),
-		("n", "toggle_debug", "Toggle console"),
+		("n", "toggle_debug", "Console"),
 		("x", "expand_all", "Expand all"),
 		("o", "collapse_all", "Collapse all"),
-		("d", "toggle_dark", "Toggle dark mode"),
-		("q", "quit", "Quit Moulti"),
+		("d", "toggle_dark", "Dark/Light"),
+		("q", "quit", "Quit"),
 	]
 
 	def __init__(self, command: list[str]|None = None):

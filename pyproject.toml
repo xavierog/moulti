@@ -8,3 +8,22 @@ line-length = 120
 [tool.mypy]
 python_version = "3.10"
 disallow_untyped_defs = true
+
+[tool.pylint.format]
+indent-string = "\t"
+max-line-length = 120
+ignore-long-lines = "add_argument"
+
+[tool.pylint."messages control"]
+disable = [
+	"broad-exception-caught",
+	"missing-function-docstring",
+	"missing-class-docstring",
+	"missing-module-docstring",
+	"too-many-instance-attributes",
+	"too-many-arguments",
+	"too-many-branches",
+	"too-many-public-methods",
+	"too-many-statements",
+	"too-many-locals",
+]

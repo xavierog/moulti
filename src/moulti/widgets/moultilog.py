@@ -55,19 +55,23 @@ class MoultiLog(RichLog):
 		self.auto_scroll = True
 		super().action_scroll_end(*args, **kwargs)
 
-	def _render_strips(self) -> Generator:
+	def _render_strips(self, keep_styles: bool = True) -> Generator:
 		"""
 		Our own variant of Strip.render() that does NOT forget to output unstyled segments.
 		"""
-		color_system = Console()._color_system # pylint: disable=protected-access
-		style_render = Style.render
-		for strip in self.lines:
-			yield ''.join([
-				text
-				if style is None
-				else style_render(style, text, color_system=color_system)
-				for text, style, _ in strip._segments # pylint: disable=protected-access
-			])
+		if keep_styles:
+			color_system = Console()._color_system # pylint: disable=protected-access
+			style_render = Style.render
+			for strip in self.lines:
+				yield ''.join([
+					text
+					if style is None
+					else style_render(style, text, color_system=color_system)
+					for text, style, _ in strip._segments # pylint: disable=protected-access
+				])
+		else:
+			for strip in self.lines:
+				yield strip.text
 
 	def to_file(self, file_descriptor: Any) -> None:
 		for line in self._render_strips():

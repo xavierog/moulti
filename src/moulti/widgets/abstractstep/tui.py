@@ -2,6 +2,7 @@ import json
 from typing import Any, Callable
 from pyperclip import copy # type: ignore
 from textual.app import ComposeResult
+from textual.events import Click
 from textual.widgets import Static, Collapsible
 
 class AbstractStep(Static):
@@ -36,6 +37,13 @@ class AbstractStep(Static):
 
 	def on_mount(self) -> None:
 		self.update_properties(self.init_kwargs)
+
+	async def on_click(self, _: Click) -> None:
+		"""
+		Steps are meant to be focusable but it is actually the CollapstibleTitle that holds the focus.
+		"""
+		if hasattr(self.collapsible, '_title'):
+			self.collapsible._title.focus() # pylint: disable=protected-access
 
 	def title_from_id(self) -> str:
 		self_id = str(self.id)

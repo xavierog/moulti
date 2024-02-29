@@ -2,7 +2,7 @@ from typing import Any, Generator
 from typing_extensions import Self
 from rich.console import Console
 from rich.style import Style
-from textual.events import MouseScrollUp
+from textual.events import MouseScrollUp, Click
 from textual.geometry import Size
 from textual.widgets import RichLog
 
@@ -54,6 +54,11 @@ class MoultiLog(RichLog):
 		"""Turn auto_scroll on again as soon as users hit the End key."""
 		self.auto_scroll = True
 		super().action_scroll_end(*args, **kwargs)
+
+	async def on_click(self, event: Click) -> None:
+		# Clicks grant focus to this widget; keep them.
+		# See also: AbstractStep.on_click().
+		event.stop()
 
 	def to_lines(self, keep_styles: bool = True) -> Generator:
 		"""

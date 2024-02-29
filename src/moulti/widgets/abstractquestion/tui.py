@@ -2,6 +2,7 @@ from typing import Any
 from textual import work
 from textual.app import ComposeResult
 from textual.message import Message
+from textual.widget import Widget
 from textual.widgets import Static
 from ..abstractstep.tui import AbstractStep
 
@@ -59,8 +60,10 @@ class AbstractQuestion(AbstractStep):
 		return str(self.question_label.renderable)
 
 	def disable(self) -> None:
-		for widget in self.collapsible.query('Collapsible > Contents').results():
-			widget.disabled = True
+		for widget in self.collapsible.query('Collapsible > Contents Widget').results(Widget):
+			if widget.focusable:
+				widget.blur()
+				widget.disabled = True
 
 	def got_answer(self, answer: str) -> None:
 		# Disable the question to ensure users answer only once:

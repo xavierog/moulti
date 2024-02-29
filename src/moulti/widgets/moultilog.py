@@ -86,5 +86,9 @@ class MoultiLog(RichLog):
 	DEFAULT_CSS = """
 	MoultiLog {
 		height: auto;
+		border-left: blank;
+	}
+	MoultiLog:focus {
+		border-left: thick $accent-lighten-3;
 	}
 	"""

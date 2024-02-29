@@ -138,11 +138,11 @@ class AbstractStep(Static):
 			padding: 0;
 			width: 100%;
 		}
-		& CollapsibleTitle:hover {
-			background: $foreground 80%;
-		}
 		& CollapsibleTitle:focus {
 			background: initial;
+		}
+		& CollapsibleTitle:hover {
+			background: $foreground 80%;
 		}
 		/* Collapsible contents: */
 		& Contents {

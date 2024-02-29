@@ -123,6 +123,7 @@ class AbstractStep(Static):
 		/* If we do not specify "auto" here, each step will take 100% of the viewport: */
 		height: auto;
 		background: $step_default;
+		border-left: blank;
 		color: auto;
 		&.success { background: $step_success; }
 		&.warning { background: $step_warning; }
@@ -130,6 +131,8 @@ class AbstractStep(Static):
 		&.debug { background: $step_debug; }
 		/* Compact design: no padding, no margins, no borders: */
 		& Collapsible {
+			/* Inherit the parent background instead of altering it via $boost: */
+			background: initial;
 			padding: 0;
 			margin: 0;
 			border: none;
@@ -152,8 +155,6 @@ class AbstractStep(Static):
 		}
 	}
 	AbstractStep:focus, AbstractStep:focus-within {
-		& CollapsibleTitle {
-			text-style: bold;
-		}
+		border-left: thick $accent-lighten-3;
 	}
 	"""

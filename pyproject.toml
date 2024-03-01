@@ -17,13 +17,14 @@ ignore-long-lines = "add_argument"
 [tool.pylint."messages control"]
 disable = [
 	"broad-exception-caught",
-	"missing-function-docstring",
 	"missing-class-docstring",
+	"missing-function-docstring",
 	"missing-module-docstring",
-	"too-many-instance-attributes",
+	"too-few-public-methods",
 	"too-many-arguments",
 	"too-many-branches",
+	"too-many-instance-attributes",
+	"too-many-locals",
 	"too-many-public-methods",
 	"too-many-statements",
-	"too-many-locals",
 ]

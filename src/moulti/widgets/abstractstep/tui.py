@@ -116,7 +116,6 @@ class AbstractStep(Static):
 	$step_success: ansi_bright_green;
 	$step_warning: orange;
 	$step_error: tomato;
-	$step_debug: $accent;
 	"""
 	DEFAULT_CSS = DEFAULT_COLORS + """
 	AbstractStep {
@@ -128,7 +127,6 @@ class AbstractStep(Static):
 		&.success { background: $step_success; }
 		&.warning { background: $step_warning; }
 		&.error { background: $step_error; }
-		&.debug { background: $step_debug; }
 		/* Compact design: no padding, no margins, no borders: */
 		& Collapsible {
 			/* Inherit the parent background instead of altering it via $boost: */

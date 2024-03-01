@@ -199,9 +199,6 @@ class Step(AbstractStep):
 		&.error {
 			& MoultiLog { scrollbar-corner-color: $step_error; }
 		}
-		&.debug {
-			& MoultiLog { scrollbar-corner-color: $step_debug; }
-		}
 	}
 	"""
 MoultiWidgetClass = Step

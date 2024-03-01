@@ -21,7 +21,7 @@ from .protocol import MoultiTLVReader, data_to_message, getraddr
 from .widgets.tui import MoultiWidgets
 from .widgets.vertscroll import VertScroll
 from .widgets.abstractstep.tui import AbstractStep
-from .widgets.step.tui import Step
+from .widgets.moulticonsole import MoultiConsole
 from .widgets.quitdialog import QuitDialog
 
 def timestamp() -> str:
@@ -156,29 +156,23 @@ class Moulti(App):
 		return prop
 
 	def init_debug(self) -> None:
-		self.debug_step = Step('__moulti_debug', title='Console', classes='debug', min_height=5, max_height=15)
-		self.debug_step.styles.display = 'none'
-		self.debug_step.collapsible.collapsed = False
+		self.debug_step = MoultiConsole('moulti_console', classes='hidden')
 
 	def logdebug(self, line: str) -> None:
 		line = timestamp() + line
 		if self._thread_id == get_ident():
-			self.debug_step.append(line)
+			self.debug_step.write(line)
 		else:
 			try:
 				worker = get_current_worker()
 			except NoActiveWorker:
 				worker = None
 			if worker and not worker.is_cancelled:
-				self.call_from_thread(self.debug_step.append, line)
+				self.call_from_thread(self.debug_step.write, line)
 
 	def action_toggle_debug(self) -> None:
-		"""Toggle the debug console."""
-		if self.debug_step.styles.display == 'none':
-			self.debug_step.collapsible.collapsed = False
-			self.debug_step.styles.display = 'block'
-		else:
-			self.debug_step.styles.display = 'none'
+		"""Toggle the console."""
+		self.debug_step.toggle_class('hidden')
 
 	def action_expand_all(self) -> None:
 		"""Expand all steps."""

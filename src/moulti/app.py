@@ -44,7 +44,7 @@ class Moulti(App):
 	"""
 	BINDINGS = [
 		("s", "save", "Save"),
-		("n", "toggle_debug", "Console"),
+		("n", "toggle_console", "Console"),
 		("x", "expand_all", "Expand all"),
 		("o", "collapse_all", "Collapse all"),
 		("d", "toggle_dark", "Dark/Light"),
@@ -54,7 +54,7 @@ class Moulti(App):
 	def __init__(self, command: list[str]|None = None):
 		self.init_security()
 		self.init_widgets()
-		self.init_debug()
+		self.end_user_console = MoultiConsole('moulti_console', classes='hidden')
 		self.init_command = command
 		self.init_command_running = False
 		self.exit_first_policy = ''
@@ -104,7 +104,7 @@ class Moulti(App):
 		yield self.title_label
 		yield self.steps_container
 		yield self.footer
-		yield self.debug_step
+		yield self.end_user_console
 
 	def on_ready(self) -> None:
 		self.init_threads()
@@ -155,24 +155,21 @@ class Moulti(App):
 		prop['title'] = str(self.title_label.renderable)
 		return prop
 
-	def init_debug(self) -> None:
-		self.debug_step = MoultiConsole('moulti_console', classes='hidden')
-
 	def logdebug(self, line: str) -> None:
 		line = timestamp() + line
 		if self._thread_id == get_ident():
-			self.debug_step.write(line)
+			self.end_user_console.write(line)
 		else:
 			try:
 				worker = get_current_worker()
 			except NoActiveWorker:
 				worker = None
 			if worker and not worker.is_cancelled:
-				self.call_from_thread(self.debug_step.write, line)
+				self.call_from_thread(self.end_user_console.write, line)
 
-	def action_toggle_debug(self) -> None:
+	def action_toggle_console(self) -> None:
 		"""Toggle the console."""
-		self.debug_step.toggle_class('hidden')
+		self.end_user_console.toggle_class('hidden')
 
 	def action_expand_all(self) -> None:
 		"""Expand all steps."""

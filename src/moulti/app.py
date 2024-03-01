@@ -97,7 +97,7 @@ class Moulti(App):
 		thread_count = default_threads + threads_per_pass * max_pass
 		moulti_executor = ThreadPoolExecutor(max_workers=thread_count, thread_name_prefix='moulti')
 		asyncio.get_running_loop().set_default_executor(moulti_executor)
-		self.logdebug(f'allow up to {thread_count} threads for up to {max_pass} concurrent "moulti pass" commands')
+		self.logconsole(f'allow up to {thread_count} threads for up to {max_pass} concurrent "moulti pass" commands')
 
 	def compose(self) -> ComposeResult:
 		"""Create child widgets for the app."""
@@ -109,7 +109,7 @@ class Moulti(App):
 	def on_ready(self) -> None:
 		self.init_threads()
 		widget_list = ' '.join(MoultiWidgets.registry().keys())
-		self.logdebug(f'known widgets: {widget_list}')
+		self.logconsole(f'known widgets: {widget_list}')
 		self.network_loop()
 
 	def network_loop_is_ready(self) -> None:
@@ -126,25 +126,25 @@ class Moulti(App):
 			environment['MOULTI_RUN'] = 'moulti'
 			environment['MOULTI_SOCKET_PATH'] = PRINTABLE_MOULTI_SOCKET
 			environment['MOULTI_INSTANCE_PID'] = str(os.getpid())
-			self.logdebug(f'exec: about to run {command}')
+			self.logconsole(f'exec: about to run {command}')
 			# Not using 'with' because that waits for the process to exit; pylint: disable=consider-using-with
 			process = subprocess.Popen(command, env=environment, stdin=subprocess.DEVNULL)
-			self.logdebug(f'exec: {command} launched with PID {process.pid}')
+			self.logconsole(f'exec: {command} launched with PID {process.pid}')
 			returncode = None
 			while not worker.is_cancelled:
 				returncode = process.poll() # non-blocking wait(), e.g. wait4(process.pid, result_addr, WNOHANG, NULL)
 				if returncode is not None:
 					self.init_command_running = False
-					self.logdebug(f'exec: {command} exited with return code {returncode}')
+					self.logconsole(f'exec: {command} exited with return code {returncode}')
 					break
 				time.sleep(0.5)
 			if returncode is None:
-				self.logdebug(f'exec: {command} is still running (PID {process.pid}) but Moulti is about to exit')
+				self.logconsole(f'exec: {command} is still running (PID {process.pid}) but Moulti is about to exit')
 				if self.exit_first_policy == 'terminate':
 					process.terminate()
 				# else just leave the process running in the background and exit.
 		except Exception as exc:
-			self.logdebug(f'exec: error running {command}: {exc}')
+			self.logconsole(f'exec: error running {command}: {exc}')
 			self.init_command_running = False
 
 	def all_steps(self) -> Iterator[AbstractStep]:
@@ -155,7 +155,7 @@ class Moulti(App):
 		prop['title'] = str(self.title_label.renderable)
 		return prop
 
-	def logdebug(self, line: str) -> None:
+	def logconsole(self, line: str) -> None:
 		line = timestamp() + line
 		if self._thread_id == get_ident():
 			self.end_user_console.write(line)
@@ -200,7 +200,7 @@ class Moulti(App):
 		Export everything currently shown by the instance as a bunch of files in a directory.
 		"""
 		if not self.save_lock.acquire(blocking=False): # pylint: disable=consider-using-with
-			self.logdebug('save: this instance is already being saved.')
+			self.logconsole('save: this instance is already being saved.')
 			summary = 'This instance is already being saved.'
 			self.notify(summary, title='One at a time!', severity='warning')
 			return
@@ -225,7 +225,7 @@ class Moulti(App):
 			summary = f'{saved_steps} steps successfully saved\nDir: {basepath}\nSubdir: {export_dirname}'
 			self.notify(summary, title='Saved!')
 		except Exception as exc:
-			self.logdebug(f'save: failed: {exc}')
+			self.logconsole(f'save: failed: {exc}')
 			summary = 'An error occurred during saving.\nRefer to the console for more details.'
 			self.notify(summary, title='Save failed!', severity='error')
 		finally:
@@ -264,10 +264,10 @@ class Moulti(App):
 				message = {'msgid': msgid, **kwargs}
 			else:
 				message = {**message, **kwargs}
-			self.logdebug(f'{raddr}: <= message={message}')
+			self.logconsole(f'{raddr}: <= message={message}')
 			send_json_message(connection, message)
 		except Exception as exc:
-			self.logdebug(f'{raddr}: reply: kwargs={kwargs}: {exc}')
+			self.logconsole(f'{raddr}: reply: kwargs={kwargs}: {exc}')
 
 	def step_from_message(self, message: Message) -> None | AbstractStep:
 		try:
@@ -322,7 +322,7 @@ class Moulti(App):
 						def reply(**kwargs: Any) -> None:
 							self.reply(connection, raddr, message, **kwargs)
 						def debug(line: str) -> None:
-							self.logdebug(f'{raddr}: {line}')
+							self.logconsole(f'{raddr}: {line}')
 						helpers = {'reply': reply, 'debug': debug, 'file_descriptors': file_descriptors}
 						# The method is expected to return a tuple (callable + arguments):
 						call = method(message, helpers)
@@ -366,15 +366,15 @@ class Moulti(App):
 				except (MoultiProtocolException, MoultiConnectionClosedException, ConnectionResetError) as exc:
 					server_selector.unregister(tlv_reader.socket)
 					tlv_reader.socket.close()
-					self.logdebug(f'{raddr}: read: closed connection; cause: {exc}')
+					self.logconsole(f'{raddr}: read: closed connection; cause: {exc}')
 					return
 			except Exception as exc:
-				self.logdebug(f'{raddr}: read: {exc}')
+				self.logconsole(f'{raddr}: read: {exc}')
 
 		def got_tlv(socket: Socket, raddr: str, data_type: str, data: bytes, file_descriptors: FDs) -> None:
 			if data_type == 'JSON':
 				message = data_to_message(data)
-				self.logdebug(f'{raddr}: => {message=} {file_descriptors=}')
+				self.logconsole(f'{raddr}: => {message=} {file_descriptors=}')
 				self.handle_message(socket, raddr, message, file_descriptors)
 			else:
 				raise MoultiProtocolException(f'cannot handle {data_type} {len(data)}-byte message')
@@ -384,20 +384,20 @@ class Moulti(App):
 			try:
 				connection, _ = socket.accept()
 				raddr = getraddr(connection)
-				self.logdebug(f'{raddr}: accept: accepted new connection')
+				self.logconsole(f'{raddr}: accept: accepted new connection')
 				# Check Unix credentials (uid/gid) if and only if Moulti listens on an abstract socket.
 				# Regular sockets are protected by file permissions.
 				if server_socket_is_abstract:
 					allowed, uid, gid = self.check_unix_credentials(connection)
 					if not allowed:
 						connection.close()
-						self.logdebug(f'{raddr}: accept: closed connection: invalid Unix credentials {uid}:{gid}')
+						self.logconsole(f'{raddr}: accept: closed connection: invalid Unix credentials {uid}:{gid}')
 						return
 				connection.setblocking(False)
-				tlv_reader = MoultiTLVReader(connection, raddr, got_tlv, self.logdebug)
+				tlv_reader = MoultiTLVReader(connection, raddr, got_tlv, self.logconsole)
 				server_selector.register(connection, selectors.EVENT_READ, tlv_reader)
 			except Exception as exc:
-				self.logdebug(f'{raddr}: accept: {exc}')
+				self.logconsole(f'{raddr}: accept: {exc}')
 
 		try:
 			server_socket, server_socket_is_abstract = moulti_listen()
@@ -406,7 +406,7 @@ class Moulti(App):
 			self.exit(f'Fatal: {exc}')
 			return
 		socket_type = "abstract socket" if server_socket_is_abstract else "socket"
-		self.logdebug(f'listening on {socket_type} {PRINTABLE_MOULTI_SOCKET}')
+		self.logconsole(f'listening on {socket_type} {PRINTABLE_MOULTI_SOCKET}')
 
 		try:
 			server_selector = selectors.DefaultSelector()
@@ -421,7 +421,7 @@ class Moulti(App):
 					elif callable(key.data):
 						key.data(key.fileobj)
 		except Exception as exc:
-			self.logdebug(f'network loop: {exc}')
+			self.logconsole(f'network loop: {exc}')
 		finally:
 			clean_socket(PRINTABLE_MOULTI_SOCKET)
 

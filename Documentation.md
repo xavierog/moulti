@@ -252,6 +252,8 @@ Here is how to use them:
 
 ## Saving your stuff
 
+### Saving a complete Moulti instance
+
 Click `Save` or hit `s` in Moulti to export (almost) all shown contents to text files.
 Specifically, Moulti creates a new directory named after the instance (`MOULTI_INSTANCE` environment variable) and the current date and time.
 This export directory is created in the directory specified by the `MOULTI_SAVE_PATH` environment variable or, alternatively, in Moulti's current working directory.
@@ -277,6 +279,15 @@ $ ls -al social-preview-2024-02-23T18-52-10.883600/
 Limitations:
 - if an `inputquestion` was configured with `--password`, then its export will contain a series of `*` characters instead of its actual value.
 - Moulti does not tinker with file permissions; therefore, the resulting files have default ownership and permissions; if necessary, use e.g. `umask` or `newgrp` to alter its behavior.
+
+### Saving a single Moulti step
+
+Hit `c` to copy the contents of the currently focused step to the clipboard. Hit `w` to do the same while preserving styles and colors (as ANSI escape codes).
+Moulti emits a notification reflecting whether the copy operation succeeded.
+Copy operations typically fail due to environment-related causes. The pyperclip documentation states most of the technical requirements:
+
+- https://pyperclip.readthedocs.io/en/latest/#not-implemented-error
+- https://pypi.org/project/pyperclip/
 
 ## Restoring your stuff
 

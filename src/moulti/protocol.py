@@ -4,7 +4,8 @@ import sys
 import pwd
 import uuid
 from struct import calcsize, unpack
-from socket import socket as Socket, AF_UNIX, SOCK_STREAM, SOL_SOCKET, recv_fds, send_fds
+from socket import socket as Socket, AF_UNIX, SOCK_STREAM, SOL_SOCKET
+from socket import recv_fds as socket_recv_fds, send_fds
 import json
 from json.decoder import JSONDecodeError
 from typing import Any, Callable
@@ -13,6 +14,14 @@ Message = dict[str, Any]
 FDs = list[int]
 TLVCallback = Callable[[Socket, str, str, bytes, FDs], None]
 LogCallback = Callable[[str], None]
+
+# recv_fds() uses CMSG_LEN instead of CMSG_SPACE to compute the ancillary data buffer size (socklen_t msg_controllen)
+# and is thus liable to underestimate it. On some platforms (e.g. FreeBSD+amd64), this results in MSG_CTRUNC.
+# A simple workaround is to adjust/increment max_fds.
+CMSG_ADJUSTMENT = 1 if 'bsd' in sys.platform else 0
+
+def recv_fds(sock: Socket, bufsize: int, maxfds: int, flags: int = 0) -> tuple[Any, Any, Any, Any]:
+	return socket_recv_fds(sock, bufsize, maxfds + CMSG_ADJUSTMENT, flags)
 
 def abstract_unix_sockets_supported() -> bool:
 	# According to https://github.com/microsoft/WSL/issues/4240#issuecomment-620805115 :

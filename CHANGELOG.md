@@ -21,6 +21,10 @@ Although Moulti's Python packages, modules and functions are obviously available
 - Make it easier to scroll around answered `buttonquestion` widgets.
 - Revamp the console by making it a proper widget, as opposed to a refurbished step.
 
+### Fixed
+
+- Handle Rich Markup errors and return a suitable error message to clients.
+
 ## [1.3.0] - 2024-02-25
 
 ### Added

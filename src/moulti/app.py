@@ -9,6 +9,7 @@ from typing import Any, Callable, Iterator
 from socket import socket as Socket
 from time import time_ns, localtime, strftime
 from threading import get_ident, Lock
+from rich.markup import MarkupError
 from textual import work
 from textual.app import App, ComposeResult
 from textual.dom import BadIdentifier
@@ -341,7 +342,7 @@ class Moulti(App):
 			# At this stage, the analysis is complete; perform the required action and reply accordingly:
 			if call:
 				self.call_from_thread(*call)
-		except (BadIdentifier, MoultiMessageException) as exc:
+		except (BadIdentifier, MarkupError, MoultiMessageException) as exc:
 			# If we catch an exception, then we systematically assume we should handle the reply:
 			finally_reply = True
 			error = str(exc)

@@ -24,7 +24,7 @@ Although Moulti's Python packages, modules and functions are obviously available
 ### Fixed
 
 - Handle Rich Markup errors and return a suitable error message to clients.
-- Fix `moulti pass` on FreeBSD.
+- Fix `moulti pass` on FreeBSD and NetBSD.
 
 ## [1.3.0] - 2024-02-25
 

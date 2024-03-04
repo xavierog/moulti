@@ -402,6 +402,7 @@ These variables are set by the Moulti instance when it runs a script, e.g. `moul
 ### Other environment variables
 
 - `TERM`: per se, Moulti does nothing with this environment variable. However, `$TERM` has a strong influence on the behavior and visual aspect of curses applications and Moulti is no exception. Your mileage may vary but, overall, it seems `TERM=xterm-256color` frequently fix things.
+- `NO_COLOR`: if present, convert the application to monochrome; this variable comes from the Textual framework.
 
 ## How to define my own step classes ?
 

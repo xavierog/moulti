@@ -132,7 +132,7 @@ class MoultiConsoleHighlighter(Highlighter):
 				# Highlight the right part:
 				right_text = Text(right)
 				self.repr_hl.highlight(right_text)
-				text.append(right_text)
+				text.append_text(right_text)
 				# All done:
 				return
 		# No separator? Highlight the entire string using MoultiRegexHighlighter:

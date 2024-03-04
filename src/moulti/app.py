@@ -53,6 +53,8 @@ class Moulti(App):
 		("d", "toggle_dark", "Dark/Light"),
 		("q", "quit", "Quit"),
 	]
+	# Disable Textual's command palette; it may come back if Moulti ends up with too many commands though:
+	ENABLE_COMMAND_PALETTE = False
 
 	def __init__(self, command: list[str]|None = None):
 		self.init_security()

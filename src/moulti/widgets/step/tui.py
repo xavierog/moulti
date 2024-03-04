@@ -91,13 +91,13 @@ class Step(AbstractStep):
 		# Deal with colored text; the text_to_write variable is made necessary by mypy.
 		text_to_write: str | Text = text
 		if ANSI_ESCAPE_SEQUENCE in text:
-			text_to_write = Text.from_ansi(text)
-			self.color = Step.next_line_color(text, text_to_write)
+			# Convert text and an extra character from ANSI to Rich Text
+			text_to_write = Text.from_ansi(text + '_')
+			# The extra character reflects the color the next line should inherit:
+			self.color = Step.last_character_color(text_to_write)
+			# Strip the extra character:
+			text_to_write.right_crop(1)
 		self.log_widget.write(text_to_write)
-
-	@classmethod
-	def next_line_color(cls, string: str, text: Text) -> str:
-		return '' if string.endswith('\x1b[0m') else Step.last_character_color(text)
 
 	@classmethod
 	def last_character_color(cls, text: Text) -> str:

@@ -12,6 +12,10 @@ Although Moulti's Python packages, modules and functions are obviously available
 
 - Moulti no longer alters ANSI colors; the previous behavior can be restored by setting `MOULTI_ANSI=textual_default`.
 
+### Fixed
+
+- Fix "next line color" heuristic for step widgets.
+
 ## [1.4.0] - 2024-03-03
 
 ### Added

@@ -13,6 +13,7 @@ from rich.markup import MarkupError
 from textual import work
 from textual.app import App, ComposeResult
 from textual.dom import BadIdentifier
+from textual.filter import ANSIToTruecolor, LineFilter
 from textual.widgets import Footer, Label
 from textual.worker import get_current_worker, NoActiveWorker
 from . import __version__ as MOULTI_VERSION
@@ -89,6 +90,28 @@ class Moulti(App):
 		self.steps_container = VertScroll(id='steps_container')
 		self.footer = Footer()
 
+	def setup_ansi_behavior(self) -> None:
+		"""
+		By default and by design, Textual strives to avoid outputting ANSI colors (i.e. the 16 colors that have no
+		official value). This makes perfect sense for most applications. Moulti is special because its users expect
+		steps to display the exact same thing as their terminal with no or little care for portability.
+		"""
+		ansi_behavior = os.environ.get('MOULTI_ANSI', 'verbatim')
+		if ansi_behavior == 'textual_default' or not hasattr(self, '_filters'):
+			return
+		filter_index = self.filter_index(ANSIToTruecolor)
+		if ansi_behavior == 'verbatim':
+			# Verbatim: remove Textual's ANSIToTruecolor filter:
+			if filter_index is not None:
+				del self._filters[filter_index]
+		self.logconsole(f'Textual filters: {self._filters}')
+
+	def filter_index(self, filter_type: type[LineFilter]) -> int|None:
+		for index, textual_filter in enumerate(self._filters):
+			if isinstance(textual_filter, filter_type):
+				return index
+		return None
+
 	def init_threads(self) -> None:
 		try:
 			max_pass = max(1, int(os.environ['MOULTI_PASS_CONCURRENCY']))
@@ -110,6 +133,7 @@ class Moulti(App):
 
 	def on_ready(self) -> None:
 		self.logconsole(f'Moulti v{MOULTI_VERSION}')
+		self.setup_ansi_behavior()
 		self.init_threads()
 		widget_list = ' '.join(MoultiWidgets.registry().keys())
 		self.logconsole(f'known widgets: {widget_list}')

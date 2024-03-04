@@ -384,6 +384,9 @@ The constant scrolling resumes when you hit the `End` key.
   moulti init
   ```
 - `MOULTI_MODE`: `light` to start Moulti with dark mode disabled, `dark` to start Moulti with dark mode enabled; defaults to `dark`.
+- `MOULTI_ANSI`: defines whether and how Moulti alters ANSI colors:
+  - `verbatim`: do not alter ANSI colors (default value since v1.5.0)
+  - `textual_default`: let the Textual framework handle ANSI colors
 - `MOULTI_CUSTOM_CSS`: absolute filepath to a custom TCSS file; see "How to define my own step classes ?"
 - `MOULTI_PASS_CONCURRENCY`: define how many concurrent "moulti pass" commands is acceptable; defaults to 20.
 - `MOULTI_SAVE_PATH`: base path under which export directories are created when saving a Moulti instance; defaults to `.` i.e. the instance's current working directory.

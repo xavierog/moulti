@@ -13,10 +13,11 @@ from rich.markup import MarkupError
 from textual import work
 from textual.app import App, ComposeResult
 from textual.dom import BadIdentifier
-from textual.filter import ANSIToTruecolor, LineFilter
+from textual.filter import ANSIToTruecolor
 from textual.widgets import Footer, Label
 from textual.worker import get_current_worker, NoActiveWorker
 from . import __version__ as MOULTI_VERSION
+from .ansi import replace_line_filter, AnsiThemePolicy
 from .protocol import PRINTABLE_MOULTI_SOCKET, clean_socket, current_instance
 from .protocol import moulti_listen, get_unix_credentials, send_json_message
 from .protocol import MoultiConnectionClosedException, MoultiProtocolException, Message, FDs
@@ -101,18 +102,14 @@ class Moulti(App):
 		ansi_behavior = os.environ.get('MOULTI_ANSI', 'verbatim')
 		if ansi_behavior == 'textual_default' or not hasattr(self, '_filters'):
 			return
-		filter_index = self.filter_index(ANSIToTruecolor)
 		if ansi_behavior == 'verbatim':
 			# Verbatim: remove Textual's ANSIToTruecolor filter:
-			if filter_index is not None:
-				del self._filters[filter_index]
+			replace_line_filter(self, ANSIToTruecolor, None)
+		else: # Deal with environment variables MOULTI_ANSI and MOULTI_ANSI_THEME_*:
+			policy = AnsiThemePolicy.from_environment('MOULTI_')
+			self.logconsole(f'Applying {policy}')
+			policy.apply(self)
 		self.logconsole(f'Textual filters: {self._filters}')
-
-	def filter_index(self, filter_type: type[LineFilter]) -> int|None:
-		for index, textual_filter in enumerate(self._filters):
-			if isinstance(textual_filter, filter_type):
-				return index
-		return None
 
 	def init_threads(self) -> None:
 		try:

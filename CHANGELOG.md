@@ -11,6 +11,7 @@ Although Moulti's Python packages, modules and functions are obviously available
 ### Added
 
 - Environment variables `MOULTI_ANSI` and `MOULTI_ANSI_THEME_*` provide (almost) full control over ANSI color themes.
+- `tools/gogh2moulti.bash` converts [Gogh themes](https://gogh-co.github.io/Gogh/) into `MOULTI_ANSI_THEME_*` variables.
 
 ### Changed
 

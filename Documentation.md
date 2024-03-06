@@ -398,8 +398,15 @@ The constant scrolling resumes when you hit the `End` key.
    # 8-color theme: specified colors are used as both regular and bright colors:
    MOULTI_ANSI_THEME_halfvga=bg=000000,fg=AAAAAA,ansi=000000:AA0000:00AA00:AA5500:0000AA:AA00AA:00AAAA:AAAAAA
    ```
-   Moulti does not take bg (background) and fg (foreground) into account for the time being.
-   Colors may be prefixed with `#`; hexadecimal digits may be specified as lower or uppercase but there must be exactly 6 digits; theme names are case-sensitive.
+   Manually defining `MOULTI_ANSI_THEME_*` can be painful. So have a look at this helper script that turns [Gogh themes](https://gogh-co.github.io/Gogh/) into such variables:
+   ```shell
+   ./tools/gogh2moulti.bash
+   ```
+   Other details:
+   - Moulti does not take `bg` (background) and `fg` (foreground) into account for the time being.
+   - Colors may be prefixed with `#`.
+   - Hexadecimal digits may be specified as lower or uppercase but there must be exactly 6 digits.
+   - Theme names are case-sensitive: if you define `MOULTI_ANSI_THEME_AlphaBeta`, be sure to mention e.g. `MOULTI_ANSI=dark=AlphaBeta`, not `MOULTI_ANSI=dark=ALPHABETA`.
 - `MOULTI_CUSTOM_CSS`: absolute filepath to a custom TCSS file; see "How to define my own step classes ?"
 - `MOULTI_PASS_CONCURRENCY`: define how many concurrent "moulti pass" commands is acceptable; defaults to 20.
 - `MOULTI_SAVE_PATH`: base path under which export directories are created when saving a Moulti instance; defaults to `.` i.e. the instance's current working directory.

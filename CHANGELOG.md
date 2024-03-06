@@ -8,13 +8,21 @@ Although Moulti's Python packages, modules and functions are obviously available
 
 ## Unreleased
 
+### Added
+
+- Environment variables `MOULTI_ANSI` and `MOULTI_ANSI_THEME_*` provide (almost) full control over ANSI color themes.
+
 ### Changed
 
-- Moulti no longer alters ANSI colors; the previous behavior can be restored by setting `MOULTI_ANSI=textual_default`.
+- By default, Moulti no longer alters ANSI colors; the previous behavior can be restored by setting `MOULTI_ANSI=textual_default`.
 
 ### Fixed
 
 - Fix "next line color" heuristic for step widgets.
+
+### Removed
+
+- Textual Command Palette (never advertised and offered very little).
 
 ## [1.4.0] - 2024-03-03
 

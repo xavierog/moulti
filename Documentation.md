@@ -386,7 +386,20 @@ The constant scrolling resumes when you hit the `End` key.
 - `MOULTI_MODE`: `light` to start Moulti with dark mode disabled, `dark` to start Moulti with dark mode enabled; defaults to `dark`.
 - `MOULTI_ANSI`: defines whether and how Moulti alters ANSI colors:
   - `verbatim`: do not alter ANSI colors (default value since v1.5.0)
-  - `textual_default`: let the Textual framework handle ANSI colors
+  - `textual_default`: let the Textual framework handle ANSI colors (default behavior before v1.5.0)
+  - `dark=theme_name1,light=theme_name2`: define what ANSI themes to use in dark and light modes;
+    specifying one theme for each mode is usually enough; if needed, specify multiple themes separated by `:` so that Moulti picks the first one it knows about.
+    Built-in themes include: `DEFAULT_TERMINAL_THEME`, `MONOKAI`, `DIMMED_MONOKAI`, `NIGHT_OWLISH`, `SVG_EXPORT_THEME`.
+    This feature works best with Textual >= 0.53.
+- `MOULTI_ANSI_THEME_*`: define your own ANSI themes; examples:
+   ```shell
+   # 16-color theme:
+   MOULTI_ANSI_THEME_Kibble=bg=0E100A,fg=F7F7F7,ansi=4D4D4D:C70031:29CF13:D8E30E:3449D1:8400FF:0798AB:E2D1E3:5A5A5A:F01578:6CE05C:F3F79E:97A4F7:C495F0:68F2E0:FFFFFF
+   # 8-color theme: specified colors are used as both regular and bright colors:
+   MOULTI_ANSI_THEME_halfvga=bg=000000,fg=AAAAAA,ansi=000000:AA0000:00AA00:AA5500:0000AA:AA00AA:00AAAA:AAAAAA
+   ```
+   Moulti does not take bg (background) and fg (foreground) into account for the time being.
+   Colors may be prefixed with `#`; hexadecimal digits may be specified as lower or uppercase but there must be exactly 6 digits; theme names are case-sensitive.
 - `MOULTI_CUSTOM_CSS`: absolute filepath to a custom TCSS file; see "How to define my own step classes ?"
 - `MOULTI_PASS_CONCURRENCY`: define how many concurrent "moulti pass" commands is acceptable; defaults to 20.
 - `MOULTI_SAVE_PATH`: base path under which export directories are created when saving a Moulti instance; defaults to `.` i.e. the instance's current working directory.

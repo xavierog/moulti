@@ -1,3 +1,4 @@
+argcomplete
 bpython
 build
 mypy

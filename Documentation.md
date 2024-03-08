@@ -25,6 +25,21 @@ pipx ensurepath
 
 Distribution packages are of course welcome.
 
+### Shell Completion
+
+Moulti is compatible with [argcomplete global completion](https://kislyuk.github.io/argcomplete/#global-completion).
+This means that, depending on your system and installed packages, shell completion for Moulti may work out of the box.
+This should be true for:
+
+- Debian (bash, but also zsh)
+- Fedora (bash only)
+
+... as long as packages `bash-completion` and `python3-argcomplete` are installed.
+
+Otherwise, refer to the [argcomplete documentation](https://kislyuk.github.io/argcomplete/).
+
+Limitation: shell completion will help typing subcommands and options but is technically unable to suggest existing step names.
+
 ## First steps with Moulti
 
 1. Open two terminals on the same machine/host/VM/container.

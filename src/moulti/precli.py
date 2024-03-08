@@ -1,6 +1,7 @@
 """
 This file can be used to run instructions early, before the interpreter tries to import Moulti modules.
 """
+# PYTHON_ARGCOMPLETE_OK
 
 import sys
 if sys.platform == 'win32':

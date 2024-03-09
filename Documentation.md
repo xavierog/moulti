@@ -328,7 +328,7 @@ Per se, Moulti does not:
 - perform syntax highlighting (use e.g. `bat` / `batcat` or `rich`)
 - wrap lines (use e.g. `fold`)
 - distinguish stdout from stderr (it reads a single stream anyway; use e.g. `stderred`)
-- tweak the buffering policy of other processes (use e.g. `stdbuf` and do not forget `grep --line-buffered`)
+- tweak the buffering policy of other processes (use e.g. `stdbuf`, `grep --line-buffered` or `PYTHONUNBUFFERED=1`)
 - keep track of when your processes started, how long they ran and/or what return code they exited with
 
 All of this can be achieved from the controlling script.
@@ -336,7 +336,6 @@ All of this can be achieved from the controlling script.
 ## Moulti does not... yet
 
 These features may appear in future versions:
-- ability to copy logs to the X11 clipboard;
 - `type` feature, for animation purposes.
 
 ## moulti pass: setting read size

@@ -13,6 +13,7 @@ NamedTerminalTheme = tuple[str, TerminalTheme]
 TerminalThemeCollection = dict[str, TerminalTheme]
 
 COLOR_RE = r'#?(?P<color>[0-9a-f]{6})'
+OVERRIDE_RE = r'^(?P<name>(?:dark|light)[bf]g)=' + COLOR_RE + '$'
 
 def textual_supports_dark_light_ansi_themes() -> bool:
 	return hasattr(TextualApp, 'ansi_theme_dark') and hasattr(TextualApp, 'ansi_theme_light')
@@ -114,34 +115,48 @@ class AnsiThemePolicy:
 	def __init__(self, dark_theme: NamedTerminalTheme|None, light_theme: NamedTerminalTheme|None) -> None:
 		self.dark_theme = dark_theme
 		self.light_theme = light_theme
+		self.overrides: dict[str, tuple[int, int, int]] = {}
+		self.verbatim = False
 
 	def apply(self, app: TextualApp) -> bool:
-		if textual_supports_dark_light_ansi_themes():
-			assert hasattr(app, 'ansi_theme_dark') and hasattr(app, 'ansi_theme_light')
-			if self.dark_theme is not None:
-				app.ansi_theme_dark = self.dark_theme[1]
-			if self.light_theme is not None:
-				app.ansi_theme_light = self.light_theme[1]
-		else:
-			theme = self.dark_theme if app.dark else self.light_theme
-			if theme is not None:
-				return replace_line_filter(app, ANSIToTruecolor, ANSIToTruecolor(terminal_theme=theme[1]))
+		if self.dark_theme is not None:
+			app.ansi_theme_dark = self.dark_theme[1]
+		if self.light_theme is not None:
+			app.ansi_theme_light = self.light_theme[1]
+		for name, color in self.overrides.items():
+			theme = app.ansi_theme_dark if name.startswith('dark') else app.ansi_theme_light
+			attribute = 'background_color' if name.endswith('bg') else 'foreground_color'
+			setattr(theme, attribute, color)
+		if self.verbatim:
+			# Verbatim: remove Textual's ANSIToTruecolor filter:
+			replace_line_filter(app, ANSIToTruecolor, None)
 		return True
 
 	def __repr__(self) -> str:
 		dark_theme = 'None' if self.dark_theme is None else self.dark_theme[0]
 		light_theme = 'None' if self.light_theme is None else self.light_theme[0]
-		return f'ANSI theme policy: {dark_theme=}, {light_theme=}'
+		verbatim = self.verbatim
+		overrides = self.overrides
+		return f'ANSI theme policy: {dark_theme=}, {light_theme=}, {verbatim=}, {overrides=}'
 
 	@classmethod
 	def from_string(cls, themes: TerminalThemeCollection, policy: str) -> 'AnsiThemePolicy':
 		"""
 		Return an AnsiThemePolicy object based on a list of known themes and a policy string.
-		A policy string is a comma-separated list of options:
+		A policy string contains a policy ("theme" or "verbatim") followed by a colon (":") followed by a comma-separated
+		list of policy-specific options.
+		Options for policy "theme":
 		- dark=THEMELIST
 		- light=THEMELIST
 		where THEMELIST is a colon-separated list of known theme names by decreasing order of preference.
-		Example: dark=MY_DARK_THEME:DEFAULT_TERMINAL_THEME,light=NIGHT_OWLISH
+		Example: theme:dark=MY_DARK_THEME:DEFAULT_TERMINAL_THEME,light=NIGHT_OWLISH
+		Options for policy "verbatim":
+		- darkbg=COLOR
+		- darkfg=COLOR
+		- lightbg=COLOR
+		- lightfg=COLOR
+        Example: verbatim:darkbg=000000,darkfg=e6e6e6,lightbg=ffaaff,lightfg=000000
+		"verbatim" is also accepted as is.
 		"""
 		def first_known(priority_list: list[str]) -> NamedTerminalTheme|None:
 			for theme_name in priority_list:
@@ -149,20 +164,35 @@ class AnsiThemePolicy:
 					return (theme_name, themes[theme_name])
 			return None
 
-		dark_theme, light_theme = None, None
-		for part in policy.split(','):
-			if part.startswith('dark='):
-				dark_theme = first_known(part[5:].split(':'))
-			elif part.startswith('light='):
-				light_theme = first_known(part[6:].split(':'))
-		return AnsiThemePolicy(dark_theme, light_theme)
+		if policy.startswith("theme:"):
+			policy = policy[6:]
+			dark_theme, light_theme = None, None
+			for part in policy.split(','):
+				if part.startswith('dark='):
+					dark_theme = first_known(part[5:].split(':'))
+				elif part.startswith('light='):
+					light_theme = first_known(part[6:].split(':'))
+			return AnsiThemePolicy(dark_theme, light_theme)
+		if policy == "verbatim":
+			verbatim_policy = AnsiThemePolicy(None, None)
+			verbatim_policy.verbatim = True
+			return verbatim_policy
+		if policy.startswith("verbatim:"):
+			verbatim_policy = AnsiThemePolicy(None, None)
+			verbatim_policy.verbatim = True
+			policy = policy[9:]
+			for part in policy.split(','):
+				if rem := re.match(OVERRIDE_RE, part):
+					verbatim_policy.overrides[rem.group('name')] = color_from_string(rem.group('color'))
+			return verbatim_policy
+		return AnsiThemePolicy(None, None)
 
 	@classmethod
 	def from_environment(cls, environment_prefix: str = '') -> 'AnsiThemePolicy':
 		"""
 		Return an AnsiThemePolicy object based on (optionally prefixed) environment variables ANSI and ANSI_THEME_*.
 		"""
-		themes = all_ansi_themes(environment_prefix)
 		env_var_name = environment_prefix + 'ANSI'
 		env_var_value = environ.get(env_var_name, '')
+		themes = all_ansi_themes(environment_prefix) if env_var_value.startswith('theme:') else {}
 		return cls.from_string(themes, env_var_value)

@@ -386,6 +386,8 @@ The constant scrolling resumes when you hit the `End` key.
 
 ### Environment variables you may set
 
+#### Connectivity
+
 - `MOULTI_INSTANCE`: name of your Moulti instance; defaults to `default`; taken into account by the instance to compute the default value of `MOULTI_SOCKET_PATH`.
 - `MOULTI_SOCKET_PATH`: path to the network socket that Moulti should listen/connect to; taken into account by both the instance and the CLI; if not specified, Moulti defaults to a platform-specific value that reflects your username and `MOULTI_INSTANCE`; examples: `@moulti-bob-test-instance.socket`, `/run/user/1000/moulti-bob-test-instance.socket`.
 - `MOULTI_ALLOWED_UID`: abstract sockets (i.e. Linux) only! By default, Moulti only accepts commands from the user (uid) that launched the Moulti instance; setting this environment variable beforehand makes it accept arbitrary uids; example:
@@ -398,14 +400,34 @@ The constant scrolling resumes when you hit the `End` key.
   export MOULTI_ALLOWED_GID=141
   moulti init
   ```
-- `MOULTI_MODE`: `light` to start Moulti with dark mode disabled, `dark` to start Moulti with dark mode enabled; defaults to `dark`.
-- `MOULTI_ANSI`: defines whether and how Moulti alters ANSI colors:
-  - `verbatim`: do not alter ANSI colors (default value since v1.5.0)
-  - `textual_default`: let the Textual framework handle ANSI colors (default behavior before v1.5.0)
-  - `dark=theme_name1,light=theme_name2`: define what ANSI themes to use in dark and light modes;
+- `MOULTI_PASS_CONCURRENCY`: define how many concurrent "moulti pass" commands is acceptable; defaults to 20.
+
+### Appearance, look and feel
+
+- `MOULTI_MODE`: `light` to start Moulti in light mode, `dark` to start Moulti in dark mode; defaults to `dark`.
+- `MOULTI_ANSI`: define whether and how Moulti alters the 16 standard ANSI colors. There are three available policies:
+  - `verbatim`: (default value since v1.5.0) ANSI colors appear the same way inside Moulti as outside Moulti.
+    However, Moulti does not try to guess the background and foreground colors of your terminal. That may affect readability.
+    If needed, you can specify them using this syntax:
+    ```
+    MOULTI_ANSI=verbatim:darkbg=000000,darkfg=e6e6e6,lightbg=ffaaff,lightfg=000000
+    # darkbg: background color in dark mode; default value: #0c0c0c
+    # darkfg: foreground color in dark mode; default value: #d9d9d9
+    # lightbg: background color in light mode; default value: #f7f7f7
+    # lightfg: foreground color in light mode; default value: #000000
+    ```
+    The order of these attributes does not matter and you do not have to specify all of them unless actually needed.
+    Therefore, `MOULTI_ANSI=verbatim` and `MOULTI_ANSI=verbatim:` work fine.
+  - `theme:dark=theme_name1,light=theme_name2`: define what ANSI themes to use in dark and light modes;
     specifying one theme for each mode is usually enough; if needed, specify multiple themes separated by `:` so that Moulti picks the first one it knows about.
+
     Built-in themes include: `DEFAULT_TERMINAL_THEME`, `MONOKAI`, `DIMMED_MONOKAI`, `NIGHT_OWLISH`, `SVG_EXPORT_THEME`.
-    This feature works best with Textual >= 0.53.
+  - `textual_default`: let the Textual framework handle ANSI colors (default behavior before v1.5.0).
+    In practice, Textual uses built-in themes:
+    - [MONOKAI](https://github.com/Textualize/textual/blob/main/src/textual/_ansi_theme.py#L3) in dark mode
+    - [ALABASTER](https://github.com/Textualize/textual/blob/main/src/textual/_ansi_theme.py#L28) in light mode
+
+    Therefore, `MOULTI_ANSI=textual_default` means the same as `MOULTI_ANSI=theme:dark=MONOKAI,light=ALABASTER`.
 - `MOULTI_ANSI_THEME_*`: define your own ANSI themes; examples:
    ```shell
    # 16-color theme:
@@ -415,15 +437,17 @@ The constant scrolling resumes when you hit the `End` key.
    ```
    Manually defining `MOULTI_ANSI_THEME_*` can be painful. So have a look at this helper script that turns [Gogh themes](https://gogh-co.github.io/Gogh/) into such variables:
    ```shell
-   ./tools/gogh2moulti.bash
+   tools/gogh2moulti.bash
    ```
-   Other details:
-   - Moulti does not take `bg` (background) and `fg` (foreground) into account for the time being.
-   - Colors may be prefixed with `#`.
-   - Hexadecimal digits may be specified as lower or uppercase but there must be exactly 6 digits.
-   - Theme names are case-sensitive: if you define `MOULTI_ANSI_THEME_AlphaBeta`, be sure to mention e.g. `MOULTI_ANSI=dark=AlphaBeta`, not `MOULTI_ANSI=dark=ALPHABETA`.
+   Theme names are case-sensitive: if you define `MOULTI_ANSI_THEME_AlphaBeta`, be sure to mention e.g. `MOULTI_ANSI=dark=AlphaBeta`, not `MOULTI_ANSI=dark=ALPHABETA`.
 - `MOULTI_CUSTOM_CSS`: absolute filepath to a custom TCSS file; see "How to define my own step classes ?"
-- `MOULTI_PASS_CONCURRENCY`: define how many concurrent "moulti pass" commands is acceptable; defaults to 20.
+
+About colors in `MOULTI_ANSI*`:
+- colors may be prefixed with `#`;
+- hexadecimal digits may be specified as lower or uppercase but there must be exactly 6 digits.
+
+### Miscellaneous
+
 - `MOULTI_SAVE_PATH`: base path under which export directories are created when saving a Moulti instance; defaults to `.` i.e. the instance's current working directory.
 
 ### Environment variables set by the Moulti instance

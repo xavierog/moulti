@@ -28,6 +28,7 @@ class MoultiConsole(Static):
 	def __init__(self, *args: Any, **kwargs: Any) -> None:
 		super().__init__(*args, **kwargs)
 		self.log_widget = MoultiLog()
+		self.log_widget.follow_ansi_theme = False
 		self.log_widget.highlighter = MoultiConsoleHighlighter()
 		self.log_widget.highlight = True
 

@@ -12,7 +12,7 @@ This document assumes:
 Moulti requires:
 - Linux, BSD or MacOS
 - Python ≥ 3.10
-- Textual ≥ 0.47
+- Textual ≥ 0.53
 
 ## Installation
 
@@ -492,8 +492,10 @@ Moulti requires Python ≥ 3.10 because:
 - Python 3.9 [isn't receiving regular bug fixes anymore](https://www.python.org/downloads/release/python-3918/).
 - Moulti type hints use PEP 604 (Allow writing union types as X | Y) syntax, which requires Python ≥ 3.10.
 
-The minimum version of Textual required to run Moulti is 0.47.
+The minimum version of Textual required to run Moulti is 0.53.
 Details:
+- version 0.53.0 exposes ANSI themes
+- version 0.47.0 was the minimum requirement before the implementation of ANSI themes
 - version 0.46.0 fails with message "Error in stylesheet"
 - version 0.24.0 fails with message "ImportError: Package 'textual.widgets' has no class 'Collapsible'"
 - version 0.1.13 fails with message "ImportError: cannot import name 'work' from 'textual'"

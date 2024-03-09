@@ -6,5 +6,5 @@ pylint
 pyperclip
 ruff
 textual-dev
-textual>=0.47
+textual>=0.53
 twine

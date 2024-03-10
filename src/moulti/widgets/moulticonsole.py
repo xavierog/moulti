@@ -119,7 +119,7 @@ class MoultiRegexHighlighter(RegexHighlighter):
 	]
 
 class MoultiConsoleHighlighter(Highlighter):
-	SEPARATORS = (' => ', ' <= ', ' exec: ')
+	SEPARATORS = (' => ', ' <= ', ' exec: ', ' theme policy: ')
 	"""
 	Everything to the right of these separators is to be highlighted by ReprHighlighter.
 	Everything to the left of these separators is to be highlighted by MoultiRegexHighlighter.

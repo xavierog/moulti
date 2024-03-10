@@ -16,7 +16,7 @@ from textual.dom import BadIdentifier
 from textual.widgets import Footer, Label
 from textual.worker import get_current_worker, NoActiveWorker
 from . import __version__ as MOULTI_VERSION
-from .ansi import AnsiThemePolicy
+from .ansi import AnsiThemePolicy, dump_filters
 from .protocol import PRINTABLE_MOULTI_SOCKET, clean_socket, current_instance
 from .protocol import moulti_listen, get_unix_credentials, send_json_message
 from .protocol import MoultiConnectionClosedException, MoultiProtocolException, Message, FDs
@@ -104,7 +104,7 @@ class Moulti(App):
 		policy = AnsiThemePolicy.from_environment('MOULTI_')
 		self.logconsole(f'Applying {policy}')
 		policy.apply(self)
-		self.logconsole(f'Textual filters: {self._filters}')
+		self.logconsole(f'Textual filters: {dump_filters(self)}')
 
 	def init_threads(self) -> None:
 		try:

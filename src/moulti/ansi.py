@@ -18,6 +18,12 @@ OVERRIDE_RE = r'^(?P<name>(?:dark|light)[bf]g)=' + COLOR_RE + '$'
 def textual_supports_dark_light_ansi_themes() -> bool:
 	return hasattr(TextualApp, 'ansi_theme_dark') and hasattr(TextualApp, 'ansi_theme_light')
 
+def dump_filters(app: TextualApp) -> str:
+	if not hasattr(app, '_filters'):
+		return 'App._filters no longer exists'
+	app_filters = getattr(app, '_filters')
+	return ', '.join((type(line_filter).__name__ for line_filter in app_filters))
+
 def replace_line_filter(app: TextualApp, filter_type: type[LineFilter], new_filter: LineFilter|None) -> bool:
 	if not hasattr(app, '_filters'):
 		return False

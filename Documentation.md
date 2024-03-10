@@ -438,7 +438,9 @@ The constant scrolling resumes when you hit the `End` key.
    ```shell
    tools/gogh2moulti.bash
    ```
-   Theme names are case-sensitive: if you define `MOULTI_ANSI_THEME_AlphaBeta`, be sure to mention e.g. `MOULTI_ANSI=dark=AlphaBeta`, not `MOULTI_ANSI=dark=ALPHABETA`.
+   Important:
+   - Setting `MOULTI_ANSI_THEME_*` defines a Moulti theme but does not use it; to use it, set `MOULTI_ANSI`.
+   - Theme names are case-sensitive: if you define `MOULTI_ANSI_THEME_AlphaBeta`, be sure to mention e.g. `MOULTI_ANSI=dark=AlphaBeta`, not `MOULTI_ANSI=dark=ALPHABETA`.
 - `MOULTI_CUSTOM_CSS`: absolute filepath to a custom TCSS file; see "How to define my own step classes ?"
 
 About colors in `MOULTI_ANSI*`:

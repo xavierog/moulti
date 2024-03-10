@@ -10,14 +10,22 @@ from textual.widgets import Label, Static
 from .moultilog import MoultiLog
 
 MOULTI_THEME = Theme({
-    'moulti.date': 'orchid2',
-    'moulti.time': 'orchid2',
-    'moulti.socket': 'steel_blue1',
-    'moulti.fileno': 'orchid1',
-    'moulti.function': 'slate_blue1',
-    'moulti.messagein': 'bold dodger_blue2',
-    'moulti.messageout': 'bold chartreuse3',
+	'moulti.date': 'orchid2',
+	'moulti.time': 'orchid2',
+	'moulti.socket': 'steel_blue1',
+	'moulti.fileno': 'orchid1',
+	'moulti.function': 'slate_blue1',
+	'moulti.messagein': 'bold dodger_blue2',
+	'moulti.messageout': 'bold chartreuse3',
+	# Redefine some repr.* styles to avoid ANSI colors:
+	'repr.bool_true': 'green1',
+	'repr.bool_false': 'deep_pink2',
+	'repr.none': 'purple',
+	'repr.number': 'cornflower_blue',
+	'repr.str': 'sea_green3',
+	'repr.attrib_name': 'dark_orange3',
 })
+
 
 class MoultiConsole(Static):
 	BINDINGS = [

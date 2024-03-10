@@ -16,6 +16,7 @@ Although Moulti's Python packages, modules and functions are obviously available
 ### Changed
 
 - By default, Moulti no longer alters ANSI colors; the previous behavior can be restored by setting `MOULTI_ANSI=textual_default`.
+- Use non-ANSI colors in the console.
 - Moulti requires textual >= 0.53.
 
 ### Fixed

@@ -98,8 +98,9 @@ class Moulti(App):
 		official value). This makes perfect sense for most applications. Moulti is special because its users expect
 		steps to display the exact same thing as their terminal with no or little care for portability.
 		"""
-		ansi_behavior = os.environ.get('MOULTI_ANSI', 'verbatim')
-		if ansi_behavior == 'textual_default':
+		if os.environ.get('MOULTI_ANSI') == 'textual_default':
+			# MOULTI_ANSI=textual_default means Moulti neither loads, applies nor alters any theme.
+			# However, Textual default themes will apply, unaltered.
 			return
 		policy = AnsiThemePolicy.from_environment('MOULTI_')
 		self.logconsole(f'Applying {policy}')

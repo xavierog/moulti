@@ -179,19 +179,14 @@ class AnsiThemePolicy:
 				elif part.startswith('light='):
 					light_theme = first_known(part[6:].split(':'))
 			return AnsiThemePolicy(dark_theme, light_theme)
-		if policy == "verbatim":
-			verbatim_policy = AnsiThemePolicy(None, None)
-			verbatim_policy.verbatim = True
-			return verbatim_policy
+		verbatim_policy = AnsiThemePolicy(None, None)
+		verbatim_policy.verbatim = True
 		if policy.startswith("verbatim:"):
-			verbatim_policy = AnsiThemePolicy(None, None)
-			verbatim_policy.verbatim = True
 			policy = policy[9:]
 			for part in policy.split(','):
 				if rem := re.match(OVERRIDE_RE, part):
 					verbatim_policy.overrides[rem.group('name')] = color_from_string(rem.group('color'))
-			return verbatim_policy
-		return AnsiThemePolicy(None, None)
+		return verbatim_policy
 
 	@classmethod
 	def from_environment(cls, environment_prefix: str = '') -> 'AnsiThemePolicy':

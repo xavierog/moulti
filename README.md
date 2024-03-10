@@ -3,21 +3,57 @@
 Moulti changes the way your shell scripts (bash, zsh, etc.) display their output in your terminal.
 Moulti enables you to assign the numerous lines emitted by your scripts to "steps", i.e. visual, collapsible blocks featuring their own title and color.
 
-Here is how upgrading a Debian system looks like with Moulti:
-![Ok, it is almost 5 MiB, but it is an APNG, not a GIF](https://xavier.kindwolf.org/p/moulti/doc/img/moulti-demo-debian-upgrade.png?20240218)
+Here is how [upgrading a Debian system](examples/upgrade-system.bash) looks like with Moulti:
+
+![Moulti demo: Debian upgrade (Animated PNG)](https://xavier.kindwolf.org/p/moulti/doc/img/moulti-demo-debian-upgrade.png?20240218)
 
 Moulti is a tool meant for people who write and execute shell scripts.
 Specifically, if you find yourself scrolling up your terminal to ensure everything went fine while your script is still running, then Moulti is made for you.
 
-But, wait, does that not prevent interactivity with users? Moulti may actually enhance it through **questions**:
+## How?
+
+Synopsis:
+
+1. Start a Moulti instance: `moulti init`
+2. Add a step: `moulti step add step_name --title='some clever title here'`
+3. Fill it: `whatever_your_script_does | moulti pass step_name`
+4. Repeat #2 and #3 until your script is done.
+
+Learn how to leverage Moulti by jumping to its [Documentation](Documentation.md).
+
+## Features
+
+As shown in the demo, Moulti enables user interactions through **questions**:
 
 ![Moulti input question](https://xavier.kindwolf.org/p/moulti/doc/img/moulti-input-question.png?20240218)
 
 ![Moulti button question](https://xavier.kindwolf.org/p/moulti/doc/img/moulti-button-question.png?20240218)
 
+When it comes to look and feel, Moulti can be customised:
 
-Learn how to leverage Moulti by jumping to its [Documentation](Documentation.md).
+- through [Textual CSS (TCSS)](https://textual.textualize.io/guide/CSS/): [documentation](Documentation.md#how-to-define-my-own-step-classes-)
+- through ANSI themes: [documentation](Documentation.md#appearance-look-and-feel)
 
 ## Implementation
 
-Moulti is written in Python and leverages [Textual](https://textual.textualize.io/).
+Moulti is written in Python and leverages [Textual](https://textual.textualize.io/), along with [Pyperclip](https://pypi.org/project/pyperclip/) and [argcomplete](https://kislyuk.github.io/argcomplete/).
+
+## Inspiration
+
+Moulti remained a mere idea for a significant time (possibly years).
+
+The idea of driving TUI elements from scripts obviously comes from tools like
+[dialog](https://invisible-island.net/dialog/dialog-figures.html) and
+[whiptail](https://whiptail.readthedocs.io/en/latest/index.html).
+
+At some point, the author stumbled upon
+[multiplex](https://github.com/dankilman/multiplex), which is probably the closest thing to Moulti. multiplex was deemed
+unsatisfying on multiple points (including architecture) and that prompted the development of Moulti.
+
+[procmux](https://github.com/napisani/procmux) is also similar to Moulti but did not affect its development.
+
+## Acknowledgments
+
+The Textual framework helped a lot, so kudos to the Textual team, and specifically to:
+- [Will McGugan](https://github.com/willmcgugan) for creating it
+- [Dave Pearson](https://davep.dev/) for his regular help and feedback about Textual issues

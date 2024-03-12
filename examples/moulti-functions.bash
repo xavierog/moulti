@@ -1,3 +1,27 @@
+function moulti_python {
+	if command -v python3 > /dev/null; then
+		python3 "$@"
+	else
+		python "$@"
+	fi
+}
+
+function moulti_duration {
+	ts_start="$(date -d "$1" "+%s%N")"
+	ts_end="$(date -d "$2" "+%s%N")"
+	moulti_python -c '
+from sys import argv
+delta = int(argv[2]) - int(argv[1]) # delta is in nanoseconds
+figures = []
+for x in (60*10**9, 60, 24): # seconds, hours, days
+	figures.insert(0, delta % x)
+	delta //= x
+figures.insert(0, int(delta))
+figures[-1] /= 10**9
+print(" ".join((f"{value}{unit}" for value, unit in zip(figures, "dhms") if value > 0)))
+' "${ts_start}" "${ts_end}"
+}
+
 # Examples:
 # moulti_exec find . -type f -name '*.py' -ls
 # moulti_exec other_bash_function arg1 arg2
@@ -8,7 +32,8 @@ function moulti_exec {
 	# Generate a random step id if none was provided:
 	id="${STEP_ID:-${RANDOM}${RANDOM}}"
 	# Create a step; set the STEP_ADD_ARGS array to customise it:
-	moulti step add "${id}" --title="$*" --top-text="Started $(date --iso-8601=ns)" --bottom-text="still running..." "${STEP_ADD_ARGS[@]}"
+	timestamp_start="$(date --iso-8601=ns)"
+	moulti step add "${id}" --title="$*" --top-text="Started ${timestamp_start}" --bottom-text="still running..." "${STEP_ADD_ARGS[@]}"
 	# Run the given command and pipe its output to Moulti; set the STEP_PASS_ARGS array to fine-tune the piping (e.g. read size):
 	"$@" < /dev/null 2>&1 | moulti pass "${id}" "${STEP_PASS_ARGS[@]}"
 	# Harvest the command's return code and the time it ended:
@@ -17,7 +42,8 @@ function moulti_exec {
 	# Determine the new step color based on the return code:
 	[ "${rc}" == 0 ] && result='success' || result='error'
 	# Update the step; set the STEP_UPDATE_ARGS array to further customise it:
-	moulti step update "${id}" --bottom-text="Exited ${timestamp_end} with RC ${rc}" --classes="${result}" "${STEP_UPDATE_ARGS[@]}"
+	duration=$(moulti_duration "${timestamp_start}" "${timestamp_end}")
+	moulti step update "${id}" --bottom-text="Exited  ${timestamp_end} with RC ${rc} after ${duration}" --classes="${result}" "${STEP_UPDATE_ARGS[@]}"
 	[ "${rc}" == 0 ] && [ "${STEP_COLLAPSE_ON_SUCCESS}" ] && moulti_delayed_collapse "${id}" "${STEP_COLLAPSE_ON_SUCCESS}" &
 	# Exit with the same return code as the given command:
 	return "${rc}"

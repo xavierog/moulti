@@ -38,6 +38,7 @@ class AbstractStep(Static):
 			yield self.bottom_label
 
 	def on_mount(self) -> None:
+		self.query_one('CollapsibleTitle').tooltip = f'Step id: {self.title_from_id()}'
 		self.update_properties(self.init_kwargs)
 
 	async def on_click(self, _: Click) -> None:

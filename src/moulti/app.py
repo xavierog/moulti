@@ -89,6 +89,7 @@ class Moulti(App):
 
 	def init_widgets(self) -> None:
 		self.title_label = Label('Moulti', id='header')
+		self.title_label.tooltip = f'Instance name: {current_instance()}'
 		self.steps_container = VertScroll(id='steps_container')
 		self.footer = Footer()
 

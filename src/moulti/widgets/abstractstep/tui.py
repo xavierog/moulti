@@ -1,6 +1,7 @@
 import json
 from typing import Any, Callable
 from pyperclip import copy # type: ignore
+from rich.errors import MarkupError
 from textual.app import ComposeResult
 from textual.events import Click
 from textual.widgets import Static, Collapsible
@@ -21,6 +22,7 @@ class AbstractStep(Static):
 		# is being appended to it:
 		self.prevent_deletion = 0
 
+		self.check_properties(kwargs)
 		self.init_kwargs = kwargs
 
 		step_classes = str(kwargs.get('classes', ''))
@@ -55,6 +57,22 @@ class AbstractStep(Static):
 		if self.parent is not None:
 			return self.parent.children.index(self) + 1
 		return -1
+
+	def check_markup(self, value: str|int|bool) -> None:
+		value = str(value)
+		text = self.render_str(value)
+		# Extra check to work around https://github.com/Textualize/textual/issues/4248:
+		for span in text.spans:
+			if hasattr(span.style, 'meta') and span.style.meta.get('@click') == ():
+				raise MarkupError('problematic @click tag')
+
+	def check_markup_dict(self, check_dict: dict[str, str|int|bool], *keys: str) -> None:
+		for key in keys:
+			if key in check_dict:
+				self.check_markup(check_dict[key])
+
+	def check_properties(self, kwargs: dict[str, str|int|bool]) -> None:
+		self.check_markup_dict(kwargs, 'title', 'top_text', 'bottom_text')
 
 	def update_properties(self, kwargs: dict[str, str|int|bool]) -> None:
 		if 'classes' in kwargs:

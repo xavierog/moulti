@@ -46,6 +46,10 @@ class AbstractQuestion(AbstractStep):
 	def compose_question(self) -> ComposeResult:
 		return []
 
+	def check_properties(self, kwargs: dict[str, str|int|bool]) -> None:
+		super().check_properties(kwargs)
+		self.check_markup_dict(kwargs, 'text')
+
 	def update_properties(self, kwargs: dict[str, str|int|bool]) -> None:
 		super().update_properties(kwargs)
 		if 'text' in kwargs:

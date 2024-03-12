@@ -34,6 +34,11 @@ class ButtonQuestion(AbstractQuestion):
 		if answer is not None:
 			self.got_answer(answer)
 
+	def check_properties(self, kwargs: dict[str, Any]) -> None:
+		super().check_properties(kwargs)
+		for _, _, label in kwargs.get('button', []):
+			self.check_markup(label)
+
 	def export_properties(self) -> dict[str, Any]:
 		prop = super().export_properties()
 		# Buttons cannot be updated so we can simply export the value found in init_kwargs:

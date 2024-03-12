@@ -42,10 +42,9 @@ class AbstractStep(Static):
 
 	async def on_click(self, _: Click) -> None:
 		"""
-		Steps are meant to be focusable but it is actually the CollapstibleTitle that holds the focus.
+		Steps are meant to be focusable but it is actually the CollapsibleTitle that holds the focus.
 		"""
-		if hasattr(self.collapsible, '_title'):
-			self.collapsible._title.focus() # pylint: disable=protected-access
+		self.query_one('CollapsibleTitle').focus()
 
 	def title_from_id(self) -> str:
 		self_id = str(self.id)

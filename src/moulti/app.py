@@ -104,9 +104,9 @@ class Moulti(App):
 			# However, Textual default themes will apply, unaltered.
 			return
 		policy = AnsiThemePolicy.from_environment('MOULTI_')
-		self.logconsole(f'Applying {policy}')
+		self.logconsole(f'{policy}')
 		policy.apply(self)
-		self.logconsole(f'Textual filters: {dump_filters(self)}')
+		self.logconsole(f'Textual filters: {dump_filters(self) or "none"}')
 
 	def init_threads(self) -> None:
 		try:
@@ -129,6 +129,7 @@ class Moulti(App):
 
 	def on_ready(self) -> None:
 		self.logconsole(f'Moulti v{MOULTI_VERSION}')
+		self.logconsole(f'instance "{current_instance()}", PID {os.getpid()}')
 		self.setup_ansi_behavior()
 		self.init_threads()
 		widget_list = ' '.join(MoultiWidgets.registry().keys())

@@ -13,7 +13,7 @@ from rich.markup import MarkupError
 from textual import work
 from textual.app import App, ComposeResult
 from textual.dom import BadIdentifier
-from textual.widgets import Footer, Label
+from textual.widgets import Footer, Label, ProgressBar
 from textual.worker import get_current_worker, NoActiveWorker
 from . import __version__ as MOULTI_VERSION
 from .ansi import AnsiThemePolicy, dump_filters
@@ -92,6 +92,7 @@ class Moulti(App):
 		self.title_label = Label('Moulti', id='header')
 		self.title_label.tooltip = f'Instance name: {current_instance()}'
 		self.steps_container = VertScroll(id='steps_container')
+		self.progress_bar = ProgressBar(id='progress_bar', show_eta=False)
 		self.footer = Footer()
 
 	def setup_ansi_behavior(self) -> None:
@@ -125,6 +126,7 @@ class Moulti(App):
 		"""Create child widgets for the app."""
 		yield self.title_label
 		yield self.steps_container
+		yield self.progress_bar
 		yield self.footer
 		yield self.end_user_console
 
@@ -480,6 +482,17 @@ class Moulti(App):
 	/* Leave a thin space between steps and their container's vertical scrollbar: */
 	#steps_container.vertical_scrollbar_visible > Widget {
 		margin-right: 1;
+	}
+	/* Show the progress bar as a full-width extension of the footer: */
+	#progress_bar {
+		display: none; /* Do not display by default */
+		background: $accent;
+		padding-left: 1;
+		padding-right: 1;
+		width: 100%;
+		&> Bar {
+			width: 1fr;
+		}
 	}
 	"""
 

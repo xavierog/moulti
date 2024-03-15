@@ -2,12 +2,12 @@
 import os
 import sys
 import json
-from argparse import ArgumentParser, _SubParsersAction
+from argparse import ArgumentParser, BooleanOptionalAction, _SubParsersAction
 from pathlib import Path
 from typing import Any, Generator
 import argcomplete
 from . import __version__ as moulti_version
-from .helpers import pint, send_to_moulti_and_handle_reply
+from .helpers import pint, float_str, send_to_moulti_and_handle_reply
 from .protocol import send_to_moulti, PRINTABLE_MOULTI_SOCKET
 from .protocol import moulti_connect, send_json_message, recv_json_message
 from .widgets.cli import add_cli_arguments
@@ -118,7 +118,10 @@ def add_main_commands(subparsers: _SubParsersAction) -> None:
 	# moulti set
 	set_parser = subparsers.add_parser('set', help='Set Moulti options')
 	set_parser.set_defaults(func=send_to_moulti_and_handle_reply, command='set')
-	set_parser.add_argument('--title', '-t', type=str, help='title displayed at the top of the screen')
+	set_parser.add_argument('--title', '-t', default=None, type=str, help='title displayed at the top of the screen')
+	set_parser.add_argument('--progress-bar', default=None, action=BooleanOptionalAction, help='whether to display the progress bar')
+	set_parser.add_argument('--progress-target', '-pt', default=None, type=float, help='total number of steps associated with the progress bar')
+	set_parser.add_argument('--progress', '-p', default=None, type=float_str, help='progress so far, in number of steps; accept absolute or relative values, e.g. 50, +1 or -5')
 
 	# moulti load
 	load_parser = subparsers.add_parser('load', help='Load a saved directory into Moulti')

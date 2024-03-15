@@ -10,6 +10,10 @@ def pint(value: str) -> int:
 		raise ArgumentTypeError('expected a positive integer')
 	return integer_value
 
+def float_str(value: str) -> str:
+	_ = float(value)
+	return value
+
 def handle_reply(reply: Message) -> None:
 	success = reply.get('done') is True
 	if not success:

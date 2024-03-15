@@ -25,3 +25,7 @@ def send_to_moulti_and_handle_reply(message: Message) -> None:
 def send_no_none_to_moulti_and_handle_reply(args: Args) -> None:
 	no_none_args = {k:v for (k,v) in args.items() if v is not None}
 	send_to_moulti_and_handle_reply(no_none_args)
+
+def call_all(calls: list[Any]) -> None:
+	for call in calls:
+		call[0](*call[1:])

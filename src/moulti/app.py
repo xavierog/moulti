@@ -17,6 +17,7 @@ from textual.widgets import Footer, Label
 from textual.worker import get_current_worker, NoActiveWorker
 from . import __version__ as MOULTI_VERSION
 from .ansi import AnsiThemePolicy, dump_filters
+from .helpers import call_all
 from .protocol import PRINTABLE_MOULTI_SOCKET, clean_socket, current_instance
 from .protocol import moulti_listen, get_unix_credentials, send_json_message
 from .protocol import MoultiConnectionClosedException, MoultiProtocolException, Message, FDs
@@ -307,7 +308,7 @@ class Moulti(App):
 			message['command'], message['action'] = command, message['command']
 		# Analyse the message to determine what to call or what error to return:
 		finally_reply = True
-		call: Any = ()
+		calls: list[Any] = []
 		error = None
 		try:
 			command_class = MoultiWidgets.command_to_class(command)
@@ -320,7 +321,7 @@ class Moulti(App):
 						raise MoultiMessageException(f'id {message.get("id")} already in use')
 					if 'id' not in message:
 						raise MoultiMessageException('missing id')
-					call = (self.steps_container.mount, command_class(**message))
+					calls.append((self.steps_container.mount, command_class(**message)))
 				else:
 					# All other actions require an existing step:
 					if not step:
@@ -329,13 +330,13 @@ class Moulti(App):
 						raise MoultiMessageException(f'{message.get("id")} is not a {command}')
 					if action == 'update':
 						step.check_properties(message)
-						call = (step.update_properties, message)
+						calls.append((step.update_properties, message))
 					elif action == 'delete':
 						if step.prevent_deletion:
 							err = 'cannot proceed with deletion as '
 							err += f'{step.prevent_deletion} ongoing operations prevent it'
 							raise MoultiMessageException(err)
-						call = (step.remove,)
+						calls.append((step.remove,))
 					else:
 						# For actions other than add/update/delete, the widget class is expected to provide a
 						# "cli_action_{action}" method:
@@ -352,18 +353,20 @@ class Moulti(App):
 						# The method is expected to return a tuple (callable + arguments):
 						call = method(message, helpers)
 						# An empty tuple means the method chose to handle everything, reply included:
-						if not call:
+						if call:
+							calls.append(call)
+						else:
 							finally_reply = False
 			elif command == 'set':
-				if 'title' in message:
-					call = (self.title_label.update, str(message['title']))
+				if message.get('title') is not None:
+					calls.append((self.title_label.update, str(message['title'])))
 			elif command == 'ping':
-				call = ()
+				pass
 			else:
 				raise MoultiMessageException(f'unknown command {command}')
 			# At this stage, the analysis is complete; perform the required action and reply accordingly:
-			if call:
-				self.call_from_thread(*call)
+			if calls:
+				self.call_from_thread(call_all, calls)
 		except (BadIdentifier, MarkupError, MoultiMessageException) as exc:
 			# If we catch an exception, then we systematically assume we should handle the reply:
 			finally_reply = True

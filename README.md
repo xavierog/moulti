@@ -29,6 +29,8 @@ As shown in the demo, Moulti enables user interactions through **questions**:
 
 ![Moulti button question](https://xavier.kindwolf.org/p/moulti/doc/img/moulti-button-question.png?20240218)
 
+Moulti also features a **progress bar**: [documentation](Documentation.md#progress-bar)
+
 When it comes to look and feel, Moulti can be customised:
 
 - through [Textual CSS (TCSS)](https://textual.textualize.io/guide/CSS/): [documentation](Documentation.md#how-to-define-my-own-step-classes-)

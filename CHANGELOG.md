@@ -3,7 +3,7 @@
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
-This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for its CLI (Command-Line Interface), i.e. for the `moulti` command. 
+This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for its CLI (Command-Line Interface), i.e. for the `moulti` command.
 Although Moulti's Python packages, modules and functions are obviously available, they do not constitute a public API yet.
 
 ## Unreleased
@@ -14,6 +14,7 @@ Although Moulti's Python packages, modules and functions are obviously available
 - `tools/gogh2moulti.bash` converts [Gogh themes](https://gogh-co.github.io/Gogh/) into `MOULTI_ANSI_THEME_*` variables.
 - Bash functions: moulti_exec(): compute and display step duration.
 - Tooltips on the Moulti header and step titles.
+- Progress bar: `moulti set --progress-bar --progress-target=100 --progress=80`
 
 ### Changed
 

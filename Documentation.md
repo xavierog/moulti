@@ -265,6 +265,50 @@ Here is how to use them:
    $
    ```
 
+## Progress bar
+
+Moulti offers an optional progress bar, which appears at the bottom of the screen, just above the footer (and above the
+console if it is visible).
+Like everything else in Moulti, the progress bar is strictly CLI-driven, which means Moulti will never set, move,
+update, or configure the progress bar by itself.
+
+Moulti's progress bar being entirely optional, it is hidden by default:
+
+```shell
+# Show the progress bar:
+moulti set --progress-bar
+# Hide the progress bar:
+moulti set --no-progress-bar
+```
+
+The progress bar displays a percentage on its right side. That percentage is computed based on **progress** and
+**progress-target** values. For instance, this command results in a "20%" progress bar:
+
+```shell
+moulti set --progress=1138 --progress-target=5555
+```
+
+However, by default, none of these values are set and Moulti shows an "indeterminate" progress bar until progress-target
+is set. It is possible to force the display of such a progress bar by setting a negative or zero progress-target:
+
+```shell
+moulti set --progress-target=0
+moulti set --progress-target=-1
+moulti set --progress-target=-2.718281828459045
+```
+
+When updating the progress bar, it is possible to use either absolute or relative values:
+
+```shell
+moulti set --progress 80
+moulti set --progress +1
+moulti set --progress +20
+# Going backward is allowed:
+moulti set --progress -5
+```
+
+Refer to [progressbar.bash](examples/progressbar.bash) for a demonstration of the typical use case.
+
 ## Saving your stuff
 
 ### Saving a complete Moulti instance

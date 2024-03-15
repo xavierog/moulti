@@ -362,6 +362,20 @@ class Moulti(App):
 			elif command == 'set':
 				if message.get('title') is not None:
 					calls.append((self.title_label.update, str(message['title'])))
+				if message.get('progress_bar') is not None:
+					display_progress_bar = 'block' if bool(message['progress_bar']) else 'none'
+					calls.append((setattr, self.progress_bar.styles, 'display', display_progress_bar))
+				if message.get('progress_target') is not None:
+					progress_target = float(message['progress_target'])
+					progress_target = None if progress_target <= 0 else progress_target
+					calls.append((setattr, self.progress_bar, 'total', progress_target))
+				if message.get('progress') is not None:
+					progress_float = float(message['progress'])
+					progress_str = str(message['progress'])
+					if progress_str.startswith('+') or progress_str.startswith('-'):
+						calls.append((self.progress_bar.advance, progress_float))
+					else:
+						calls.append((setattr, self.progress_bar, 'progress', progress_float))
 			elif command == 'ping':
 				pass
 			else:
@@ -369,7 +383,7 @@ class Moulti(App):
 			# At this stage, the analysis is complete; perform the required action and reply accordingly:
 			if calls:
 				self.call_from_thread(call_all, calls)
-		except (BadIdentifier, MarkupError, MoultiMessageException) as exc:
+		except (BadIdentifier, MarkupError, MoultiMessageException, ValueError) as exc:
 			# If we catch an exception, then we systematically assume we should handle the reply:
 			finally_reply = True
 			error = str(exc)

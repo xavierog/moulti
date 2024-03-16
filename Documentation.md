@@ -254,7 +254,6 @@ Here is how to use them:
    - label: what the button should display
 
    Known limitations:
-   - Buttons that do not fit on screen remain hidden and unreachable.
    - Buttons cannot be changed through `moulti buttonquestion update`.
 
 

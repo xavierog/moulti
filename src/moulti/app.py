@@ -367,8 +367,8 @@ class Moulti(App):
 					calls.append((setattr, self.progress_bar.styles, 'display', display_progress_bar))
 				if message.get('progress_target') is not None:
 					progress_target = float(message['progress_target'])
-					progress_target = None if progress_target <= 0 else progress_target
-					calls.append((setattr, self.progress_bar, 'total', progress_target))
+					final_progress_target: float|None = None if progress_target <= 0 else progress_target
+					calls.append((setattr, self.progress_bar, 'total', final_progress_target))
 				if message.get('progress') is not None:
 					progress_float = float(message['progress'])
 					progress_str = str(message['progress'])

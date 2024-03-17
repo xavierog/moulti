@@ -95,22 +95,60 @@ class ButtonQuestion(AbstractQuestion):
 
 	async def apply_button_layout(self, new_layout: list[int]) -> None:
 		"""
-		Given a list of integers representing how many buttons each row should contain, reorganise the inner containers
-		and buttons to achieve that state.
+		Given a list of integers representing how many buttons each row should contain, achieve that state by:
+		- adding new Horizontal containers if needed
+		- moving buttons
+		- removing unnecessary Horizontal containers, if any
 		"""
-		# Important: during the removal, it is essential to enforce the height so the widget does not shrink down and
-		# potentially triggers the removal of vertical scroll bars on the parent container (which, in turn, would
-		# trigger a loop of resize events).
-		self.vertical.styles.height = len(new_layout) * 5 # number of rows × height of a Horizontal container (see CSS)
-		removal = self.vertical.remove_children()
-		self.regenerate_buttons()
-		horizontals = []
-		i = 0
-		for row in new_layout:
-			horizontals.append(Horizontal(*self.buttons[i:i+row]))
-			i += row
-		await removal
-		self.vertical.mount_all(horizontals)
+		horizontals = list(self.vertical.query('Horizontal').results())
+		current_button_map: list[int] = []
+		for horizontal_index, horizontal in enumerate(horizontals):
+			current_button_map.extend(horizontal_index for _ in horizontal.query('Button').results())
+		current_horizontal_count = max(current_button_map) + 1
+
+		new_button_map: list[int] = []
+		for horizontal_index, button_count in enumerate(new_layout):
+			new_button_map.extend(horizontal_index for _ in range(button_count))
+		new_horizontal_count = len(new_layout)
+
+		buttons_to_move: dict[tuple[int, int], list[int]] = {}
+		for button_index, current_horizontal_index in enumerate(current_button_map):
+			new_horizontal_index = new_button_map[button_index]
+			if current_horizontal_index != new_horizontal_index:
+				move_direction = new_horizontal_index - current_horizontal_index
+				move_direction //= abs(move_direction)
+				buttons_to_move.setdefault((new_horizontal_index, move_direction), []).append(button_index)
+
+		if not buttons_to_move:
+			return
+
+		# Add extra Horizontal containers if needed:
+		if new_horizontal_count > current_horizontal_count:
+			new_horizontals = list(Horizontal() for _ in range(current_horizontal_count, new_horizontal_count))
+			horizontals.extend(new_horizontals)
+			self.vertical.mount_all(new_horizontals)
+
+		# Move buttons:
+		disabled = self.answer is not None
+		buttons_reference = self.init_kwargs.get('button', DEFAULT_BUTTONS)
+		for movement, button_indices in buttons_to_move.items():
+			fresh_buttons = []
+			for button_index in button_indices:
+				self.buttons[button_index].remove()
+				button_value, button_classes, button_label = buttons_reference[button_index]
+				fresh_button = Button(button_label, variant=button_classes, name=button_value, disabled=disabled)
+				self.buttons[button_index] = fresh_button
+				fresh_buttons.append(fresh_button)
+			target_horizontal_index, direction = movement
+			if direction > 0:
+				horizontals[target_horizontal_index].mount_all(fresh_buttons, before=0)
+			else:
+				horizontals[target_horizontal_index].mount_all(fresh_buttons)
+
+		# Remove unnecessary Horizontal containers, if any:
+		if new_horizontal_count < current_horizontal_count:
+			for horizontal_index in range(new_horizontal_count, current_horizontal_count):
+				horizontals[horizontal_index].remove()
 
 	async def watch_known_width(self, _old_width: int, _new_width: int) -> None:
 		"""

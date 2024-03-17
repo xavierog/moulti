@@ -27,6 +27,7 @@ Although Moulti's Python packages, modules and functions are obviously available
 - Fix "next line color" heuristic for step widgets.
 - Fix detection of markup errors.
 - New layout for button questions: there should no longer be any hidden/unreachable button.
+- `MOULTI_CUSTOM_CSS= moulti init/run` no longer results in a traceback.
 
 ### Removed
 

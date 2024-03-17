@@ -512,7 +512,7 @@ class Moulti(App):
 
 	# Allow end users to redefine Moulti's look and feel through an optional
 	# custom CSS set through an environment variable:
-	CSS_PATH = os.environ.get('MOULTI_CUSTOM_CSS')
+	CSS_PATH = os.environ.get('MOULTI_CUSTOM_CSS') or None
 
 def main(command: list[str]|None = None) -> None:
 	reply = Moulti(command=command).run()

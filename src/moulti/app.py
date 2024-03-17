@@ -521,3 +521,5 @@ def main(command: list[str]|None = None) -> None:
 
 if __name__ == '__main__':
 	main()
+else:
+	app = Moulti()

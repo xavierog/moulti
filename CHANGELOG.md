@@ -12,6 +12,7 @@ Although Moulti's Python packages, modules and functions are obviously available
 
 - Environment variables `MOULTI_ANSI` and `MOULTI_ANSI_THEME_*` provide full control over ANSI color themes.
 - `tools/gogh2moulti.bash` converts [Gogh themes](https://gogh-co.github.io/Gogh/) into `MOULTI_ANSI_THEME_*` variables.
+- Shell completion based on the argcomplete library.
 - Bash functions: moulti_exec(): compute and display step duration.
 - Tooltips on the Moulti header and step titles.
 - Progress bar: `moulti set --progress-bar --progress-target=100 --progress=80`

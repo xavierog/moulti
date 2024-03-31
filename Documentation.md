@@ -367,12 +367,24 @@ Per se, Moulti does not:
 
 - number lines (use e.g. `nl -ba` or `cat -n`)
 - timestamp lines (use e.g. `ts '%FT%T%z'` from the `moreutils` package)
-- strip colors from input (use e.g. `ansi2txt` from [colorized-logs](https://github.com/kilobyte/colorized-logs))
 - perform syntax highlighting (use e.g. `bat` / `batcat` or `rich`)
 - wrap lines (use e.g. `fold`)
 - distinguish stdout from stderr (it reads a single stream anyway; use e.g. `stderred`)
-- tweak the buffering policy of other processes (use e.g. `stdbuf`, `grep --line-buffered` or `PYTHONUNBUFFERED=1`)
-- keep track of when your processes started, how long they ran and/or what return code they exited with
+- tweak the output buffering policy of other processes:
+  1. look for command-line options and environment variables that explicitly address the issue, e.g. `--line-buffered` or `PYTHONUNBUFFERED=1`
+  2. use `LD_PRELOAD`-based tools such as `stdbuf` or [cvolny/faketty](https://github.com/cvolny/faketty)
+  3. use tools that allocate a [pty](https://en.wikipedia.org/wiki/Pseudoterminal), e.g. `script` or [dtolnay/faketty](https://github.com/dtolnay/faketty):
+  ```bash
+  script --quiet --return --command 'your command here' /dev/null | moulti pass your_step
+  ```
+- trick other processes into outputting colors or emojis:
+  1. look for command-line options and environment variables that explicitly address the issue, e.g. `--color=always` or `FORCE_COLOR=1`
+  2. use `LD_PRELOAD`-based tools such as [cvolny/faketty](https://github.com/cvolny/faketty)
+  3. use tools that allocate a pty, e.g. `script` or [dtolnay/faketty](https://github.com/dtolnay/faketty)
+- strip colors from input:
+  1. look for command-line options and environment variables that explicitly address the issue, e.g. `--color=never` or `NO_COLOR=1`
+  2. use tools to strip ANSI escape codes, e.g. `ansi2txt` from [colorized-logs](https://github.com/kilobyte/colorized-logs)
+- keep track of when your processes started, how long they ran and/or what return code they exited with... but see `moulti_exec` in [moulti-functions.bash](examples/moulti-functions.bash) for an example of it.
 
 All of this can be achieved from the controlling script.
 

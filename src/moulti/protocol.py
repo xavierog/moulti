@@ -209,11 +209,11 @@ def write_tlv_data_to_socket(socket: Socket, data: bytes, data_type: str = 'JSON
 	data_type = data_type + '____'
 	data_length = len(data)
 	preamble = f':{data_type[0:4]}:{data_length:013}:'.encode('ascii')
+	to_send = preamble + data
 	if fds:
-		send_fds(socket, [preamble], fds)
+		send_fds(socket, [to_send], fds)
 	else:
-		write_fixed_amount_to_socket(socket, preamble)
-	write_fixed_amount_to_socket(socket, data)
+		write_fixed_amount_to_socket(socket, to_send)
 
 def data_to_message(data: bytes) -> Message:
 	try:

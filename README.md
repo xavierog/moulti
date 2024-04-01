@@ -7,6 +7,8 @@ Here is how [upgrading a Debian system](examples/upgrade-system.bash) looks like
 
 ![Moulti demo: Debian upgrade (Animated PNG)](https://xavier.kindwolf.org/p/moulti/doc/img/moulti-demo-debian-upgrade.png?20240218)
 
+Interested? [Run this demo in a container using docker or podman](https://hub.docker.com/r/xavierong/moulti-demo)
+
 Moulti is a tool meant for people who write and execute shell scripts.
 Specifically, if you find yourself scrolling up your terminal to ensure everything went fine while your script is still running, then Moulti is made for you.
 

@@ -180,6 +180,7 @@ class Moulti(App):
 	def export_properties(self) -> dict[str, Any]:
 		prop = {}
 		prop['title'] = str(self.title_label.renderable)
+		prop['step_position'] = 'bottom' if self.steps_container.has_class('bottom') else 'top'
 		return prop
 
 	def logconsole(self, line: str) -> None:
@@ -362,6 +363,8 @@ class Moulti(App):
 			elif command == 'set':
 				if message.get('title') is not None:
 					calls.append((self.title_label.update, str(message['title'])))
+				if message.get('step_position') is not None:
+					calls.append((self.steps_container.set_class, message['step_position'] == 'bottom', 'bottom'))
 				if message.get('progress_bar') is not None:
 					display_progress_bar = 'block' if bool(message['progress_bar']) else 'none'
 					calls.append((setattr, self.progress_bar.styles, 'display', display_progress_bar))
@@ -496,6 +499,9 @@ class Moulti(App):
 	/* Leave a thin space between steps and their container's vertical scrollbar: */
 	#steps_container.vertical_scrollbar_visible > Widget {
 		margin-right: 1;
+	}
+	#steps_container.bottom {
+		align-vertical: bottom;
 	}
 	/* Show the progress bar as a full-width extension of the footer: */
 	#progress_bar {

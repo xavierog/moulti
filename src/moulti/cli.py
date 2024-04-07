@@ -119,6 +119,7 @@ def add_main_commands(subparsers: _SubParsersAction) -> None:
 	set_parser = subparsers.add_parser('set', help='Set Moulti options')
 	set_parser.set_defaults(func=send_to_moulti_and_handle_reply, command='set')
 	set_parser.add_argument('--title', '-t', default=None, type=str, help='title displayed at the top of the screen')
+	set_parser.add_argument('--step-position', default=None, type=str, choices=('top', 'bottom'), help='whether to display steps at the top (default) or bottom of the screen')
 	set_parser.add_argument('--progress-bar', default=None, action=BooleanOptionalAction, help='whether to display the progress bar')
 	set_parser.add_argument('--progress-target', '-pt', default=None, type=float, help='total number of steps associated with the progress bar')
 	set_parser.add_argument('--progress', '-p', default=None, type=float_str, help='progress so far, in number of steps; accept absolute or relative values, e.g. 50, +1 or -5')

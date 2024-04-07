@@ -209,6 +209,15 @@ As you probably noticed already, there are multiple ways to fill a Moulti step:
 All methods above share one common limitation: it is not possible to append partial lines to Moulti steps.
 Conversely, lines will not show up in Moulti until they are terminated with a line feed (LF / `\n`) character.
 
+## Multiple ways to display steps
+
+By default, Moulti displays steps at the top of the screen and adds new steps below existing steps.
+
+This behavior can be changed through `moulti set`:
+
+- `moulti set --step-position=bottom` displays steps at the bottom of the screen
+- `moulti set --step-position=top` displays steps at the top of the screen
+
 ## Interact with end users through questions
 
 Sometimes, it is necessary to prompt the user for a confirmation, a value or an option. Since Moulti occupies the entirety of the terminal and its standard input, it is no longer possible to use shell features such as `read`.

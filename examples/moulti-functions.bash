@@ -44,7 +44,7 @@ function moulti_exec {
 	# Update the step; set the STEP_UPDATE_ARGS array to further customise it:
 	duration=$(moulti_duration "${timestamp_start}" "${timestamp_end}")
 	moulti step update "${id}" --bottom-text="Exited  ${timestamp_end} with RC ${rc} after ${duration}" --classes="${result}" "${STEP_UPDATE_ARGS[@]}"
-	[ "${rc}" == 0 ] && [ "${STEP_COLLAPSE_ON_SUCCESS}" ] && moulti_delayed_collapse "${id}" "${STEP_COLLAPSE_ON_SUCCESS}" &
+	[ "${rc}" == 0 ] && [ "${STEP_COLLAPSE_ON_SUCCESS}" ] && { moulti_delayed_collapse "${id}" "${STEP_COLLAPSE_ON_SUCCESS}" & }
 	# Exit with the same return code as the given command:
 	return "${rc}"
 }

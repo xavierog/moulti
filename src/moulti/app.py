@@ -178,8 +178,11 @@ class Moulti(App):
 		return self.query('#steps_container AbstractStep').results(AbstractStep)
 
 	def export_properties(self) -> dict[str, Any]:
-		prop = {}
+		prop: dict[str, Any] = {}
 		prop['title'] = str(self.title_label.renderable)
+		prop['progress_bar'] = self.progress_bar.styles.display == 'block'
+		prop['progress_target'] = self.progress_bar.total
+		prop['progress'] = self.progress_bar.progress
 		prop['step_position'] = 'bottom' if self.steps_container.has_class('bottom') else 'top'
 		return prop
 

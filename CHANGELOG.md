@@ -12,6 +12,10 @@ Although Moulti's Python packages, modules and functions are obviously available
 
 - `moulti set --step-position=bottom`
 
+### Fixed
+
+- The "Save" feature now exports the progress bar.
+
 ## [1.5.1] - 2024-03-31
 
 ### Fixed

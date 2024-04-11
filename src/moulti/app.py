@@ -23,7 +23,7 @@ from .protocol import moulti_listen, get_unix_credentials, send_json_message
 from .protocol import MoultiConnectionClosedException, MoultiProtocolException, Message, FDs
 from .protocol import MoultiTLVReader, data_to_message, getraddr
 from .widgets.tui import MoultiWidgets
-from .widgets.vertscroll import VertScroll
+from .widgets.stepcontainer import StepContainer
 from .widgets.abstractstep.tui import AbstractStep
 from .widgets.moulticonsole import MoultiConsole
 from .widgets.quitdialog import QuitDialog
@@ -91,7 +91,7 @@ class Moulti(App):
 	def init_widgets(self) -> None:
 		self.title_label = Label('Moulti', id='header')
 		self.title_label.tooltip = f'Instance name: {current_instance()}'
-		self.steps_container = VertScroll(id='steps_container')
+		self.steps_container = StepContainer()
 		self.progress_bar = ProgressBar(id='progress_bar', show_eta=False)
 		self.footer = Footer()
 
@@ -175,7 +175,7 @@ class Moulti(App):
 			self.init_command_running = False
 
 	def all_steps(self) -> Iterator[AbstractStep]:
-		return self.query('#steps_container AbstractStep').results(AbstractStep)
+		return self.steps_container.ordered_steps()
 
 	def export_properties(self) -> dict[str, Any]:
 		prop: dict[str, Any] = {}
@@ -184,6 +184,7 @@ class Moulti(App):
 		prop['progress_target'] = self.progress_bar.total
 		prop['progress'] = self.progress_bar.progress
 		prop['step_position'] = 'bottom' if self.steps_container.has_class('bottom') else 'top'
+		prop['step_direction'] = 'down' if self.steps_container.layout_direction_is_down else 'up'
 		return prop
 
 	def logconsole(self, line: str) -> None:
@@ -327,7 +328,7 @@ class Moulti(App):
 						raise MoultiMessageException(f'id {message.get("id")} already in use')
 					if 'id' not in message:
 						raise MoultiMessageException('missing id')
-					calls.append((self.steps_container.mount, command_class(**message)))
+					calls.append((self.steps_container.add_step, command_class(**message)))
 				else:
 					# All other actions require an existing step:
 					if not step:
@@ -368,6 +369,9 @@ class Moulti(App):
 					calls.append((self.title_label.update, str(message['title'])))
 				if message.get('step_position') is not None:
 					calls.append((self.steps_container.set_class, message['step_position'] == 'bottom', 'bottom'))
+				if message.get('step_direction') is not None:
+					is_down = bool(message['step_direction'] != 'up')
+					calls.append((setattr, self.steps_container, 'layout_direction_is_down', is_down))
 				if message.get('progress_bar') is not None:
 					display_progress_bar = 'block' if bool(message['progress_bar']) else 'none'
 					calls.append((setattr, self.progress_bar.styles, 'display', display_progress_bar))
@@ -499,13 +503,6 @@ class Moulti(App):
 		color: auto;
 	}
 
-	/* Leave a thin space between steps and their container's vertical scrollbar: */
-	#steps_container.vertical_scrollbar_visible > Widget {
-		margin-right: 1;
-	}
-	#steps_container.bottom {
-		align-vertical: bottom;
-	}
 	/* Show the progress bar as a full-width extension of the footer: */
 	#progress_bar {
 		display: none; /* Do not display by default */

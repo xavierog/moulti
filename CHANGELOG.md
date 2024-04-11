@@ -11,6 +11,7 @@ Although Moulti's Python packages, modules and functions are obviously available
 ### Added
 
 - `moulti set --step-position=bottom`
+- `moulti set --step-direction=up`
 
 ### Fixed
 

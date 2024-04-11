@@ -1,4 +1,5 @@
 import json
+from operator import attrgetter
 from typing import Any, Callable
 from pyperclip import copy # type: ignore
 from rich.errors import MarkupError
@@ -55,7 +56,7 @@ class AbstractStep(Static):
 
 	def index(self) -> int:
 		if self.parent is not None:
-			return self.parent.children.index(self) + 1
+			return sorted(self.parent.children, key=attrgetter('sort_order')).index(self) + 1
 		return -1
 
 	def check_markup(self, value: str|int|bool) -> None:

@@ -217,6 +217,8 @@ This behavior can be changed through `moulti set`:
 
 - `moulti set --step-position=bottom` displays steps at the bottom of the screen
 - `moulti set --step-position=top` displays steps at the top of the screen
+- `moulti set --step-direction=up` displays steps from last to first (new steps are added above existing steps)
+- `moulti set --step-direction=down` displays steps from first to last (new steps are added below existing steps)
 
 ## Interact with end users through questions
 

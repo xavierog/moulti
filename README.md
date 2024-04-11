@@ -35,6 +35,7 @@ Moulti also features a **progress bar**: [documentation](Documentation.md#progre
 
 When it comes to look and feel, Moulti can be customised:
 
+- through `moulti set`: define whether Moulti steps flow up or down: [documentation](Documentation.md#multiple-ways-to-display-steps)
 - through [Textual CSS (TCSS)](https://textual.textualize.io/guide/CSS/): [documentation](Documentation.md#how-to-define-my-own-step-classes-)
 - through ANSI themes: [documentation](Documentation.md#appearance-look-and-feel)
 

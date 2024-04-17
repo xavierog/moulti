@@ -5,12 +5,19 @@ from pyperclip import copy # type: ignore
 from rich.errors import MarkupError
 from textual.app import ComposeResult
 from textual.events import Click
+from textual.message import Message
 from textual.widgets import Static, Collapsible
 
 class AbstractStep(Static):
 	"""
 	This is the base class for all components end users may wish to add to Moulti.
 	"""
+
+	class StepActivity(Message):
+		def __init__(self, step: 'AbstractStep', *args: Any, **kwargs: Any):
+			self.step = step
+			super().__init__(*args, **kwargs)
+
 	def __init__(self, id: str, **kwargs: Any): # pylint: disable=redefined-builtin
 		self.collapsible = Collapsible(title=id)
 		self.top_label = Static('', classes='top_text')
@@ -22,6 +29,8 @@ class AbstractStep(Static):
 		# This attribute is meant to prevent deletion of a step while content
 		# is being appended to it:
 		self.prevent_deletion = 0
+
+		self.scroll_on_activity: bool|int = False
 
 		self.check_properties(kwargs)
 		self.init_kwargs = kwargs
@@ -90,6 +99,12 @@ class AbstractStep(Static):
 			self.bottom_text = str(kwargs['bottom_text'])
 			self.bottom_label.update(self.bottom_text)
 		self.bottom_label.styles.display = 'block' if self.bottom_text else 'none'
+		if 'scroll_on_activity' in kwargs:
+			scroll_on_activity = kwargs['scroll_on_activity']
+			if isinstance(scroll_on_activity, int):
+				self.scroll_on_activity = scroll_on_activity
+			else:
+				self.scroll_on_activity = bool(scroll_on_activity)
 
 	def export_properties(self) -> dict[str, Any]:
 		prop: dict[str, Any] = {}
@@ -99,6 +114,7 @@ class AbstractStep(Static):
 		prop['collapsed'] = self.collapsible.collapsed
 		prop['top_text'] = self.top_text
 		prop['bottom_text'] = self.bottom_text
+		prop['scroll_on_activity'] = self.scroll_on_activity
 		return prop
 
 	def save(self, opener: Callable[[str, int], int], filename: str, extra_properties: dict[str, Any]) -> None:
@@ -129,6 +145,10 @@ class AbstractStep(Static):
 				result, explanation = False, str(exc)
 			self.notify_copy_to_clipboard(result, explanation)
 		return wrapper
+
+	def activity(self) -> None:
+		msg = AbstractStep.StepActivity(self)
+		self.call_after_refresh(self.post_message, msg)
 
 	DEFAULT_COLORS = """
 	$step_default: $primary;

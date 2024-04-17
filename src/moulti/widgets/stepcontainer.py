@@ -1,4 +1,5 @@
 from typing import Any, Iterator, Sequence, cast
+from textual import on
 from textual.geometry import Region
 from textual.reactive import Reactive
 from textual.widget import AwaitMount
@@ -69,3 +70,17 @@ class StepContainer(VertScroll):
 		line = (step_region.bottom if where < 0 else step_region.y) + where
 		target_region = Region(step_region.x, line, step_region.width, 1)
 		self.scroll_to_region(target_region)
+
+	@on(AbstractStep.StepActivity)
+	def on_step_activity(self, activity: AbstractStep.StepActivity) -> None:
+		# Consume the event:
+		activity.prevent_default()
+		activity.stop()
+		# Extract step and its scroll policy:
+		step = activity.step
+		scroll_on_activity = step.scroll_on_activity
+		# Delay the actual scrolling:
+		if scroll_on_activity is not False:
+			def do_scroll() -> None:
+				self.scroll_to_step(step, scroll_on_activity)
+			self.set_timer(0.05, do_scroll)

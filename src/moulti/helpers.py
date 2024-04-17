@@ -14,6 +14,13 @@ def float_str(value: str) -> str:
 	_ = float(value)
 	return value
 
+def bool_or_int(value: str) -> bool|int:
+	if value.lower() == 'false':
+		return False
+	if value.lower() == 'true':
+		return True
+	return int(value)
+
 def handle_reply(reply: Message) -> None:
 	success = reply.get('done') is True
 	if not success:

@@ -98,6 +98,7 @@ class Step(AbstractStep):
 			# Strip the extra character:
 			text_to_write.right_crop(1)
 		self.log_widget.write(text_to_write)
+		self.activity()
 
 	@classmethod
 	def last_character_color(cls, text: Text) -> str:

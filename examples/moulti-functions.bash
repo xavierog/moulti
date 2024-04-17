@@ -33,7 +33,7 @@ function moulti_exec {
 	id="${STEP_ID:-${RANDOM}${RANDOM}}"
 	# Create a step; set the STEP_ADD_ARGS array to customise it:
 	timestamp_start="$(date --iso-8601=ns)"
-	moulti step add "${id}" --title="$*" --top-text="Started ${timestamp_start}" --bottom-text="still running..." "${STEP_ADD_ARGS[@]}"
+	moulti step add "${id}" --title="$*" --top-text="Started ${timestamp_start}" --bottom-text="still running..." --scroll-on-activity=-1 "${STEP_ADD_ARGS[@]}"
 	# Run the given command and pipe its output to Moulti; set the STEP_PASS_ARGS array to fine-tune the piping (e.g. read size):
 	"$@" < /dev/null 2>&1 | moulti pass "${id}" "${STEP_PASS_ARGS[@]}"
 	# Harvest the command's return code and the time it ended:
@@ -43,7 +43,7 @@ function moulti_exec {
 	[ "${rc}" == 0 ] && result='success' || result='error'
 	# Update the step; set the STEP_UPDATE_ARGS array to further customise it:
 	duration=$(moulti_duration "${timestamp_start}" "${timestamp_end}")
-	moulti step update "${id}" --bottom-text="Exited  ${timestamp_end} with RC ${rc} after ${duration}" --classes="${result}" "${STEP_UPDATE_ARGS[@]}"
+	moulti step update "${id}" --bottom-text="Exited  ${timestamp_end} with RC ${rc} after ${duration}" --classes="${result}" --scroll-on-activity=false "${STEP_UPDATE_ARGS[@]}"
 	[ "${rc}" == 0 ] && [ "${STEP_COLLAPSE_ON_SUCCESS}" ] && { moulti_delayed_collapse "${id}" "${STEP_COLLAPSE_ON_SUCCESS}" & }
 	# Exit with the same return code as the given command:
 	return "${rc}"

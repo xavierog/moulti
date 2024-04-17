@@ -386,6 +386,15 @@ class Moulti(App):
 						calls.append((self.progress_bar.advance, progress_float))
 					else:
 						calls.append((setattr, self.progress_bar, 'progress', progress_float))
+			elif command == 'scroll':
+				step = self.step_from_message(message)
+				if step is None:
+					raise MoultiMessageException(f'unknown id: {message.get("id")}')
+				try:
+					offset = int(message['offset'])
+				except Exception:
+					offset = True
+				calls.append((self.steps_container.scroll_to_step, step, offset))
 			elif command == 'ping':
 				pass
 			else:

@@ -1,4 +1,5 @@
-from typing import Iterator, Sequence, cast
+from typing import Any, Iterator, Sequence, cast
+from textual.geometry import Region
 from textual.reactive import Reactive
 from textual.widget import AwaitMount
 from .vertscroll import VertScroll
@@ -18,6 +19,10 @@ class StepContainer(VertScroll):
 	}
 	"""
 
+	def __init__(self, *args: Any, **kwargs: Any):
+		super().__init__(*args, **kwargs)
+		self.prevent_programmatic_scrolling = False
+
 	layout_direction_is_down = Reactive(True)
 
 	def watch_layout_direction_is_down(self, _was_down: bool, is_down: bool) -> None:
@@ -32,3 +37,14 @@ class StepContainer(VertScroll):
 
 	def add_step(self, step: AbstractStep) -> AwaitMount:
 		return self.mount(step, before=None if self.layout_direction_is_down else 0)
+
+	def scroll_to_step(self, step: AbstractStep, where: bool|int = True) -> None:
+		if self.prevent_programmatic_scrolling or where is False:
+			return
+		if where is True:
+			self.scroll_to_widget(step, origin_visible=True)
+			return
+		step_region = step.virtual_region
+		line = (step_region.bottom if where < 0 else step_region.y) + where
+		target_region = Region(step_region.x, line, step_region.width, 1)
+		self.scroll_to_region(target_region)

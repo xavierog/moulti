@@ -9,10 +9,20 @@ class StepContainer(VertScroll):
 	"""
 	Vertical scrollable container for steps.
 	"""
+	BINDINGS = [
+		('l', 'toggle_scrolling', 'Lock scroll')
+	]
+
 	DEFAULT_CSS = """
 	/* Leave a thin space between steps and the container's vertical scrollbar: */
 	StepContainer.vertical_scrollbar_visible > Widget {
 		margin-right: 1;
+	}
+	$scrollbar_green: #18b218;
+	StepContainer.prevent_programmatic_scrolling {
+		scrollbar-color: $scrollbar_green;
+		scrollbar-color-active: $scrollbar_green;
+		scrollbar-color-hover: $scrollbar_green;
 	}
 	StepContainer.bottom {
 		align-vertical: bottom;
@@ -22,6 +32,17 @@ class StepContainer(VertScroll):
 	def __init__(self, *args: Any, **kwargs: Any):
 		super().__init__(*args, **kwargs)
 		self.prevent_programmatic_scrolling = False
+
+	def action_toggle_scrolling(self) -> None:
+		# Actual toggle:
+		self.prevent_programmatic_scrolling = not self.prevent_programmatic_scrolling
+		# Visual toggle:
+		self.set_class(self.prevent_programmatic_scrolling, 'prevent_programmatic_scrolling')
+		# Workaround for the scrollbar to change color immediately:
+		scrollbar = self.vertical_scrollbar
+		value = scrollbar.mouse_over
+		scrollbar.mouse_over = not value
+		scrollbar.mouse_over = value
 
 	layout_direction_is_down = Reactive(True)
 

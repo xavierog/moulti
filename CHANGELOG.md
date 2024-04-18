@@ -12,6 +12,11 @@ Although Moulti's Python packages, modules and functions are obviously available
 
 - `moulti set --step-position=bottom`
 - `moulti set --step-direction=up`
+- Programmatic scrolling:
+  - `moulti scroll step_id offset`
+  - `moulti step add --scroll-on-actvity=-1`
+  - `moulti step update --scroll-on-actvity=false`
+  - "Lock scroll" action to prevent programmatic scrolling
 
 ### Fixed
 

@@ -1,0 +1,75 @@
+"""
+A simple "askpass" program for Moulti, compatible with ssh and sudo.
+"""
+import os
+import sys
+import random
+from typing import Callable
+from .protocol import Message, moulti_connect, send_json_message, recv_json_message
+
+class NoAnswerException(Exception):
+	pass
+
+def generate_step_id(prefix: str = '') -> str:
+	return prefix + str(random.randint(10_000_000, 99_999_999))
+
+def get_answer(send: Callable, step_type: str, step_id: str) -> str:
+	try:
+		send({'command': 'scroll', 'id': step_id})
+	except Exception:
+		pass
+
+	try:
+		reply = send({'command': step_type, 'action': 'get-answer', 'id': step_id, 'wait': True})
+	except Exception as exc:
+		raise NoAnswerException() from exc
+
+	try:
+		send({'command': step_type, 'action': 'delete', 'id': step_id})
+	except Exception:
+		pass
+
+	if not reply['done'] or 'answer' not in reply:
+		raise NoAnswerException()
+
+	return reply['answer']
+
+def main() -> None:
+	try:
+		prefix = 'askpass_'
+		prompt = sys.argv[1] if len(sys.argv) >= 2 else 'askpass'
+		# Escape '[' characters so Textual does not interpret them as Rich tags:
+		prompt = prompt.replace('[', r'\[')
+		main_input_id = generate_step_id(prefix)
+		common = {'action': 'add', 'classes': 'askpass', 'title': prompt, 'bottom_text': ' ', 'collapsed': False}
+		ssh_askpass_prompt = os.environ.get('SSH_ASKPASS_PROMPT')
+		ok_button = ['ok', 'success', 'OK']
+		cancel_button = ['cancel', 'error', 'Cancel']
+
+		with moulti_connect() as moulti_socket:
+			def send(msg: Message) -> Message:
+				send_json_message(moulti_socket, msg)
+				return recv_json_message(moulti_socket, 0)[0]
+			if ssh_askpass_prompt == 'none':
+				send({'command': 'buttonquestion', 'id': main_input_id, 'button': [ok_button], **common})
+				get_answer(send, 'buttonquestion', main_input_id)
+			elif ssh_askpass_prompt == 'confirm':
+				send({'command': 'buttonquestion', 'id': main_input_id, 'button': [ok_button, cancel_button], **common})
+				answer = get_answer(send, 'buttonquestion', main_input_id)
+				sys.exit(int(answer == 'cancel')) # ok => exit 0, cancel => exit 1
+			else:
+				ask_secret = 'fingerprint' not in prompt
+				send({'command': 'inputquestion', 'id': main_input_id, 'password': ask_secret, **common})
+				answer = get_answer(send, 'inputquestion', main_input_id)
+				print(answer)
+		sys.exit(0)
+	except NoAnswerException:
+		sys.exit(1)
+	except KeyboardInterrupt:
+		print('')
+		sys.exit(10)
+	except Exception:
+		sys.exit(15)
+
+if __name__ == '__main__':
+	main()

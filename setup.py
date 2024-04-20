@@ -43,7 +43,8 @@ setup(
 	install_requires=['textual>=0.53', 'pyperclip', 'argcomplete'],
 	entry_points={
 		'console_scripts': [
-			'moulti = moulti.precli:main'
+			'moulti = moulti.precli:main',
+			'moulti-askpass = moulti.askpass:main',
 		]
 	},
 )

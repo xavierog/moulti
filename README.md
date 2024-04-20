@@ -34,6 +34,7 @@ As shown in the demo, Moulti enables user interactions through **questions**:
 Moulti also features:
 - a **progress bar**: [documentation](Documentation.md#progress-bar)
 - programmatic scrolling: [documentation](Documentation.md#programmatically-scrolling-through-steps)
+- an askpass helper named `moulti-askpass`: [documentation](Documentation.md#moulti-run-dealing-with-ssh)
 
 When it comes to look and feel, Moulti can be customised:
 

@@ -167,6 +167,61 @@ moulti step add main_script_output
 exec > >(tee --append custom.log | moulti pass main_script_output) 2>&1
 ```
 
+### moulti run: dealing with ssh
+
+SSH clients and SSH-based tools (e.g. Ansible) sometimes need user input, e.g. to accept a new host key or enter a passphrase/password.
+By default, these interactions happen not over stdin but rather over the current TTY... resulting in a messy conflict with Moulti.
+
+This issue is usually addressed by configuring SSH clients so they use a separate "askpass" program for user interactions.
+Moulti provides such a program: `moulti-askpass`.
+
+Try out `moulti-askpass` on its own:
+
+```bash
+# First terminal:
+MOULTI_INSTANCE=trying-moulti-askpass moulti init
+
+# Second terminal:
+export MOULTI_INSTANCE=trying-moulti-askpass
+moulti-askpass 'Tell me a secret:'
+SSH_ASKPASS_PROMPT=confirm moulti-askpass 'If you can read this, then moulti-askpass works fine'
+SSH_ASKPASS_PROMPT=none moulti-askpass 'If you can read this, then moulti-askpass works fine'
+```
+
+The OpenSSH client can be configured to use moulti-askpass by setting two environment variables:
+
+```bash
+export SSH_ASKPASS=moulti-askpass
+export SSH_ASKPASS_REQUIRE=force
+```
+
+`moulti run` automatically sets these variables **IF** `SSH_ASKPASS` is not set already.
+Consequently, SSH clients and SSH-based tools should work out of the box with `moulti run`.
+
+### moulti run: dealing with git
+
+Like SSH, Git may [require user input](https://git-scm.com/docs/gitcredentials#_requesting_credentials).
+Fortunately, it uses `SSH_ASKPASS` to do so.
+
+Consequently, Git should work out of the box with `moulti run`.
+If necessary, explicitly set `GIT_ASKPASS` in your scripts to bypass the `core.askPass` configuration variable:
+
+```bash
+export GIT_ASKPASS="${SSH_ASKPASS}"
+```
+
+### moulti run: dealing with sudo
+
+Like SSH, sudo may require user input.
+Like SSH, sudo supports askpass programs: it requires:
+
+- running `sudo -A` or `sudo --askpass` instead of `sudo`
+- setting a single environment variable: `export SUDO_ASKPASS=$(which moulti-askpass)`
+
+Note that `sudo` does not perform `$PATH` lookup, so `SUDO_ASKPASS` must be a path (either absolute or relative).
+
+`moulti run` automatically sets `SUDO_ASKPASS` **IF** it is not set already **AND** `moulti-askpass` exists in `$PATH`.
+Consequently, sudo should work out of the box with `moulti run`.
 
 ## Python scripting
 
@@ -618,6 +673,14 @@ Step.customstate {
     color: red;
     background: yellow;
     & MoultiLog { scrollbar-corner-color: yellow; }
+}
+
+/* Customise steps shown by moulti-askpass: */
+.askpass {
+    color: gray;
+    background: black;
+    padding: 2;
+    border: panel blue;
 }
 
 /* Change the colors of the Moulti header: */

@@ -7,6 +7,7 @@ import selectors
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Callable, Iterator
 from socket import socket as Socket
+from shutil import which
 from time import time_ns, localtime, strftime
 from threading import get_ident, Lock
 from rich.markup import MarkupError
@@ -153,6 +154,13 @@ class Moulti(App):
 			environment['MOULTI_RUN'] = 'moulti'
 			environment['MOULTI_SOCKET_PATH'] = PRINTABLE_MOULTI_SOCKET
 			environment['MOULTI_INSTANCE_PID'] = str(os.getpid())
+			if 'SSH_ASKPASS' not in os.environ:
+				environment['SSH_ASKPASS'] = 'moulti-askpass'
+				environment['SSH_ASKPASS_REQUIRE'] = 'force'
+			if 'SUDO_ASKPASS' not in os.environ:
+				# sudo requires an absolute path:
+				if moulti_askpass_abspath := which('moulti-askpass'):
+					environment['SUDO_ASKPASS'] = moulti_askpass_abspath
 			self.logconsole(f'exec: about to run {command}')
 			# Not using 'with' because that waits for the process to exit; pylint: disable=consider-using-with
 			process = subprocess.Popen(command, env=environment, stdin=subprocess.DEVNULL)

@@ -13,6 +13,18 @@ class NoAnswerException(Exception):
 def generate_step_id(prefix: str = '') -> str:
 	return prefix + str(random.randint(10_000_000, 99_999_999))
 
+def get_prompt() -> tuple[str, str, bool]:
+	prompt = sys.argv[1] if len(sys.argv) >= 2 else 'askpass'
+	# Assume the user is prompted for a secret value, unless the prompt says otherwise:
+	ask_secret = 'fingerprint' not in prompt
+	# Escape '[' characters so Textual does not interpret them as Rich tags:
+	prompt = prompt.replace('[', r'\[')
+	# For proper alignment, use the first line as title and the rest as top-text:
+	split = prompt.split('\n', 1)
+	if len(split) == 1:
+		split.append('')
+	return split[0], split[1], ask_secret
+
 def get_answer(send: Callable, step_type: str, step_id: str) -> str:
 	try:
 		send({'command': 'scroll', 'id': step_id})
@@ -37,11 +49,12 @@ def get_answer(send: Callable, step_type: str, step_id: str) -> str:
 def main() -> None:
 	try:
 		prefix = 'askpass_'
-		prompt = sys.argv[1] if len(sys.argv) >= 2 else 'askpass'
-		# Escape '[' characters so Textual does not interpret them as Rich tags:
-		prompt = prompt.replace('[', r'\[')
 		main_input_id = generate_step_id(prefix)
-		common = {'action': 'add', 'classes': 'askpass', 'title': prompt, 'bottom_text': ' ', 'collapsed': False}
+		title, top_text, ask_secret = get_prompt()
+		common = {
+			'action': 'add', 'classes': 'askpass', 'title': title, 'top_text': top_text, 'bottom_text': ' ',
+			'collapsed': False
+		}
 		ssh_askpass_prompt = os.environ.get('SSH_ASKPASS_PROMPT')
 		ok_button = ['ok', 'success', 'OK']
 		cancel_button = ['cancel', 'error', 'Cancel']
@@ -58,7 +71,6 @@ def main() -> None:
 				answer = get_answer(send, 'buttonquestion', main_input_id)
 				sys.exit(int(answer == 'cancel')) # ok => exit 0, cancel => exit 1
 			else:
-				ask_secret = 'fingerprint' not in prompt
 				send({'command': 'inputquestion', 'id': main_input_id, 'password': ask_secret, **common})
 				answer = get_answer(send, 'inputquestion', main_input_id)
 				print(answer)

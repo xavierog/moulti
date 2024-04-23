@@ -26,6 +26,7 @@ from .protocol import MoultiTLVReader, data_to_message, getraddr
 from .widgets.tui import MoultiWidgets
 from .widgets.stepcontainer import StepContainer
 from .widgets.abstractstep.tui import AbstractStep
+from .widgets.collapsiblestep.tui import CollapsibleStep
 from .widgets.moulticonsole import MoultiConsole
 from .widgets.quitdialog import QuitDialog
 
@@ -50,8 +51,8 @@ class Moulti(App):
 	BINDINGS = [
 		("s", "save", "Save"),
 		("n", "toggle_console", "Console"),
-		("x", "expand_all", "Expand all"),
-		("o", "collapse_all", "Collapse all"),
+		("x", "collapse_all(False)", "Expand all"),
+		("o", "collapse_all(True)", "Collapse all"),
 		("d", "toggle_dark", "Dark/Light"),
 		("q", "quit", "Quit"),
 	]
@@ -211,15 +212,10 @@ class Moulti(App):
 		"""Toggle the console."""
 		self.end_user_console.toggle_class('hidden')
 
-	def action_expand_all(self) -> None:
-		"""Expand all steps."""
-		for step in self.all_steps():
-			step.collapsible.collapsed = False
-
-	def action_collapse_all(self) -> None:
+	def action_collapse_all(self, collapsed: bool = True) -> None:
 		"""Collapse all steps."""
-		for step in self.all_steps():
-			step.collapsible.collapsed = True
+		for step in self.steps_container.query('CollapsibleStep').results(CollapsibleStep):
+			step.collapsible.collapsed = collapsed
 
 	async def action_quit(self) -> None:
 		"""Quit Moulti."""

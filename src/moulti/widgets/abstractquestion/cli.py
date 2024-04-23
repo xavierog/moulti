@@ -1,10 +1,10 @@
 from argparse import ArgumentParser
 from moulti.helpers import Args, handle_reply
 from moulti.protocol import send_to_moulti
-from ..abstractstep.cli import add_abstractstep_options
+from ..collapsiblestep.cli import add_collapsiblestep_options
 
 def add_abstractquestion_options(parser: ArgumentParser, none: bool = False) -> None:
-	add_abstractstep_options(parser, none)
+	add_collapsiblestep_options(parser, none)
 	parser.add_argument('--text', '-t', type=str, default=None if none else '', help='Question text')
 
 def question_get_answer(args: Args) -> None:

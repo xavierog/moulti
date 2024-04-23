@@ -5,12 +5,12 @@ from textual import work
 from textual.app import ComposeResult
 from textual.worker import get_current_worker
 from rich.text import Text
-from ..abstractstep.tui import AbstractStep
+from ..collapsiblestep.tui import CollapsibleStep
 from ..moultilog import MoultiLog
 
 ANSI_ESCAPE_SEQUENCE = '\x1b'
 
-class Step(AbstractStep):
+class Step(CollapsibleStep):
 	"""
 	This widget represents a step in a script, program or process.
 	Visually speaking, it is essentially a collapsible text area surrounded
@@ -68,7 +68,7 @@ class Step(AbstractStep):
 		with open(filename, 'w', encoding='utf-8', errors='surrogateescape', opener=opener) as contents_filedesc:
 			self.log_widget.to_file(contents_filedesc)
 
-	@AbstractStep.copy_to_clipboard
+	@CollapsibleStep.copy_to_clipboard
 	def action_to_clipboard(self, keep_styles: bool = True) -> tuple[bool, str, str]:
 		lines = list(self.log_widget.to_lines(keep_styles))
 		lines_count = len(lines)
@@ -186,7 +186,7 @@ class Step(AbstractStep):
 		finally:
 			self.prevent_deletion -= 1
 
-	DEFAULT_CSS = AbstractStep.DEFAULT_COLORS + """
+	DEFAULT_CSS = CollapsibleStep.DEFAULT_CSS + """
 	Step {
 		& MoultiLog {
 			scrollbar-corner-color: $step_default;

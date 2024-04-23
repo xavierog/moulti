@@ -3,10 +3,8 @@ from operator import attrgetter
 from typing import Any, Callable
 from pyperclip import copy # type: ignore
 from rich.errors import MarkupError
-from textual.app import ComposeResult
-from textual.events import Click
 from textual.message import Message
-from textual.widgets import Static, Collapsible
+from textual.widgets import Static
 
 class AbstractStep(Static):
 	"""
@@ -19,43 +17,21 @@ class AbstractStep(Static):
 			super().__init__(*args, **kwargs)
 
 	def __init__(self, id: str, **kwargs: Any): # pylint: disable=redefined-builtin
-		self.collapsible = Collapsible(title=id)
-		self.top_label = Static('', classes='top_text')
-		self.bottom_label = Static('', classes='bottom_text')
-
-		self.top_text = ''
-		self.bottom_text = ''
+		self.title = id
 
 		# This attribute is meant to prevent deletion of a step while content
 		# is being appended to it:
 		self.prevent_deletion = 0
 
 		self.scroll_on_activity: bool|int = False
-
 		self.check_properties(kwargs)
 		self.init_kwargs = kwargs
 
 		step_classes = str(kwargs.get('classes', ''))
 		super().__init__(id='step_' + id, classes=step_classes)
 
-	def subcompose(self) -> ComposeResult:
-		return []
-
-	def compose(self) -> ComposeResult:
-		with self.collapsible:
-			yield self.top_label
-			yield from self.subcompose()
-			yield self.bottom_label
-
 	def on_mount(self) -> None:
-		self.query_one('CollapsibleTitle').tooltip = f'Step id: {self.title_from_id()}'
 		self.update_properties(self.init_kwargs)
-
-	async def on_click(self, _: Click) -> None:
-		"""
-		Steps are meant to be focusable but it is actually the CollapsibleTitle that holds the focus.
-		"""
-		self.query_one('CollapsibleTitle').focus()
 
 	def title_from_id(self) -> str:
 		self_id = str(self.id)
@@ -82,23 +58,13 @@ class AbstractStep(Static):
 				self.check_markup(check_dict[key])
 
 	def check_properties(self, kwargs: dict[str, str|int|bool]) -> None:
-		self.check_markup_dict(kwargs, 'title', 'top_text', 'bottom_text')
+		self.check_markup_dict(kwargs, 'title')
 
 	def update_properties(self, kwargs: dict[str, str|int|bool]) -> None:
 		if 'classes' in kwargs:
 			self.set_classes(str(kwargs['classes']))
 		if 'title' in kwargs:
-			self.collapsible.title = str(kwargs['title']) if kwargs['title'] else self.title_from_id()
-		if 'collapsed' in kwargs:
-			self.collapsible.collapsed = bool(kwargs['collapsed'])
-		if 'top_text' in kwargs:
-			self.top_text = str(kwargs['top_text'])
-			self.top_label.update(self.top_text)
-		self.top_label.styles.display = 'block' if self.top_text else 'none'
-		if 'bottom_text' in kwargs:
-			self.bottom_text = str(kwargs['bottom_text'])
-			self.bottom_label.update(self.bottom_text)
-		self.bottom_label.styles.display = 'block' if self.bottom_text else 'none'
+			self.title = str(kwargs['title']) if kwargs['title'] else self.title_from_id()
 		if 'scroll_on_activity' in kwargs:
 			scroll_on_activity = kwargs['scroll_on_activity']
 			if isinstance(scroll_on_activity, int):
@@ -110,10 +76,7 @@ class AbstractStep(Static):
 		prop: dict[str, Any] = {}
 		prop['id'] = self.title_from_id()
 		prop['classes'] = ' '.join(self.classes)
-		prop['title'] = self.collapsible.title
-		prop['collapsed'] = self.collapsible.collapsed
-		prop['top_text'] = self.top_text
-		prop['bottom_text'] = self.bottom_text
+		prop['title'] = self.title
 		prop['scroll_on_activity'] = self.scroll_on_activity
 		return prop
 
@@ -166,30 +129,6 @@ class AbstractStep(Static):
 		&.success { background: $step_success; }
 		&.warning { background: $step_warning; }
 		&.error { background: $step_error; }
-		/* Compact design: no padding, no margins, no borders: */
-		& Collapsible {
-			/* Inherit the parent background instead of altering it via $boost: */
-			background: initial;
-			padding: 0;
-			margin: 0;
-			border: none;
-		}
-		& CollapsibleTitle {
-			padding: 0;
-			width: 100%;
-		}
-		& CollapsibleTitle:focus {
-			background: initial;
-		}
-		& CollapsibleTitle:hover {
-			background: $foreground 80%;
-		}
-		/* Collapsible contents: */
-		& Contents {
-			/* Leave some space on each side of the contents: */
-			padding-left: 2 !important;
-			padding-right: 1 !important;
-		}
 	}
 	AbstractStep:focus, AbstractStep:focus-within {
 		border-left: thick $accent-lighten-3;

@@ -21,6 +21,7 @@ setup(
 		'moulti',
 		'moulti.widgets',
 		'moulti.widgets.abstractstep',
+		'moulti.widgets.collapsiblestep',
 		'moulti.widgets.step',
 		'moulti.widgets.abstractquestion',
 		'moulti.widgets.buttonquestion',

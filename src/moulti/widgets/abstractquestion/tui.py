@@ -4,9 +4,9 @@ from textual.app import ComposeResult
 from textual.message import Message
 from textual.widget import Widget
 from textual.widgets import Static
-from ..abstractstep.tui import AbstractStep
+from ..collapsiblestep.tui import CollapsibleStep
 
-class AbstractQuestion(AbstractStep):
+class AbstractQuestion(CollapsibleStep):
 	"""
 	This widget represents an interactive question in a script, program or process.
 	"""

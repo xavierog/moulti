@@ -329,6 +329,16 @@ Here is how to use them:
    craig
    $
    ```
+## Dividers
+
+Dividers are simplistic steps that exist solely for cosmetic purposes, like displaying static text or acting as visual separator between two groups of steps (hence the name).
+Unlike other steps, they are not collapsible.
+
+```bash
+moulti divider add my_first_divider --title=$'This text is simply displayed.\nMulti-line is possible. So is [i]rich formatting[/]'
+moulti divider update my_first_divider --classes=warning
+moulti divider delete my_first_divider
+```
 
 ## Progress bar
 

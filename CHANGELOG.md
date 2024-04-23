@@ -12,6 +12,7 @@ Although Moulti's Python packages, modules and functions are obviously available
 
 - `moulti-askpass`, an askpass helper for Moulti
 - `moulti run` automatically sets `SSH_ASKPASS`, `SSH_ASKPASS_REQUIRE` and `SUDO_ASKPASS` environment variables so as to leverage `moulti-askpass`.
+- dividers: non-collapsible steps that simply display text.
 
 ## [1.6.0] - 2024-04-18
 

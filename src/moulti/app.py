@@ -39,6 +39,27 @@ def timestamp() -> str:
 	timestr = f'{timestr}.{ms:03d} '
 	return timestr
 
+def run_environment(_command: list[str], copy: bool = True) -> dict[str, str]:
+	"""
+	Return environment variables set by "Moulti run <command>".
+	"""
+	environment = os.environ.copy() if copy else {}
+
+	environment['MOULTI_RUN'] = 'moulti'
+	environment['MOULTI_SOCKET_PATH'] = PRINTABLE_MOULTI_SOCKET
+	environment['MOULTI_INSTANCE_PID'] = str(os.getpid())
+
+	if 'SSH_ASKPASS' not in os.environ:
+		environment['SSH_ASKPASS'] = 'moulti-askpass'
+		environment['SSH_ASKPASS_REQUIRE'] = 'force'
+
+	if 'SUDO_ASKPASS' not in os.environ:
+		# sudo requires an absolute path:
+		if moulti_askpass_abspath := which('moulti-askpass'):
+			environment['SUDO_ASKPASS'] = moulti_askpass_abspath
+
+	return environment
+
 class MoultiMessageException(Exception):
 	pass
 
@@ -151,20 +172,9 @@ class Moulti(App):
 		import subprocess # pylint: disable=import-outside-toplevel
 		try:
 			self.init_command_running = True
-			environment = os.environ.copy()
-			environment['MOULTI_RUN'] = 'moulti'
-			environment['MOULTI_SOCKET_PATH'] = PRINTABLE_MOULTI_SOCKET
-			environment['MOULTI_INSTANCE_PID'] = str(os.getpid())
-			if 'SSH_ASKPASS' not in os.environ:
-				environment['SSH_ASKPASS'] = 'moulti-askpass'
-				environment['SSH_ASKPASS_REQUIRE'] = 'force'
-			if 'SUDO_ASKPASS' not in os.environ:
-				# sudo requires an absolute path:
-				if moulti_askpass_abspath := which('moulti-askpass'):
-					environment['SUDO_ASKPASS'] = moulti_askpass_abspath
 			self.logconsole(f'exec: about to run {command}')
 			# Not using 'with' because that waits for the process to exit; pylint: disable=consider-using-with
-			process = subprocess.Popen(command, env=environment, stdin=subprocess.DEVNULL)
+			process = subprocess.Popen(command, env=run_environment(command), stdin=subprocess.DEVNULL)
 			self.logconsole(f'exec: {command} launched with PID {process.pid}')
 			returncode = None
 			while not worker.is_cancelled:

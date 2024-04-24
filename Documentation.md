@@ -657,6 +657,25 @@ These variables are set by the Moulti instance when it runs a script, e.g. `moul
 - `MOULTI_INSTANCE_PID`: process id of the Moulti instance, in case your script needs to act upon the Moulti process itself.
 - `MOULTI_SOCKET_PATH`: described in the previous section; the Moulti instance explicitly sets this variable to ensure your script can connect to it.
 
+Additionally, Moulti may set variables so other tools integrate into Moulti:
+
+- [ssh](#moulti-run-dealing-with-ssh)
+- [sudo](#moulti-run-dealing-with-sudo)
+
+Such variables may or may not be set depending on criteria like existing environment variables or the command-line.
+If you feel confused and want to investigate the matter, run `moulti run --print-env -- your command here`.
+Example:
+
+```console
+$ moulti run --print-env -- true
+MOULTI_RUN=moulti
+MOULTI_SOCKET_PATH=@moulti-username-default.socket
+MOULTI_INSTANCE_PID=271828
+SSH_ASKPASS=moulti-askpass
+SSH_ASKPASS_REQUIRE=force
+SUDO_ASKPASS=/usr/local/bin/moulti-askpass
+```
+
 ### Other environment variables
 
 - `TERM`: per se, Moulti does nothing with this environment variable. However, `$TERM` has a strong influence on the behavior and visual aspect of curses applications and Moulti is no exception. Your mileage may vary but, overall, it seems `TERM=xterm-256color` frequently fix things.

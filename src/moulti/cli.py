@@ -14,6 +14,15 @@ from .widgets.cli import add_cli_arguments
 
 def init(args: dict) -> None:
 	"""Start a new Moulti instance."""
+
+	# Handle --print-env:
+	if args.pop('print_env', False):
+		from .app import run_environment # pylint: disable=import-outside-toplevel
+		environment_variables = run_environment(args['command'], False)
+		for name, value in environment_variables.items():
+			print(f'{name}={value}')
+		sys.exit(0)
+
 	from .app import main as init_moulti # pylint: disable=import-outside-toplevel
 	init_moulti(**args)
 
@@ -106,6 +115,7 @@ def add_main_commands(subparsers: _SubParsersAction) -> None:
 	# moulti run
 	run_parser = subparsers.add_parser('run', help='Start a new Moulti instance and run a command')
 	run_parser.set_defaults(func=init)
+	run_parser.add_argument('--print-env', action='store_true', default=False, help='print environment variables set by Moulti and exit')
 	run_parser.add_argument('command', type=str, nargs='+', help='command to run along with its arguments')
 
 	# moulti wait

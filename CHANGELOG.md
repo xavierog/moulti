@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for its CLI (Command-Line Interface), i.e. for the `moulti` command.
 Although Moulti's Python packages, modules and functions are obviously available, they do not constitute a public API yet.
 
+## Unreleased
+
+### Added
+
+- Ansible callback plugin: `ansible/moulti.py`
+- `moulti run` sets the adequate environment variables to enable the Ansible callback plugin.
+
 ## [1.7.0] - 2024-04-28
 
 ### Added

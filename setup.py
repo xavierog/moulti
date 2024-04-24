@@ -19,6 +19,7 @@ setup(
 	url='https://github.com/xavierog/moulti',
 	packages=[
 		'moulti',
+		'moulti.ansible',
 		'moulti.widgets',
 		'moulti.widgets.abstractstep',
 		'moulti.widgets.divider',
@@ -40,7 +41,7 @@ setup(
 		'Topic :: Utilities',
 	],
 	license='MIT',
-	keywords=['cli', 'tui', 'curses', 'terminal', 'multiplex', 'script', 'output', 'steps', 'textual', 'collapsible'],
+	keywords=['cli', 'tui', 'curses', 'terminal', 'multiplex', 'script', 'output', 'steps', 'textual', 'collapsible', 'ansible'],
 	package_dir={'': 'src'},
 	install_requires=['textual>=0.53', 'pyperclip', 'argcomplete'],
 	entry_points={

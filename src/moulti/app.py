@@ -43,9 +43,13 @@ def timestamp() -> str:
 	ms = ns // 10**6
 	timestr = strftime('%FT%T', localtime(timestamp_s))
 	timestr = f'{timestr}.{ms:03d} '
+
 	return timestr
 
-def run_environment(_command: list[str], copy: bool = True) -> dict[str, str]:
+def is_ansible(command: list[str]) -> bool:
+	return bool(len(command)) and 'ansible' in command[0]
+
+def run_environment(command: list[str], copy: bool = True) -> dict[str, str]:
 	"""
 	Return environment variables set by "Moulti run <command>".
 	"""
@@ -63,6 +67,15 @@ def run_environment(_command: list[str], copy: bool = True) -> dict[str, str]:
 		# sudo requires an absolute path:
 		if moulti_askpass_abspath := which('moulti-askpass'):
 			environment['SUDO_ASKPASS'] = moulti_askpass_abspath
+
+	if (ansible_policy := os.environ.get('MOULTI_ANSIBLE', 'default')) != 'no':
+		if ansible_policy == 'force' or (is_ansible(command) and 'ANSIBLE_STDOUT_CALLBACK' not in os.environ):
+			from . import ansible # pylint: disable=import-outside-toplevel
+			if ansible_callback_paths := os.environ.get('ANSIBLE_CALLBACK_PLUGINS', ''):
+				ansible_callback_paths += ':'
+			ansible_callback_paths += ansible.__path__[0]
+			environment['ANSIBLE_CALLBACK_PLUGINS'] = ansible_callback_paths
+			environment['ANSIBLE_STDOUT_CALLBACK'] = 'moulti'
 
 	return environment
 

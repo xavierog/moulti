@@ -141,7 +141,7 @@ In practice, it makes sense to heavily leverage shell functions, such as those a
 
 ### moulti run: dealing with stdin, stdout, stderr
 
-Script launched through "moulti run":
+By default, scripts launched through "moulti run":
 
 - have their standard input (stdin, file descriptor #0) redirected to `/dev/null`;
 - inherit the standard and error outputs (stdout and stderr, file descriptors #1 and #2) from Moulti (e.g. `/dev/pts/42`);
@@ -166,6 +166,14 @@ exec > >(moulti pass main_script_output) 2>&1
 moulti step add main_script_output
 exec > >(tee --append custom.log | moulti pass main_script_output) 2>&1
 ```
+
+If, for some reason, the recommendations above cannot be applied, the environment variable `MOULTI_RUN_OUTPUT` should help:
+- `MOULTI_RUN_OUTPUT=discard` redirects stdout and stderr to /dev/null, thus discarding any unexpected output;
+- `MOULTI_RUN_OUTPUT=harvest` harvests stdout and stderr lines and passes them to the `moulti_run_output` step;
+- any other value leads to the default behaviour: stdout and stderr are left untouched and their output is liable to degrade Moulti's visual display.
+
+The `moulti_run_output` step is special in that it is created upon reception of the first byte of output if it does not exist already.
+It can be created beforehand, can be updated or cleared at any time and cannot be deleted while the script is running.
 
 ### moulti run: dealing with ssh
 
@@ -648,6 +656,8 @@ About colors in `MOULTI_ANSI*`:
 ### Miscellaneous
 
 - `MOULTI_SAVE_PATH`: base path under which export directories are created when saving a Moulti instance; defaults to `.` i.e. the instance's current working directory.
+- `MOULTI_RUN_OUTPUT`: see [moulti run: dealing with stdin, stdout, stderr](#moulti-run-dealing-with-stdin-stdout-stderr)
+
 
 ### Environment variables set by the Moulti instance
 

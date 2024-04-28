@@ -134,7 +134,11 @@ class Step(CollapsibleStep):
 		try:
 			file_desc = helpers['file_descriptors'][0]
 			# Read lines from the given file descriptor:
-			with os.fdopen(file_desc, encoding='utf-8', errors='surrogateescape') as text_io:
+			if isinstance(file_desc, int):
+				actual_file_desc = os.fdopen(file_desc, encoding='utf-8', errors='surrogateescape')
+			else:
+				actual_file_desc = file_desc
+			with actual_file_desc as text_io:
 				# Syscall-wise, Python will read(fd, buffer, count) where count = max(8192, read_size) - read_bytes.
 				# But it will NOT return anything unless it has reached the hinted read size.
 				# Out of the box, Moulti should strive to display lines as soon as possible, hence the default value of

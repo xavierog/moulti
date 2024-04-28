@@ -4,8 +4,10 @@ import time
 import asyncio
 import datetime
 import selectors
+import subprocess
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any, Callable, Iterator
+from queue import Queue
+from typing import Any, Callable, Iterator, cast
 from socket import socket as Socket
 from shutil import which
 from time import time_ns, localtime, strftime
@@ -27,8 +29,12 @@ from .widgets.tui import MoultiWidgets
 from .widgets.stepcontainer import StepContainer
 from .widgets.abstractstep.tui import AbstractStep
 from .widgets.collapsiblestep.tui import CollapsibleStep
+from .widgets.step.tui import Step
 from .widgets.moulticonsole import MoultiConsole
 from .widgets.quitdialog import QuitDialog
+
+
+MOULTI_RUN_OUTPUT_STEP_ID = 'moulti_run_output'
 
 def timestamp() -> str:
 	timestamp_ns = time_ns()
@@ -166,18 +172,93 @@ class Moulti(App):
 		if self.init_command is not None:
 			self.exec(self.init_command)
 
+	def output_policy(self) -> bool|None:
+		"""
+		`moulti run` launches an arbitrary command. In an ideal world, this command should not output anything on
+		stdout/stderr. In practice, this method returns:
+		- None if Moulti should ignore stdout/stderr (default)
+		- False if Moulti should discard stdout/stderr
+		- True if Moulti should harvest stdout/stderr and append it to the "moulti_run_output" step
+		"""
+		policy = None
+		if value := os.environ.get('MOULTI_RUN_OUTPUT'):
+			if value == 'discard':
+				policy = False
+			elif value == 'harvest':
+				policy = True
+		return policy
+
+	def output_policy_popen_args(self) -> dict[str, Any]:
+		"""
+		Return the adequate subprocess.Popen() arguments for `moulti run` based on output_policy().
+		"""
+		policy = self.output_policy()
+		if policy is None: # default/ignore
+			return {'stdout': None, 'stderr': None}
+		if policy: # harvest
+			return {
+				'stdout': subprocess.PIPE,
+				'stderr': subprocess.STDOUT,
+				'text': True,
+				'encoding': 'utf-8',
+				'errors': 'surrogateescape',
+			}
+		# discard:
+		return {'stdout': subprocess.DEVNULL, 'stderr': subprocess.DEVNULL}
+
+	def output_policy_step(self) -> Step:
+		"""
+		Return the step that should display unexpected stdout/stderr lines harvested by `moulti run`.
+		"""
+		step = self.step_from_message({'id': MOULTI_RUN_OUTPUT_STEP_ID})
+		if step is not None:
+			return cast(Step, step)
+		# This should not fail since the id is valid and reserved:
+		step = Step(id=MOULTI_RUN_OUTPUT_STEP_ID, collapsed=False)
+		call = (self.steps_container.add_step, step)
+		self.call_from_thread(call_all, [call])
+		return step
+
+	def output_policy_pass(self, step: Step, filedesc: Any, initial_data: str) -> None:
+		"""
+		Set up the queue and threads necessary to display unexpected stdout/stderr lines harvested by `moulti run`.
+		"""
+		# This method is very similar to Step.cli_action_pass().
+		queue: Queue = Queue()
+		# Helper functions:
+		def reply(**_kwargs: Any) -> None:
+			pass
+		def debug(line: str) -> None:
+			self.logconsole(f'exec: {line}')
+		helpers = {'file_descriptors': [filedesc], 'debug': debug, 'reply': reply}
+		step.append_from_queue(queue, helpers)
+		queue.put_nowait(initial_data)
+		step.append_from_file_descriptor_to_queue(queue, {}, helpers)
+
 	@work(thread=True)
 	def exec(self, command: list[str]) -> None:
+		"""
+		Launch the given command with the assumption it is meant to drive the current Moulti instance.
+		This method is the heart of `moulti run`.
+		"""
 		worker = get_current_worker()
-		import subprocess # pylint: disable=import-outside-toplevel
 		try:
 			self.init_command_running = True
 			self.logconsole(f'exec: about to run {command}')
+			popen_args: dict[str, Any] = {'env': run_environment(command), 'stdin': subprocess.DEVNULL}
 			# Not using 'with' because that waits for the process to exit; pylint: disable=consider-using-with
-			process = subprocess.Popen(command, env=run_environment(command), stdin=subprocess.DEVNULL)
+			process = subprocess.Popen(command, **popen_args, **self.output_policy_popen_args())
 			self.logconsole(f'exec: {command} launched with PID {process.pid}')
 			returncode = None
+			watch_output = bool(self.output_policy())
 			while not worker.is_cancelled:
+				if watch_output: # Harvest stdout/stderr lines
+					# If the child process outputs anything, pass it to a special step:
+					assert process.stdout is not None # for mypy
+					if (data := process.stdout.read(1)) and (step := self.output_policy_step()):
+						self.output_policy_pass(step, process.stdout, data)
+						# We no longer need to watch output in this loop:
+						watch_output = False
 				returncode = process.poll() # non-blocking wait(), e.g. wait4(process.pid, result_addr, WNOHANG, NULL)
 				if returncode is not None:
 					self.init_command_running = False
@@ -342,6 +423,10 @@ class Moulti(App):
 						raise MoultiMessageException(f'id {message.get("id")} already in use')
 					if 'id' not in message:
 						raise MoultiMessageException('missing id')
+					# Users may create the 'moulti_run_output' step but it MUST be a step, not a question or a divider:
+					if message['id'] == MOULTI_RUN_OUTPUT_STEP_ID and message['command'] != 'step':
+						err = f'{MOULTI_RUN_OUTPUT_STEP_ID} is a reserved id that must be assigned to a step'
+						raise MoultiMessageException(err)
 					calls.append((self.steps_container.add_step, command_class(**message)))
 				else:
 					# All other actions require an existing step:

@@ -41,9 +41,9 @@ setup(
 		'Topic :: Utilities',
 	],
 	license='MIT',
-	keywords=['cli', 'tui', 'curses', 'terminal', 'multiplex', 'script', 'output', 'steps', 'textual', 'collapsible', 'ansible'],
+	keywords=['cli', 'tui', 'curses', 'terminal', 'multiplex', 'script', 'output', 'steps', 'textual', 'collapsible', 'ansible', 'diff'],
 	package_dir={'': 'src'},
-	install_requires=['textual>=0.53', 'pyperclip', 'argcomplete'],
+	install_requires=['textual>=0.53', 'pyperclip', 'argcomplete', 'unidiff'],
 	entry_points={
 		'console_scripts': [
 			'moulti = moulti.precli:main',

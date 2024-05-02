@@ -502,6 +502,50 @@ Explanations: `moulti run moulti load` is NOT a typo. The command above:
 3. `moulti load path/to/saved/directory`, i.e. a Moulti CLI command that reads the contents of the given directory and
    loads it into the Moulti instance.
 
+## moulti diff
+
+`moulti diff` is a variant of `moulti load` specialized in loading [diff](https://en.wikipedia.org/wiki/Diff#Unified_format) files into Moulti.
+
+Important: `moulti diff` only supports the [unified diff format](https://en.wikipedia.org/wiki/Diff#Unified_format).
+
+Here is how to use it:
+
+```shell
+# Terminal #1: launch a Moulti instance
+moulti init
+
+# Terminal #2:
+#  Example 1: load a diff file:
+moulti diff parse /path/to/example.diff
+
+# Example #2: get diff data from an external command through a pipe:
+diff -u /etc/passwd /etc/passwd- | moulti diff parse /dev/stdin
+
+#  Example #3: the same without a pipe:
+moulti diff run -- diff -u /etc/passwd /etc/passwd-
+```
+
+Like `moulti load`, `moulti diff` can be combined with `moulti run`:
+
+```shell
+# Load a diff file:
+moulti run -- moulti diff parse /path/to/examples.diff
+
+#  Example #3: the same without a pipe:
+moulti run -- moulti diff run -- git -C /path/to/git/working/directory show
+```
+
+### Encoding
+
+By default, `moulti diff` reads diff data as UTF-8 text; this encoding can be
+changed by setting the environment variable `MOULTI_DIFF_ENCODING`, e.g.
+`export MOULTI_DIFF_ENCODING=iso-8859-1`.
+
+### Title
+
+By default, `moulti diff` changes the title of the Moulti instance; set the
+environment variable `MOULTI_DIFF_NO_TITLE` to any value to prevent that.
+
 ## Moulti does not...
 
 Per se, Moulti does not:
@@ -710,11 +754,16 @@ About colors in `MOULTI_ANSI*`:
 - colors may be prefixed with `#`;
 - hexadecimal digits may be specified as lower or uppercase but there must be exactly 6 digits.
 
+### Title
+
+- `MOULTI_ANSIBLE_NO_TITLE` to prevent the Ansible plugin from changing the title of the Moulti instance
+- `MOULTI_DIFF_NO_TITLE` to prevent `moulti diff` from changing the title of the Moulti instance
+
 ### Miscellaneous
 
 - `MOULTI_SAVE_PATH`: base path under which export directories are created when saving a Moulti instance; defaults to `.` i.e. the instance's current working directory.
 - `MOULTI_RUN_OUTPUT`: see [moulti run: dealing with stdin, stdout, stderr](#moulti-run-dealing-with-stdin-stdout-stderr)
-
+- `MOULTI_DIFF_ENCODING`: see [moulti diff: encoding](#encoding)
 
 ### Environment variables set by the Moulti instance
 

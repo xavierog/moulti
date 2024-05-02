@@ -12,6 +12,7 @@ Although Moulti's Python packages, modules and functions are obviously available
 
 - Ansible callback plugin: `ansible/moulti.py`
 - `moulti run` sets the adequate environment variables to enable the Ansible callback plugin.
+- `moulti diff`: load diff data into Moulti.
 
 ## [1.7.0] - 2024-04-28
 

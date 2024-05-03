@@ -613,7 +613,7 @@ last line<enter>
 
 ## Scrolling
 
-## Manually scrolling through steps
+### Manually scrolling through steps
 
 You can scroll through steps:
 - by grabbing the main scrollbar handle using the mouse pointer;
@@ -623,9 +623,9 @@ You can scroll through steps:
 If necessary, hit `l` or click "L Lock scroll" in the footer to prevent programmatic scrolling from interfering with your actions.
 When this lock is enabled, the main scrollbar handle turns green.
 
-## Programmatically scrolling through steps
+### Programmatically scrolling through steps
 
-### moulti scroll
+#### moulti scroll
 
 Use `moulti scroll step_name` to make Moulti scroll to a given step.
 If this step cannot be displayed entirely, `moulti scroll` will display its upper part.
@@ -649,7 +649,7 @@ moulti scroll step_name -2
 
 It often makes sense to call `moulti scroll` after adding an interactive step (buttonquestion, inputquestion).
 
-### Scroll on activity
+#### Scroll on activity
 
 Sometimes, it is desirable to make a step visible when a new line of output shows up.
 This can be achieved using `--scroll-on-activity`:
@@ -674,7 +674,7 @@ moulti step update foo --scroll-on-activity=false
 moulti pass foo --append <<< 'do not scroll!'
 ```
 
-## Manually scrolling inside steps
+### Manually scrolling inside steps
 
 By default, Moulti strives to display the latest lines it received and thus keeps scrolling down as long as lines keep coming.
 This constant scrolling stops as soon as you scroll up:
@@ -684,7 +684,7 @@ This constant scrolling stops as soon as you scroll up:
 
 The constant scrolling resumes when you hit the `End` key.
 
-## Programmatically scrolling inside steps
+### Programmatically scrolling inside steps
 
 Moulti currently offers no suport for programmatic scrolling inside steps.
 

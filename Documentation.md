@@ -927,6 +927,7 @@ With regular file-based Unix sockets, it is necessary to cautiously pick:
   - /run/user/<uid> is known to be protected and thus a perfect choice
   - directories under $HOME are typically (but not systematically) protected from other users and are therefore a
     suitable failover whenever /run/user is not available.
+
 With abstract sockets, it is necessary to check the "credentials" of each incoming connection; here, "credentials"
 simply means "uid and gid".
 It is also possible to check those credentials with file-based Unix sockets but the mechanisms to do so suffer from

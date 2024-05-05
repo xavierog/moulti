@@ -9,8 +9,16 @@ Here is how [upgrading a Debian system](examples/upgrade-system.bash) looks like
 
 Interested? [Run this demo in a container using docker or podman](https://hub.docker.com/r/xavierong/moulti-demo)
 
-Moulti is a tool meant for people who write and execute shell scripts.
+Not convinced yet? What if the output of your Ansible playbooks looked like this?
+
+![Moulti: Ansible playbook output](https://xavier.kindwolf.org/p/moulti/doc/img/moulti-ansible.png?20240505)
+
+Moulti is a tool meant for people who write and execute shell scripts and/or Ansible playbooks.
 Specifically, if you find yourself scrolling up your terminal to ensure everything went fine while your script is still running, then Moulti is made for you.
+
+By the way, Moulti can also display unified diff files:
+
+![Moulti: unified diff output](https://xavier.kindwolf.org/p/moulti/doc/img/moulti-diff.png?20240505)
 
 ## How?
 
@@ -35,6 +43,7 @@ Moulti also features:
 - a **progress bar**: [documentation](Documentation.md#progress-bar)
 - programmatic scrolling: [documentation](Documentation.md#programmatically-scrolling-through-steps)
 - an askpass helper named `moulti-askpass`: [documentation](Documentation.md#moulti-run-dealing-with-ssh)
+- support for [Ansible playbooks](Documentation.md#moulti-run-dealing-with-ansible) and [unified diff](Documentation.md#moulti-diff)
 
 When it comes to look and feel, Moulti can be customised:
 

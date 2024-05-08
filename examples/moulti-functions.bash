@@ -1,9 +1,11 @@
 function moulti_python {
-	if command -v python3 > /dev/null; then
-		python3 "$@"
-	else
-		python "$@"
-	fi
+	# This will not age well:
+	for name in python3 python3.{10..13} python; do
+		if command -v "${name}" > /dev/null; then
+			"${name}" "$@"
+			break
+		fi
+	done
 }
 
 function moulti_iso_date {

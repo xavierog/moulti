@@ -21,9 +21,8 @@ function cleanup {
 	rm -rf "${working_dir:?nope}"
 }
 
-# Compute a 
 tmp_dir="${TMPDIR:-/tmp}"
-working_dir=$(mktemp --tmpdir="${tmp_dir}" --directory "${MOULTI_INSTANCE}.$(date '+%s').XXXXXXXXXX")
+working_dir=$(mktemp -p "${tmp_dir}" -d "${MOULTI_INSTANCE}.$(date '+%s').XXXXXXXXXX")
 trap cleanup EXIT
 cd "${working_dir}"
 

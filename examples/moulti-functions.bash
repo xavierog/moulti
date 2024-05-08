@@ -6,20 +6,26 @@ function moulti_python {
 	fi
 }
 
+function moulti_iso_date {
+	# This Perl one-liner is about 10 times slower than GNU date but Perl is
+	# more ubiquitous than GNU date.
+	perl -MPOSIX -MTime::HiRes -e '
+		($s, $us) = Time::HiRes::gettimeofday();
+		@lt = localtime($s);
+		$dt = strftime(q[%FT%T], @lt);
+		$tz = strftime(q[%z], @lt);
+		printf(qq[%s.%03d%s\n], $dt, $us / 1000, $tz);'
+}
+
 function moulti_duration {
-	ts_start="$(date -d "$1" "+%s%N")"
-	ts_end="$(date -d "$2" "+%s%N")"
 	moulti_python -c '
 from sys import argv
-delta = int(argv[2]) - int(argv[1]) # delta is in nanoseconds
-figures = []
-for x in (60*10**9, 60, 24): # seconds, hours, days
-	figures.insert(0, delta % x)
-	delta //= x
-figures.insert(0, int(delta))
-figures[-1] /= 10**9
-print(" ".join((f"{value}{unit}" for value, unit in zip(figures, "dhms") if value > 0)))
-' "${ts_start}" "${ts_end}"
+from datetime import datetime
+date1 = datetime.strptime(argv[1], "%Y-%m-%dT%H:%M:%S.%f%z")
+date2 = datetime.strptime(argv[2], "%Y-%m-%dT%H:%M:%S.%f%z")
+duration  = str(date2 - date1)
+print(duration[:-3])
+' "$@"
 }
 
 # Examples:
@@ -32,13 +38,13 @@ function moulti_exec {
 	# Generate a random step id if none was provided:
 	id="${STEP_ID:-${RANDOM}${RANDOM}}"
 	# Create a step; set the STEP_ADD_ARGS array to customise it:
-	timestamp_start="$(date --iso-8601=ns)"
+	timestamp_start="$(moulti_iso_date)"
 	moulti step add "${id}" --title="$*" --top-text="Started ${timestamp_start}" --bottom-text="still running..." --scroll-on-activity=-1 "${STEP_ADD_ARGS[@]}"
 	# Run the given command and pipe its output to Moulti; set the STEP_PASS_ARGS array to fine-tune the piping (e.g. read size):
 	"$@" < /dev/null 2>&1 | moulti pass "${id}" "${STEP_PASS_ARGS[@]}"
 	# Harvest the command's return code and the time it ended:
 	rc="${PIPESTATUS[0]}"
-	timestamp_end="$(date --iso-8601=ns)"
+	timestamp_end="$(moulti_iso_date)"
 	# Determine the new step color based on the return code:
 	[ "${rc}" == 0 ] && result='success' || result='error'
 	# Update the step; set the STEP_UPDATE_ARGS array to further customise it:

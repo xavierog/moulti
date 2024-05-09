@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import Generator
 import argcomplete
 from . import __version__ as moulti_version
-from .diff import diff_parse, diff_run
 from .helpers import pint, float_str, send_to_moulti_and_handle_reply
 from .pipeline import pipeline
 from .protocol import send_to_moulti, PRINTABLE_MOULTI_SOCKET
@@ -73,6 +72,14 @@ def load(args: dict, read_size: int = 1024**2) -> None:
 	"""
 	errors = pipeline(saved_files(args['saved_directory']), read_size)
 	sys.exit(errors)
+
+def diff_parse(args: dict) -> None:
+	from .diff import diff_parse as real_diff_parse # pylint: disable=import-outside-toplevel
+	real_diff_parse(args)
+
+def diff_run(args: dict) -> None:
+	from .diff import diff_run as real_diff_run # pylint: disable=import-outside-toplevel
+	real_diff_run(args)
 
 def add_main_commands(subparsers: _SubParsersAction) -> None:
 	# moulti init

@@ -620,8 +620,11 @@ You can scroll through steps:
 - using the mouse wheel (or its laptop equivalent) -- tip: ensure the cursor is not over a scrollable step log part;
 - by hitting the `Up`, `PgUp`, `Home` or `End` key -- tip: ensure the focus is not held by a step log part.
 
-If necessary, hit `l` or click "L Lock scroll" in the footer to prevent programmatic scrolling from interfering with your actions.
-When this lock is enabled, the main scrollbar handle turns green.
+If moulti is already scrolling through steps automatically (see next section `Programmatically scrolling through steps`),
+but you want to read a part of the output while the job is still running, hit `l` or click "L Lock scroll" in the footer
+to prevent programmatic scrolling from interfering with your actions.
+
+The main scrollbar handle turns green to indicate that the lock is enabled and automatic scrolling is disengaged.
 
 ### Programmatically scrolling through steps
 

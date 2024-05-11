@@ -70,3 +70,49 @@ function moulti_type {
 		# No sleep because this hack is already inefficient enough.
 	done
 }
+
+MOULTI_NEW_STEP_PATTERN='^([-=#@]+)(\s*)(.+?)\2\1$'
+
+function moulti_process_lines {
+	exec {original_stdout}>&1
+	local step_counter=0
+	local step_id
+	IFS=''
+	while read -r line; do
+		if [[ "${line}" =~ ${MOULTI_NEW_STEP_PATTERN} ]]; then
+			((++step_counter))
+			local prev_id="${step_id}"
+			local next_id="$$_step_${step_counter}"
+			step_id=$(moulti_make_step "${prev_id}" "${next_id}" "${line}" "${BASH_REMATCH[@]}" < /dev/null)
+			if [ "${step_id}" ] && [ "${step_id}" != "${prev_id}" ]; then
+				# Redirect stdout to `moulti pass our_new_step`
+				exec > >(moulti pass "${step_id}")
+			else
+				step_id="${prev_id}"
+			fi
+		fi
+		moulti_inspect_line "${line}" "${step_id}" < /dev/null
+	done
+	exec 1>&${original_stdout}
+}
+
+# Arguments:
+# 1: previous step id
+# 2: next step id (suggestion)
+# 3: current line (complete, no CR/LF)
+# 4: matched substring
+# 5: capture #1
+# 6: capture #2, etc.
+# This function MUST output the id of the created step.
+function moulti_make_step {
+	# Default implementation: use the complete line as title:
+	moulti step add "$2" --title="$3" --bottom-text=' ' --scroll-on-activity=-1 && echo "$2"
+}
+
+# Arguments:
+# 1: current line (complete, no CR/LF)
+# 2: current step id
+function moulti_inspect_line {
+	# Default implementation: systematically output the line:
+	printf '%s\n' "$1"
+}

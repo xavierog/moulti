@@ -711,7 +711,7 @@ Moulti currently offers no suport for programmatic scrolling inside steps.
   ```
 - `MOULTI_PASS_CONCURRENCY`: define how many concurrent "moulti pass" commands is acceptable; defaults to 20.
 
-### Appearance, look and feel
+#### Appearance, look and feel
 
 - `MOULTI_MODE`: `light` to start Moulti in light mode, `dark` to start Moulti in dark mode; defaults to `dark`.
 - `MOULTI_ANSI`: define whether and how Moulti alters the 16 standard ANSI colors. There are three available policies:
@@ -757,12 +757,12 @@ About colors in `MOULTI_ANSI*`:
 - colors may be prefixed with `#`;
 - hexadecimal digits may be specified as lower or uppercase but there must be exactly 6 digits.
 
-### Title
+#### Title
 
 - `MOULTI_ANSIBLE_NO_TITLE` to prevent the Ansible plugin from changing the title of the Moulti instance
 - `MOULTI_DIFF_NO_TITLE` to prevent `moulti diff` from changing the title of the Moulti instance
 
-### Miscellaneous
+#### Miscellaneous
 
 - `MOULTI_SAVE_PATH`: base path under which export directories are created when saving a Moulti instance; defaults to `.` i.e. the instance's current working directory.
 - `MOULTI_RUN_OUTPUT`: see [moulti run: dealing with stdin, stdout, stderr](#moulti-run-dealing-with-stdin-stdout-stderr)

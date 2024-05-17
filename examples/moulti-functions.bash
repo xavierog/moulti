@@ -1,7 +1,69 @@
+function moulti_tool_is_available {
+	command -v "$1" > /dev/null 2>&1
+}
+
+function moulti_any_tool_is_available {
+	local IFS tool
+	IFS='|'
+	for tool in $1; do
+		moulti_tool_is_available "${tool}" && return 0
+	done
+	return 1
+}
+
+function moulti_check_requirements {
+	local not_ok=0
+	local summary='The following tools are required but appear to be missing:'
+	local answer arg rc tool
+	for arg; do
+		if [[ "${arg}" =~ ^ret:([0-9]+):(.+)$ ]]; then
+			# syntax: ret:{expected_return_code}:{arbitrary shell command}
+			local expected_rc="${BASH_REMATCH[1]}"
+			local command="${BASH_REMATCH[2]}"
+			eval "${command}" > /dev/null 2>&1
+			rc=$?
+			if [ "$rc" != "${expected_rc}" ]; then
+				not_ok=1
+				printf -v summary -- '%s\n- %s (expected rc %d, got %d)' \
+					"${summary}" "${command}" "${expected_rc}" "${rc}"
+			fi
+		elif [[ "${arg}" =~ \| ]]; then
+			# syntax: {tool1}|{tool2}|...|{tooln}
+			if ! moulti_any_tool_is_available "${arg}"; then
+				not_ok=1
+				printf -v summary -- '%s\n- %s' "${summary}" "${arg//|/ or }"
+			fi
+		else
+			# syntax: {tool}
+			if ! moulti_tool_is_available "${arg}"; then
+				not_ok=1
+				printf -v summary -- '%s\n- %s' "${summary}" "${arg}"
+			fi
+		fi
+	done
+	local step_id='moulti_check_requirements'
+	if [ "${not_ok}" -eq 1 ]; then
+		moulti buttonquestion delete "${step_id}" 2> /dev/null || true
+		moulti buttonquestion add "${step_id}" \
+			--title='[b]Unmet requirements[/]' \
+			--class='error' \
+			--top-text="${summary}" \
+			--text='Do you want to continue anyway?' \
+			--button yes error 'Yes, continue' \
+			--button no success 'No, abort'
+		answer=$(moulti buttonquestion get-answer --wait "${step_id}")
+		if [ "${answer}" != 'yes' ]; then
+			moulti buttonquestion update "${step_id}" --bottom-text='Execution aborted. Hit q to exit.'
+			exit 1
+		fi
+	fi
+	return "${not_ok}"
+}
+
 function moulti_python {
 	# This will not age well:
 	for name in python3 python3.{10..13} python; do
-		if command -v "${name}" > /dev/null; then
+		if moulti_tool_is_available "${name}"; then
 			"${name}" "$@"
 			break
 		fi

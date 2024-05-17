@@ -3,6 +3,9 @@
 export TERM=xterm-256color
 [ "${MOULTI_RUN}" ] || exec moulti run -- "$0" "$@"
 
+source moulti-functions.bash
+moulti_check_requirements apt
+
 # We could use apt-get BUT there is no equivalent to apt list --upgradable.
 function apt {
 	local rc
@@ -11,11 +14,9 @@ function apt {
 	return $rc
 }
 
-source moulti-functions.bash
 
 export DEBIAN_FRONTEND=noninteractive
 set -e
-moulti wait --max-attempts=120
 moulti_type set --title 'Moulti demo: Debian upgrade'
 sleep 0.5
 

@@ -6,6 +6,7 @@ export MOULTI_INSTANCE='generate-ssh-keys'
 
 set -e
 source moulti-functions.bash
+moulti_check_requirements stdbuf ssh-keygen || true
 
 # Run moulti_exec with stdbuf and a simplified ssh-keygen command in the title:
 function ssh_keygen {
@@ -25,8 +26,6 @@ tmp_dir="${TMPDIR:-/tmp}"
 working_dir=$(mktemp -p "${tmp_dir}" -d "${MOULTI_INSTANCE}.$(date '+%s').XXXXXXXXXX")
 trap cleanup EXIT
 cd "${working_dir}"
-
-moulti wait --max-attempts=120
 
 max_keys=10
 printf -v title $'Moulti demo: progress bar\nGenerating [b]%d[/b] SSH keys\nin [i]%s[/i]' "${max_keys}" "${working_dir}"

@@ -3,6 +3,9 @@
 export MOULTI_INSTANCE='many-buttons'
 [ "${MOULTI_RUN}" ] || exec moulti run -- "$0" "$@"
 
+source moulti-functions.bash
+moulti_check_requirements xargs
+
 moulti set --title='So I heard you love buttons...'
 
 CLASSES=('default' 'success' 'warning' 'error' 'primary')

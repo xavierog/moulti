@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 export MOULTI_INSTANCE='moulti-python-checks'
-source examples/moulti-functions.bash
 [ "${MOULTI_RUN}" ] || exec moulti run -- "$0" "$@"
+
+source examples/moulti-functions.bash
+moulti_check_requirements ruff mypy pylint
 
 moulti step add versions --title='Versions' --bottom-text=' '
 {
@@ -10,7 +12,7 @@ moulti step add versions --title='Versions' --bottom-text=' '
 	mypy --version
 	echo --
 	pylint --version
-} | moulti pass versions
+} 2>&1 | moulti pass versions
 
 moulti_exec ruff check setup.py src
 moulti_exec mypy src

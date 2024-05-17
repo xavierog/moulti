@@ -50,4 +50,7 @@ setup(
 			'moulti-askpass = moulti.askpass:main',
 		]
 	},
+	scripts=[
+		'examples/moulti-functions.bash',
+	],
 )

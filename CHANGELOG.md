@@ -10,7 +10,15 @@ Although Moulti's Python packages, modules and functions are obviously available
 
 ### Added
 
-- bash functions: `moulti_process_lines()` helps turning arbitrary output into Moulti steps
+- bash functions:
+  - `moulti_process_lines()` helps to turn arbitrary output into Moulti steps
+  - `moulti_check_requirements()` helps to ensure required commands are available
+
+### Changed
+
+- bash functions:
+  - pip/pipx deploys `moulti-functions.bash`
+  - `moulti_iso_date()` leverages either GNU date, Perl or Python
 
 ## [1.8.1] - 2024-05-12
 

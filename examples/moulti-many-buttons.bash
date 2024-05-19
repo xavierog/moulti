@@ -53,7 +53,7 @@ for city in "${CITIES[@]}"; do
 	((idx=RANDOM%5))
 	class="${CLASSES[$idx]}"
 	printf -- '--button\0%s\0%s\0%s\0' "${city}" "${class}" "${city}"
-done | xargs --null -- moulti buttonquestion add city \
+done | xargs -0 -- moulti buttonquestion add city \
 	--title='Let'\''s start with a simple question' \
 	--top-text='Ok, maybe not that simple...' \
 	--bottom-text='Your ad here! Call 1-800-555-0199' \

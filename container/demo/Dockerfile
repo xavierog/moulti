@@ -7,7 +7,7 @@ COPY src/moulti /tmp/moulti/src/moulti
 ENV PIPX_HOME=/opt/pipx PIPX_BIN_DIR=/usr/local/bin PIPX_MAN_DIR=/usr/local/share/man
 RUN unlink /etc/apt/apt.conf.d/docker-clean && \
     apt update && \
-    apt install --no-install-recommends -y perl pipx xclip && \
+    apt install --no-install-recommends -y pipx xclip && \
     pipx install /tmp/moulti && \
     mkdir /export && \
     rm -rf /tmp/moulti /root/.cache && \

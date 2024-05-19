@@ -70,16 +70,32 @@ function moulti_python {
 	done
 }
 
-function moulti_iso_date {
-	# This Perl one-liner is about 10 times slower than GNU date but Perl is
-	# more ubiquitous than GNU date.
-	perl -MPOSIX -MTime::HiRes -e '
-		($s, $us) = Time::HiRes::gettimeofday();
-		@lt = localtime($s);
-		$dt = strftime(q[%FT%T], @lt);
-		$tz = strftime(q[%z], @lt);
-		printf(qq[%s.%03d%s\n], $dt, $us / 1000, $tz);'
-}
+if date --iso=ns > /dev/null 2>&1; then
+	function moulti_iso_date {
+		# Keep only milliseconds and use '.' as separator between seconds and milliseconds:
+		date --iso=ns | sed -E 's/,([0-9]{3})[0-9]*/.\1/'
+	}
+elif perl -MPOSIX -MTime::HiRes -e '' 2> /dev/null; then
+	function moulti_iso_date {
+		# This Perl one-liner is about 10 times slower than GNU date but Perl is
+		# more ubiquitous than GNU date.
+		perl -MPOSIX -MTime::HiRes -e '
+			($s, $us) = Time::HiRes::gettimeofday();
+			@lt = localtime($s);
+			$dt = strftime(q[%FT%T], @lt);
+			$tz = strftime(q[%z], @lt);
+			printf(qq[%s.%03d%s\n], $dt, $us / 1000, $tz);'
+	}
+else
+	# Despite being obviously available, Python is third on the list
+	# because some platforms ship non-optimized builds.
+	function moulti_iso_date {
+		moulti_python -c '
+from datetime import datetime
+now = datetime.now().astimezone()
+print(now.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + now.strftime("%z"))'
+	}
+fi
 
 function moulti_duration {
 	moulti_python -c '

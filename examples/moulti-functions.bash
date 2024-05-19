@@ -70,10 +70,14 @@ function moulti_python {
 	done
 }
 
-if date --iso=ns > /dev/null 2>&1; then
+if date --iso-8601=ns > /dev/null 2>&1; then
 	function moulti_iso_date {
 		# Keep only milliseconds and use '.' as separator between seconds and milliseconds:
-		date --iso=ns | sed -E 's/,([0-9]{3})[0-9]*/.\1/'
+		date --iso-8601=ns | sed -E 's/,([0-9]{3})[0-9]*/.\1/'
+	}
+elif gdate --iso-8601=ns > /dev/null 2>&1; then
+	function moulti_iso_date {
+		gdate --iso-8601=ns | sed -E 's/,([0-9]{3})[0-9]*/.\1/'
 	}
 elif perl -MPOSIX -MTime::HiRes -e '' 2> /dev/null; then
 	function moulti_iso_date {

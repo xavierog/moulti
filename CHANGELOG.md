@@ -13,6 +13,7 @@ Although Moulti's Python packages, modules and functions are obviously available
 - bash functions:
   - `moulti_process_lines()` helps to turn arbitrary output into Moulti steps
   - `moulti_check_requirements()` helps to ensure required commands are available
+  - `stdbuf()` replaces the `stdbuf` utility on NetBSD and OpenBSD
 
 ### Changed
 

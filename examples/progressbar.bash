@@ -6,7 +6,7 @@ export MOULTI_INSTANCE='generate-ssh-keys'
 
 set -e
 source moulti-functions.bash
-moulti_check_requirements stdbuf ssh-keygen || true
+moulti_check_requirements 'stdbuf|unbuffer' ssh-keygen || true
 
 # Run moulti_exec with stdbuf and a simplified ssh-keygen command in the title:
 function ssh_keygen {

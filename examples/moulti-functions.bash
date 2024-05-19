@@ -153,6 +153,22 @@ function moulti_type {
 	done
 }
 
+if [ "$(uname)" == 'NetBSD' ]; then
+	function stdbuf {
+		# Ignore arguments and request line buffering for stdout:
+		while [[ "$1" =~ ^- ]]; do shift; done
+		STDBUF1='L' "$@"
+	}
+elif [ "$(uname)" == 'OpenBSD' ]; then
+	if moulti_tool_is_available unbuffer; then
+		function stdbuf {
+			# Ignore arguments and call unbuffer:
+			while [[ "$1" =~ ^- ]]; do shift; done
+			unbuffer "$@"
+		}
+	fi
+fi
+
 MOULTI_NEW_STEP_PATTERN='^([-=#@]+)(\s*)(.+?)\2\1$'
 
 function moulti_process_lines {

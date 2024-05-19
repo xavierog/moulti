@@ -665,9 +665,9 @@ Per se, Moulti does not:
 - wrap lines (use e.g. `fold`)
 - distinguish stdout from stderr (it reads a single stream anyway; use e.g. `stderred`)
 - tweak the output buffering policy of other processes:
-  1. look for command-line options and environment variables that explicitly address the issue, e.g. `--line-buffered` or `PYTHONUNBUFFERED=1`
-  2. use `LD_PRELOAD`-based tools such as `stdbuf` or [cvolny/faketty](https://github.com/cvolny/faketty)
-  3. use tools that allocate a [pty](https://en.wikipedia.org/wiki/Pseudoterminal), e.g. `script` or [dtolnay/faketty](https://github.com/dtolnay/faketty):
+  1. look for command-line options and environment variables that explicitly address the issue, e.g. `--line-buffered`, `PYTHONUNBUFFERED=1` or `STDBUF` (NetBSD-specific)
+  2. use `LD_PRELOAD`-based tools such as `stdbuf` (from the `coreutils` package) or [cvolny/faketty](https://github.com/cvolny/faketty)
+  3. use tools that allocate a [pty](https://en.wikipedia.org/wiki/Pseudoterminal), e.g. `script`, `unbuffer` (from the `expect` package) or [dtolnay/faketty](https://github.com/dtolnay/faketty):
   ```bash
   script --quiet --return --command 'your command here' /dev/null | moulti pass your_step
   ```

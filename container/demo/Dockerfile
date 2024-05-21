@@ -14,7 +14,7 @@ RUN unlink /etc/apt/apt.conf.d/docker-clean && \
     rm -rf /var/cache/apt/archives/*.deb /var/cache/apt/archives/partial/*.deb /var/cache/apt/*.bin /var/lib/apt/lists/deb*
 
 # Install the demo script:
-COPY examples/upgrade-system.bash /root
+COPY examples/moulti-debian-upgrade.bash /root/upgrade-system.bash
 
 ENV TERM=xterm-256color COLORTERM=truecolor MOULTI_SAVE_PATH=/export DISPLAY=:0
 

@@ -556,7 +556,7 @@ moulti set --progress +20
 moulti set --progress -5
 ```
 
-Refer to [progressbar.bash](examples/progressbar.bash) for a demonstration of the typical use case.
+Refer to [moulti-progressbar.bash](examples/moulti-progressbar.bash) for a demonstration of the typical use case.
 
 ## Saving your stuff
 

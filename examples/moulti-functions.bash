@@ -215,6 +215,6 @@ function moulti_inspect_line {
 	printf '%s\n' "$1"
 }
 
-[ "$0" != "${BASH_SOURCE}" ] && return 0
+[ "$0" != "${BASH_SOURCE[0]}" ] && return 0
 printf 'This file is meant to be sourced in scripts that leverage Moulti:\n'
-printf 'source %s\n' "${BASH_SOURCE}"
+printf 'source %s\n' "${BASH_SOURCE[0]}"

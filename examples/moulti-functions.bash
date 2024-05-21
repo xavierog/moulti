@@ -145,7 +145,7 @@ function moulti_delayed_collapse {
 }
 
 function moulti_type {
-	local string="${@: -1}" # last argument
+	local string="${*: -1}" # last argument
 	string_length="${#string}"
 	for (( i=1; i <= string_length; i++ )); do
 		moulti "${@:1:$#-1}" "${string:0:i}" # all arguments but the last one, followed by the partial string

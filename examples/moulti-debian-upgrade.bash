@@ -11,7 +11,7 @@ function apt {
 	local rc
 	command apt "$@" 2>&1 | grep --line-buffered -vP '^(?:WARNING: apt does not have a stable CLI|$)' || true
 	rc="${PIPESTATUS[0]}"
-	return $rc
+	return "$rc"
 }
 
 

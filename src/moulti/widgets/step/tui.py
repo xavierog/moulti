@@ -1,5 +1,6 @@
 import os
-from queue import Queue
+from queue import Queue, Empty
+from time import monotonic_ns
 from typing import Any, Callable
 from textual import work
 from textual.app import ComposeResult
@@ -9,6 +10,31 @@ from ..collapsiblestep.tui import CollapsibleStep
 from ..moultilog import MoultiLog
 
 ANSI_ESCAPE_SEQUENCE = '\x1b'
+
+class ThrottledAppender:
+	"""
+	This class uses Textual's call_from_thread() to schedule calls to "step.append(buffer)" inside Textual's asyncio
+	event loop in a thread-safe manner. These calls are throttled so as not to flood the event loop.
+	"""
+	def __init__(self, step: 'Step', delay_ms: int):
+		self.step = step
+		self.call_from_thread = step.app.call_from_thread
+		self.delay_ns = delay_ms * 1_000_000
+		self.buffers: list[list[str]] = []
+		self.last_append = 0
+
+	def new_data(self, buffer: list[str], force: bool = False) -> None:
+		self.buffers.append(buffer)
+		self.append(force)
+
+	def append(self, force: bool = False) ->  None:
+		if self.buffers:
+			now = monotonic_ns()
+			if force or (now - self.last_append >= self.delay_ns):
+				if buffered_string := ''.join([c for b in self.buffers for c in b]):
+					self.call_from_thread(self.step.append, buffered_string)
+				self.buffers.clear()
+				self.last_append = now
 
 class Step(CollapsibleStep):
 	"""
@@ -160,31 +186,36 @@ class Step(CollapsibleStep):
 		current_worker = get_current_worker()
 		self.prevent_deletion += 1
 		try:
+			throttling_ms = 25
+			throttling_s = throttling_ms / 1000
+			appender = ThrottledAppender(self, throttling_ms)
 			buffer = []
 			while True:
 				if current_worker.is_cancelled:
 					break
-				data = queue.get()
-				if data is not None:
-					# Buffer data to avoid queuing partial lines as, down the
-					# line, RichLog.write() only handles complete lines:
-					# look for the position of \n from the end of the string :
-					eol = data.rfind('\n')
-					if eol == -1: # no \n found, buffer the whole string:
-						buffer.append(data)
-					else:
-						before = data[:eol]
-						after = data[eol+1:]
-						buffer.append(before)
-						self.app.call_from_thread(self.append, ''.join(buffer))
-						buffer.clear()
-						if after:
-							buffer.append(after)
-				else:
-					# Reached EOF: flush buffer and signal EOF:
-					if buffer:
-						self.app.call_from_thread(self.append, ''.join(buffer))
-					break
+				try:
+					data = queue.get(block=True, timeout=throttling_s)
+					if data is not None:
+						# Buffer data to avoid queuing partial lines as, down the
+						# line, RichLog.write() only handles complete lines:
+						# look for the position of \n from the end of the string :
+						eol = data.rfind('\n')
+						if eol == -1: # no \n found, buffer the whole string:
+							buffer.append(data)
+						else:
+							before = data[:eol+1]
+							after = data[eol+1:]
+							buffer.append(before)
+							appender.new_data(buffer)
+							buffer = []
+							if after:
+								buffer.append(after)
+					else: # Reached EOF: flush buffer and exit:
+						appender.new_data(buffer, True)
+						break
+				except Empty:
+					# No data: there may be data left in the appender's buffer:
+					appender.append(True)
 		except Exception as exc:
 			helpers['debug'](f'append_from_queue: {exc}')
 		finally:

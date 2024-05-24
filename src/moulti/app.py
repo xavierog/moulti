@@ -16,7 +16,7 @@ from rich.markup import MarkupError
 from textual import work
 from textual.app import App, ComposeResult
 from textual.dom import BadIdentifier
-from textual.widgets import Footer, Label, ProgressBar
+from textual.widgets import Label, ProgressBar
 from textual.worker import get_current_worker, NoActiveWorker
 from . import __version__ as MOULTI_VERSION
 from .ansi import AnsiThemePolicy, dump_filters
@@ -26,6 +26,7 @@ from .protocol import moulti_listen, get_unix_credentials, send_json_message
 from .protocol import MoultiConnectionClosedException, MoultiProtocolException, Message, FDs
 from .protocol import MoultiTLVReader, data_to_message, getraddr
 from .widgets.tui import MoultiWidgets
+from .widgets.footer import Footer
 from .widgets.stepcontainer import StepContainer
 from .widgets.abstractstep.tui import AbstractStep
 from .widgets.collapsiblestep.tui import CollapsibleStep

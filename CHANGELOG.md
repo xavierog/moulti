@@ -12,6 +12,10 @@ Although Moulti's Python packages, modules and functions are obviously available
 
 - performance: throttle calls to step.append(buffer).
 
+### Fixed
+
+- footer: restore the usual look'n feel for Textual >= 0.63.0
+
 ## [1.9.0] - 2024-05-19
 
 ### Added

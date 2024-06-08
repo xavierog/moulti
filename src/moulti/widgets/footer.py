@@ -17,16 +17,12 @@ class Footer(TextualFooter):
 				footer_key.description = ' ' + footer_key.description
 			yield footer_key
 
-	DEFAULT_CSS = """
-Footer {
-    background: $accent;
-	/* FooterKey is specific to the new Footer and thus does not affect the previous one. */
-	FooterKey {
+	FOOTER_KEY_CSS = """
 		background: $accent;
-		color: $text;
+		color: white;
 		.footer-key--key {
 			background: $accent-darken-2;
-			color: $text;
+			color: white;
 		}
 		&:hover {
 			background: $accent-darken-1;
@@ -43,7 +39,15 @@ Footer {
 					background: $accent-darken-2;
 				}
 			}
-		}
+		}"""
+
+	DEFAULT_CSS = """
+Footer {
+    background: $accent;
+	/* FooterKey is specific to the new Footer and thus does not affect the previous one. */
+	FooterKey {%s
+	}
+	FooterKey:light {%s
 	}
 }
-"""
+""" % (FOOTER_KEY_CSS, FOOTER_KEY_CSS)

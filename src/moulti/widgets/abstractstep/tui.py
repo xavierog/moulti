@@ -1,10 +1,10 @@
 import json
 from operator import attrgetter
 from typing import Any, Callable
-from pyperclip import copy # type: ignore
 from rich.errors import MarkupError
 from textual.message import Message
 from textual.widgets import Static
+from moulti.clipboard import copy
 
 class AbstractStep(Static):
 	"""
@@ -103,7 +103,7 @@ class AbstractStep(Static):
 			try:
 				result, data, explanation = func(self, *args, **kwargs)
 				if result:
-					copy(data)
+					copy(self.app, data)
 			except Exception as exc:
 				result, explanation = False, str(exc)
 			self.notify_copy_to_clipboard(result, explanation)

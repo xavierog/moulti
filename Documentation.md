@@ -597,6 +597,14 @@ Copy operations typically fail due to environment-related causes. The pyperclip 
 - https://pyperclip.readthedocs.io/en/latest/#not-implemented-error
 - https://pypi.org/project/pyperclip/
 
+If pyperclip fails, Moulti tries again using OSC 52, a special escape sequence terminals understand as "please push these data into the local clipboard".
+This has the side-effect of making copy work over SSH but your terminal may or may not support OSC 52.
+
+This behavior can be controlled through environment variable `MOULTI_CLIPBOARD_COPY`:
+- `MOULTI_CLIPBOARD_COPY=pyperclip`: Moulti shall use only pyperclip;
+- `MOULTI_CLIPBOARD_COPY=terminal-osc-52`: Moulti shall use only OSC 52;
+- any other value: Moulti first tries pyperclip; if it fails, it tries OSC 52.
+
 ## Restoring your stuff
 
 Here is the typical way to restore a Moulti instance:
@@ -876,6 +884,7 @@ About colors in `MOULTI_ANSI*`:
 - `MOULTI_SAVE_PATH`: base path under which export directories are created when saving a Moulti instance; defaults to `.` i.e. the instance's current working directory.
 - `MOULTI_RUN_OUTPUT`: see [moulti run: dealing with stdin, stdout, stderr](#moulti-run-dealing-with-stdin-stdout-stderr)
 - `MOULTI_DIFF_ENCODING`: see [moulti diff: encoding](#encoding)
+- `MOULTI_CLIPBOARD_COPY`: see [Saving a single Moulti step](#saving-a-single-moulti-step)
 
 ### Environment variables set by the Moulti instance
 

@@ -1,12 +1,12 @@
 from typing import Any
 from typing_extensions import Self
-from pyperclip import copy # type: ignore
 from rich.highlighter import Highlighter, RegexHighlighter, ReprHighlighter
 from rich.text import Text
 from rich.theme import Theme
 from textual.app import ComposeResult
 from textual.events import Click
 from textual.widgets import Label, Static
+from moulti.clipboard import copy
 from .moultilog import MoultiLog
 
 MOULTI_THEME = Theme({
@@ -56,7 +56,7 @@ class MoultiConsole(Static):
 
 	async def action_to_clipboard(self, keep_styles: bool = False) -> None:
 		try:
-			copy('\n'.join(self.log_widget.to_lines(keep_styles)))
+			copy(self.app, '\n'.join(self.log_widget.to_lines(keep_styles)))
 			title, message, res = 'Console copied!', 'Console lines copied to clipboard', True
 		except Exception as exc:
 			title, message, res = 'Failed to copy console!', str(exc), False

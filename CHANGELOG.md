@@ -8,6 +8,14 @@ Although Moulti's Python packages, modules and functions are obviously available
 
 ## Unreleased
 
+### Added
+
+- copy to clipboard: support OSC 52 and introduce the environment variable `MOULTI_CLIPBOARD_COPY`.
+
+### Changed
+
+- in some situations (e.g. SSH and terminal lacking support for OSC 52), Moulti may fail to copy data to the clipboard AND fail to detect and report that failure.
+
 ### Fixed
 
 - footer: fix key text color in light mode.

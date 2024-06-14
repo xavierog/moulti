@@ -20,6 +20,12 @@ By the way, Moulti can also display unified diff files:
 
 ![Moulti: unified diff output](https://xavier.kindwolf.org/p/moulti/doc/img/moulti-diff.png?20240505)
 
+## Installation
+
+TL;DR: `pipx install moulti; pipx ensurepath`
+
+More details in the [Documentation](Documentation.md#installation)
+
 ## How?
 
 Synopsis:

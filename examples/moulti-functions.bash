@@ -183,6 +183,8 @@ function moulti_process_lines {
 			local next_id="$$_step_${step_counter}"
 			step_id=$(moulti_make_step "${prev_id}" "${next_id}" "${line}" "${BASH_REMATCH[@]}" < /dev/null)
 			if [ "${step_id}" ] && [ "${step_id}" != "${prev_id}" ]; then
+				# Ensure the previous `moulti pass` gets EOF:
+				exec 1>&-
 				# Redirect stdout to `moulti pass our_new_step`
 				exec > >(moulti pass "${step_id}")
 			else

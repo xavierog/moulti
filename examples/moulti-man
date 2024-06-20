@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+# No tty? Just run man without Moulti:
+[ -t 1 ] || exec man "$@"
+
+# Force bash to populate $COLUMNS:
+shopt -s checkwinsize
+:|:
+
+# Moulti's borders and scrollbars consume 10 columns:
+moulti_columns=10
+# manpage.unindent() typically strips 3 columns:
+max_unindent=3
+# Instruct `man` to wrap text accordingly:
+export MANWIDTH=$(((COLUMNS-moulti_columns+max_unindent)))
+
+export MOULTI_INSTANCE="man-$$"
+exec moulti run -- moulti manpage run -- man "$@"

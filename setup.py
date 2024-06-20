@@ -52,5 +52,6 @@ setup(
 	},
 	scripts=[
 		'examples/moulti-functions.bash',
+		'examples/moulti-man',
 	],
 )

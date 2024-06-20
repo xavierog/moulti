@@ -663,6 +663,21 @@ changed by setting the environment variable `MOULTI_DIFF_ENCODING`, e.g.
 By default, `moulti diff` changes the title of the Moulti instance; set the
 environment variable `MOULTI_DIFF_NO_TITLE` to any value to prevent that.
 
+## Moulti manpage
+
+Like `moulti diff`, `moulti manpage` offers two subcommands (`parse` and `run`) that make it possible to load and read
+[man pages](https://en.wikipedia.org/wiki/Man_page) in Moulti:
+
+```shell
+moulti run -- moulti manpage run -- man bash
+```
+
+For the sake of convenience, Moulti provides `moulti-man`, a wrapper around `man`:
+
+```shell
+moulti-man bash
+```
+
 ## Moulti does not...
 
 Per se, Moulti does not:
@@ -878,12 +893,14 @@ About colors in `MOULTI_ANSI*`:
 
 - `MOULTI_ANSIBLE_NO_TITLE` to prevent the Ansible plugin from changing the title of the Moulti instance
 - `MOULTI_DIFF_NO_TITLE` to prevent `moulti diff` from changing the title of the Moulti instance
+- `MOULTI_MANPAGE_NO_TITLE` to prevent `moulti manpage` from changing the title of the Moulti instance
 
 #### Miscellaneous
 
 - `MOULTI_SAVE_PATH`: base path under which export directories are created when saving a Moulti instance; defaults to `.` i.e. the instance's current working directory.
 - `MOULTI_RUN_OUTPUT`: see [moulti run: dealing with stdin, stdout, stderr](#moulti-run-dealing-with-stdin-stdout-stderr)
 - `MOULTI_DIFF_ENCODING`: see [moulti diff: encoding](#encoding)
+- `MOULTI_MANPAGE_ENCODING`: same as `MOULTI_DIFF_ENCODING` for `moulti manpage`
 - `MOULTI_CLIPBOARD_COPY`: see [Saving a single Moulti step](#saving-a-single-moulti-step)
 
 ### Environment variables set by the Moulti instance

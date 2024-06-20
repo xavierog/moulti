@@ -16,7 +16,9 @@ Not convinced yet? What if the output of your Ansible playbooks looked like this
 Moulti is a tool meant for people who write and execute shell scripts and/or Ansible playbooks.
 Specifically, if you find yourself scrolling up your terminal to ensure everything went fine while your script is still running, then Moulti is made for you.
 
-By the way, Moulti can also display unified diff files:
+By the way, Moulti can also display man pages and unified diff files:
+
+![Moulti: man page](https://xavier.kindwolf.org/p/moulti/doc/img/moulti-man-bash.png?20240621)
 
 ![Moulti: unified diff output](https://xavier.kindwolf.org/p/moulti/doc/img/moulti-diff.png?20240505)
 
@@ -49,7 +51,7 @@ Moulti also features:
 - a **progress bar**: [documentation](Documentation.md#progress-bar)
 - programmatic scrolling: [documentation](Documentation.md#programmatically-scrolling-through-steps)
 - an askpass helper named `moulti-askpass`: [documentation](Documentation.md#moulti-run-dealing-with-ssh)
-- support for [Ansible playbooks](Documentation.md#moulti-run-dealing-with-ansible) and [unified diff](Documentation.md#moulti-diff)
+- support for [Ansible playbooks](Documentation.md#moulti-run-dealing-with-ansible), [man pages](Documentation.md#moulti-manpage) and [unified diff](Documentation.md#moulti-diff)
 
 When it comes to look and feel, Moulti can be customised:
 
@@ -59,7 +61,8 @@ When it comes to look and feel, Moulti can be customised:
 
 ## Implementation
 
-Moulti is written in Python and leverages [Textual](https://textual.textualize.io/), along with [Pyperclip](https://pypi.org/project/pyperclip/) and [argcomplete](https://kislyuk.github.io/argcomplete/).
+Moulti is written in Python and leverages [Textual](https://textual.textualize.io/), along with [Pyperclip](https://pypi.org/project/pyperclip/),
+[argcomplete](https://kislyuk.github.io/argcomplete/) and [unidiff](https://github.com/matiasb/python-unidiff).
 
 ## Inspiration
 

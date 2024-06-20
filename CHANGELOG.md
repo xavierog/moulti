@@ -8,6 +8,10 @@ Although Moulti's Python packages, modules and functions are obviously available
 
 ## Unreleased
 
+### Added
+
+- `moulti-man`, `moulti manpage`: load man pages into Moulti.
+
 ### Fixed
 
 - `moulti_process_lines()`: prevent `moulti pass` processes from piling on.

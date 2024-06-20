@@ -11,6 +11,7 @@ from .helpers import pint, float_str, send_to_moulti_and_handle_reply
 from .pipeline import pipeline
 from .protocol import send_to_moulti, PRINTABLE_MOULTI_SOCKET
 from .widgets.cli import add_cli_arguments
+from .manpage import manpage_parse, manpage_run
 
 def init(args: dict) -> None:
 	"""Start a new Moulti instance."""
@@ -125,6 +126,17 @@ def add_main_commands(subparsers: _SubParsersAction) -> None:
 	diff_run_parser = diff_subparsers.add_parser('run', help='Load unified diff data into Moulti from a command')
 	diff_run_parser.set_defaults(func=diff_run)
 	diff_run_parser.add_argument('command', type=str, nargs='+', help='command to run along with its arguments')
+
+	# moulti manpage parse/run
+	manpage_parser = subparsers.add_parser('manpage', help='Load man page data into Moulti')
+	manpage_subparsers = manpage_parser.add_subparsers(required=True)
+	manpage_parse_parser = manpage_subparsers.add_parser('parse', help='Load man page data into Moulti from a file')
+	manpage_parse_parser.set_defaults(func=manpage_parse)
+	arg = manpage_parse_parser.add_argument('manpage_filepath', type=Path, help='path to a file holding man output')
+	arg.completer = argcomplete.completers.FilesCompleter()
+	manpage_run_parser = manpage_subparsers.add_parser('run', help='Load man page data into Moulti from a command')
+	manpage_run_parser.set_defaults(func=manpage_run)
+	manpage_run_parser.add_argument('command', type=str, nargs='+', help='command to run along with its arguments')
 
 	# moulti scroll
 	scroll_parser = subparsers.add_parser('scroll', help='Scroll to make a specific step visible')

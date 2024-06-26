@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 # pylint: disable=import-error
 from ansible.utils.color import parsecolor # type: ignore
-from ansible.utils.display import _proxy, Display # type: ignore
+from ansible.utils.display import Display # type: ignore
 from ansible.plugins.callback.default import CallbackModule as DefaultCallbackModule # type: ignore
 
 DOCUMENTATION = '''
@@ -150,7 +150,7 @@ class MoultiDisplay(Display):
 		pipe.stdin.write(data.encode('utf-8')) # type: ignore
 		pipe.stdin.flush() # type: ignore
 
-	@_proxy
+	@Display._proxy
 	def display(self, msg: str, color: str | None = None, stderr: bool = False, screen_only: bool = False,
 		log_only: bool = False, newline: bool = True,
 	) -> None:

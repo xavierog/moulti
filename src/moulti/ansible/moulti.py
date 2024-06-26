@@ -11,7 +11,7 @@ from ansible.utils.display import Display # type: ignore
 try:
     from ansible.utils.display import proxy_display # type: ignore
 except ImportError:
-    from ansible.utils.display.Display import _proxy as proxy_display # type: ignore
+    proxy_display = Display._proxy
 from ansible.plugins.callback.default import CallbackModule as DefaultCallbackModule # type: ignore
 
 DOCUMENTATION = '''

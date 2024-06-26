@@ -347,6 +347,7 @@ In practice, Ansible users run `ansible-playbook` commands that output a success
 
 [Ansible uses a plugin architecture to enable a rich, flexible and expandable feature set](https://docs.ansible.com/ansible/latest/plugins/plugins.html) so Moulti provides an [stdout callback plugin](https://docs.ansible.com/ansible/latest/plugins/callback.html#types-of-callback-plugins).
 When loaded and executed by `ansible-playbook`, this plugin runs `moulti` commands that display the results of each Ansible task in a separate Moulti step.
+This plugin is known to work with ansible-core 2.16 and 2.17.
 
 In practice, combining Ansible with Moulti is as simple as:
 ```bash

@@ -7,7 +7,11 @@ from pathlib import Path
 from typing import Any
 # pylint: disable=import-error
 from ansible.utils.color import parsecolor # type: ignore
-from ansible.utils.display import proxy_display, Display # type: ignore
+from ansible.utils.display import Display # type: ignore
+try: # for Ansible 2.16
+	from ansible.utils.display import proxy_display # type: ignore
+except ImportError: # for Ansible >= 2.17
+	proxy_display = Display._proxy # pylint: disable=protected-access
 from ansible.plugins.callback.default import CallbackModule as DefaultCallbackModule # type: ignore
 
 DOCUMENTATION = '''

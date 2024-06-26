@@ -8,6 +8,10 @@ from typing import Any
 # pylint: disable=import-error
 from ansible.utils.color import parsecolor # type: ignore
 from ansible.utils.display import Display # type: ignore
+try:
+    from ansible.utils.display import proxy_display # type: ignore
+except ImportError:
+    proxy_display = Display._proxy
 from ansible.plugins.callback.default import CallbackModule as DefaultCallbackModule # type: ignore
 
 DOCUMENTATION = '''
@@ -150,7 +154,7 @@ class MoultiDisplay(Display):
 		pipe.stdin.write(data.encode('utf-8')) # type: ignore
 		pipe.stdin.flush() # type: ignore
 
-	@Display._proxy
+	@proxy_display
 	def display(self, msg: str, color: str | None = None, stderr: bool = False, screen_only: bool = False,
 		log_only: bool = False, newline: bool = True,
 	) -> None:

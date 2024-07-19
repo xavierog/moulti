@@ -8,3 +8,4 @@ ruff
 textual-dev
 textual>=0.53
 twine
+unidiff

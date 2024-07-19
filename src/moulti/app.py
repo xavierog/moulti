@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import time
 import asyncio
@@ -14,6 +15,7 @@ from time import time_ns, localtime, strftime
 from threading import get_ident, Lock
 from rich.markup import MarkupError
 from textual import work
+from textual import __version__ as TEXTUAL_VERSION
 from textual.app import App, ComposeResult
 from textual.dom import BadIdentifier
 from textual.widgets import Label, ProgressBar
@@ -174,7 +176,7 @@ class Moulti(App):
 		yield self.end_user_console
 
 	def on_ready(self) -> None:
-		self.logconsole(f'Moulti v{MOULTI_VERSION}')
+		self.logconsole(f'Moulti v{MOULTI_VERSION}, Textual v{TEXTUAL_VERSION}, Python v{sys.version}')
 		self.logconsole(f'instance "{current_instance()}", PID {os.getpid()}')
 		self.setup_ansi_behavior()
 		self.init_threads()

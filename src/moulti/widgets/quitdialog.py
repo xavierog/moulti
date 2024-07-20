@@ -2,7 +2,7 @@ from textual.app import ComposeResult
 from textual.containers import Grid
 from textual.message import Message
 from textual.screen import ModalScreen
-from textual.widgets import Button, Label, RadioSet, RadioButton
+from textual.widgets import Button, Label
 
 class QuitDialog(ModalScreen):
 	"""
@@ -19,23 +19,10 @@ class QuitDialog(ModalScreen):
 		if self.message:
 			base_message += '\n' + self.message
 		with Grid(id='quit_dialog_grid'):
-			yield Label(base_message, id='quit_dialog_question', classes='quit_dialog_question')
-			yield RadioSet(
-				RadioButton(
-					'Quit and leave the process running in the background',
-					value=True,
-					id='quit_dialog_just_quit_option'),
-				RadioButton('Terminate the process and quit', id='quit_dialog_terminate_option'),
-				classes='quit_dialog_question',
-				id='quit_dialog_options'
-			)
-			yield Button('Quit', variant='error', id='quit_dialog_quit_button')
-			yield Button('Cancel', variant='primary', id='quit_dialog_cancel_button')
-
-	def exit_first_policy(self) -> str:
-		if self.query_one('#quit_dialog_terminate_option', RadioButton).value:
-			return 'terminate'
-		return ''
+			yield Label(base_message, id='quit_dialog_question')
+			yield Button('Do not quit', variant='primary', id='do_not_quit')
+			yield Button('Quit and leave the process running in the background', variant='warning', id='quit')
+			yield Button('Terminate the process and quit', variant='error', id='terminate_and_quit')
 
 	class ExitRequest(Message):
 		def __init__(self, exit_first_policy: str):
@@ -43,10 +30,11 @@ class QuitDialog(ModalScreen):
 			super().__init__()
 
 	def on_button_pressed(self, event: Button.Pressed) -> None:
-		if event.button.id == 'quit_dialog_quit_button':
-			self.post_message(self.ExitRequest(self.exit_first_policy()))
-		else:
+		if event.button.id == 'do_not_quit':
 			self.app.pop_screen()
+		else:
+			policy = 'terminate' if event.button.id == 'terminate_and_quit' else ''
+			self.post_message(self.ExitRequest(policy))
 
 	DEFAULT_CSS = """
 		QuitDialog {
@@ -54,16 +42,12 @@ class QuitDialog(ModalScreen):
 			& Button {
 				width: 100%;
 			}
-			& RadioButton {
-				padding: 1;
-				width: 100%;
-			}
 		}
 
 		#quit_dialog_grid {
-			grid-size: 2 3;
+			grid-size: 1 4;
 			grid-gutter: 1 2;
-			grid-rows: 1fr 2fr 3;
+			grid-rows: 1fr 1fr 1fr;
 			padding: 0 1;
 			width: 65;
 			height: 18;
@@ -71,11 +55,10 @@ class QuitDialog(ModalScreen):
 			background: $surface;
 		}
 
-		.quit_dialog_question {
+		#quit_dialog_question {
 			column-span: 2;
 			height: 1fr;
 			width: 100%;
 			content-align: center middle;
 		}
-
 	"""

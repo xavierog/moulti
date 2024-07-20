@@ -12,6 +12,10 @@ Although Moulti's Python packages, modules and functions are obviously available
 
 - help screen (`h`)
 
+### Changed
+
+- the quit dialog is now more keyboard-friendly
+
 ### Fixed
 
 - ensure only one instance of the quit dialog is shown at any time.

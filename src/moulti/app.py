@@ -17,6 +17,7 @@ from rich.markup import MarkupError
 from textual import work
 from textual import __version__ as TEXTUAL_VERSION
 from textual.app import App, ComposeResult
+from textual.css.query import NoMatches
 from textual.dom import BadIdentifier
 from textual.widgets import Label, ProgressBar
 from textual.worker import get_current_worker, NoActiveWorker
@@ -333,8 +334,11 @@ class Moulti(App):
 	async def action_quit(self) -> None:
 		"""Quit Moulti."""
 		if self.init_command is not None and self.init_command_running:
-			message = 'The command passed to "moulti run" is still running.'
-			self.push_screen(QuitDialog(message))
+			try:
+				self.query('QuitDialog').first()
+			except NoMatches:
+				message = 'The command passed to "moulti run" is still running.'
+				self.push_screen(QuitDialog(message))
 			return
 		await super().action_quit()
 

@@ -35,6 +35,7 @@ from .widgets.collapsiblestep.tui import CollapsibleStep
 from .widgets.step.tui import Step
 from .widgets.moulticonsole import MoultiConsole
 from .widgets.quitdialog import QuitDialog
+from .widgets.helpscreen import HelpScreen
 
 
 MOULTI_RUN_OUTPUT_STEP_ID = 'moulti_run_output'
@@ -97,6 +98,7 @@ class Moulti(App):
 		("x", "collapse_all(False)", "Expand all"),
 		("o", "collapse_all(True)", "Collapse all"),
 		("d", "toggle_dark", "Dark/Light"),
+		("h", "help", "Help"),
 		("q", "quit", "Quit"),
 	]
 	# Disable Textual's command palette; it may come back if Moulti ends up with too many commands though:
@@ -323,6 +325,10 @@ class Moulti(App):
 		"""Collapse all steps."""
 		for step in self.steps_container.query('CollapsibleStep').results(CollapsibleStep):
 			step.collapsible.collapsed = collapsed
+
+	def action_help(self) -> None:
+		"""Display the help screen."""
+		self.push_screen(HelpScreen())
 
 	async def action_quit(self) -> None:
 		"""Quit Moulti."""

@@ -323,4 +323,4 @@ class MoultiTLVReader:
 			self.got_complete_tlv()
 		except BlockingIOError:
 			# It turns out there is nothing (left) to read; better luck next read().
-			return
+			pass

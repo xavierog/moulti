@@ -1,2 +1,2 @@
 __author__ = 'Xavier G. <xavier.moulti@kindwolf.org>'
-__version__ = '1.12.1'
+__version__ = '1.13.0'

@@ -42,6 +42,7 @@ class MoultiDisplay(Display):
 		super().__init__(*args, **kwargs)
 		self.step_counter = 0
 		self.current_step: str|None = None
+		self.current_type: str|None = None
 		self.start_time = datetime.now()
 		self.pipes: dict[str, sp.Popen|None] = {}
 		if 'MOULTI_ANSIBLE_NO_TITLE' not in os.environ:
@@ -84,6 +85,7 @@ class MoultiDisplay(Display):
 		moulti_args += [*args]
 		self.moulti(moulti_args)
 		self.current_step = widget_id
+		self.current_type = widget_type
 		return widget_id
 
 	def new_playbook(self, title: str) -> str:
@@ -102,7 +104,7 @@ class MoultiDisplay(Display):
 		return f'{duration_parts[0]}.{duration_parts[1][:3]}' # milliseconds, not microseconds
 
 	def new_task(self, title: str) -> str:
-		task_id = self.new_widget('step', f'TASK: {title}', 'ansible_task', '--bottom-text', ' ')
+		task_id = self.new_widget('step', f'{title}', 'ansible_task', '--bottom-text', ' ')
 		self.start_time = datetime.now()
 		self.moulti(['step', 'update', task_id, '--top-text', f'Started {self.date_time(self.start_time)}'])
 		self.is_task = True
@@ -181,7 +183,7 @@ class MoultiDisplay(Display):
 
 	def banner(self, msg: str, color: str | None = None, _cows: bool = True) -> None:
 		if msg.startswith('TASK'):
-			self.new_task(msg[6:-1])
+			self.new_task(f'TASK: {msg[6:-1]}')
 		elif msg.startswith('PLAY RECAP'):
 			self.new_recap(msg)
 		elif msg.startswith('PLAYBOOK'):
@@ -192,7 +194,10 @@ class MoultiDisplay(Display):
 			super().banner(msg, color, cows=False)
 
 	def write(self, data: str) -> str:
-		step_id = self.current_step or self.new_task('Pre-task output')
+		if self.current_step and self.current_type == 'step':
+			step_id = self.current_step
+		else:
+			step_id = self.new_task('Ansible standard output')
 		self.do_write(step_id, data)
 		return step_id
 

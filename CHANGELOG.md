@@ -19,6 +19,7 @@ Although Moulti's Python packages, modules and functions are obviously available
 ### Fixed
 
 - ensure only one instance of the quit dialog is shown at any time.
+- Ansible callback plugin: do not try to pass text to a divider.
 
 ## [1.12.1] - 2024-06-27
 

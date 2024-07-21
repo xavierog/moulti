@@ -13,6 +13,7 @@ try: # for Ansible 2.16
 except ImportError: # for Ansible >= 2.17
 	proxy_display = Display._proxy # pylint: disable=protected-access
 from ansible.plugins.callback.default import CallbackModule as DefaultCallbackModule # type: ignore
+from ansible.utils.unsafe_proxy import wrap_var # type: ignore
 
 DOCUMENTATION = '''
     name: moulti
@@ -27,6 +28,12 @@ DOCUMENTATION = '''
     requirements:
       - set as stdout in configuration
 '''
+
+Answer = tuple[str, list[str]]
+"""
+The first element of the tuple is the answer itself.
+The second element is the list of inputquestion widgets created to obtain this answer.
+"""
 
 def escape_rich_tags(value: str) -> str:
 	return value.replace('[', r'\[')
@@ -56,8 +63,8 @@ class MoultiDisplay(Display):
 		# Close the last remaining pipe, if any:
 		self.close_current_pipe()
 
-	def moulti(self, args: list[str]) -> sp.CompletedProcess:
-		return sp.run(['moulti'] + args, shell=False, check=True)
+	def moulti(self, args: list[str], **sp_args: Any) -> sp.CompletedProcess:
+		return sp.run(['moulti'] + args, shell=False, check=True, **sp_args)
 
 	def set_title_from_command_line(self) -> None:
 		simplified_args = []
@@ -207,6 +214,66 @@ class MoultiDisplay(Display):
 	def close(self) -> None:
 		pass
 
+	def get_answer(self, inputquestion_id: str, default: str | None = None) -> str:
+		cpe = self.moulti(['inputquestion', 'get-answer', '--wait', inputquestion_id], capture_output=True)
+		answer = cpe.stdout.decode('utf-8', errors='surrogate_or_strict').rstrip('\n')
+		if not answer and default is not None:
+			answer = default
+		return answer
+
+	def simple_prompt(self, msg: str, *args: Any, private: bool = False, default: str | None = None) -> Answer:
+		cmd_args = list(args)
+		if private:
+			cmd_args.append('--password')
+		if default is not None and not private:
+			cmd_args.append(f'--bottom-text=Default value: {default}')
+		question_id = self.new_widget('inputquestion', msg, 'warning', *cmd_args)
+		self.moulti(['scroll', question_id, '-1'])
+		answer = self.get_answer(question_id, default)
+		return (answer, [question_id])
+
+	def confirm_prompt(self, msg: str, *args: Any, private: bool = False, default: str | None = None) -> Answer:
+		widgets = []
+		confirm = '--top-text=Please enter the value again to confirm:'
+		mismatch = '--top-text=[bold]Values entered do not match[/]'
+		while True:
+			answer1, id1 = self.simple_prompt(msg, *args, private=private, default=default)
+			answer2, id2 = self.simple_prompt(msg, *args, confirm, private=private, default=default)
+			widgets.extend(id1)
+			widgets.extend(id2)
+			if answer1 == answer2:
+				return (answer1, widgets)
+			for widget_id in (id1[0], id2[0]):
+				self.moulti(['inputquestion', 'update', '--classes=error', mismatch, widget_id])
+
+	def prompt(self, msg: str, private: bool = False, default: str | None = None) -> str:
+		return self.simple_prompt(msg, private=private, default=default)[0]
+
+	def do_var_prompt(
+		self,
+		varname: str,
+		private: bool = True,
+		prompt: str | None = None,
+		encrypt: str | None = None,
+		confirm: bool = False,
+		salt_size: int | None = None,
+		salt: str | None = None,
+		default: str | None = None,
+		unsafe: bool = False,
+	) -> str:
+		do_prompt = self.confirm_prompt if confirm else self.simple_prompt
+		msg = prompt if prompt is not None and prompt != varname else f'Input for {varname}?'
+		result, _widgets = do_prompt(msg, private=private, default=default)
+
+		if encrypt:
+			# Circular import because encrypt needs a display class
+			from ansible.utils.encrypt import do_encrypt # type: ignore # pylint: disable=import-outside-toplevel
+			result = do_encrypt(result, encrypt, salt_size=salt_size, salt=salt)
+		if unsafe:
+			result = wrap_var(result)
+
+		return result
+
 class CallbackModule(DefaultCallbackModule):
 	"""
 	Same as Ansible's default callback module, with a "MoultiDisplay" instead of a regular Display.
@@ -217,4 +284,11 @@ class CallbackModule(DefaultCallbackModule):
 
 	def __init__(self) -> None:
 		super().__init__()
-		self._display: Display = MoultiDisplay(verbosity=self._display.verbosity)
+		# Get a reference to the original Display singleton that was initialized before this file was even loaded:
+		original_display = Display()
+		# Replace it with our own Display:
+		self._display: Display = MoultiDisplay(verbosity=original_display.verbosity)
+		# But various other parts of Ansible kept a reference to the original Display singleton.
+		# Hijack its do_var_prompt() method (+prompt(), just in case) to handle vars_prompt:
+		original_display.do_var_prompt = self._display.do_var_prompt
+		original_display.prompt = self._display.prompt

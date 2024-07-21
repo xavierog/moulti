@@ -11,6 +11,7 @@ Although Moulti's Python packages, modules and functions are obviously available
 ### Added
 
 - help screen (`h`)
+- Ansible callback plugin: handle `vars_prompt` using inputquestion widgets.
 
 ### Changed
 

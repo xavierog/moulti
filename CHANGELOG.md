@@ -11,6 +11,7 @@ Although Moulti's Python packages, modules and functions are obviously available
 ### Added
 
 - CLI command `moulti question {add,update,get-answer,delete}`
+- Ansible callback plugin: support `prompt_until()` and the `pause` module
 
 ## [1.13.0] - 2024-07-21
 

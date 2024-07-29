@@ -2,10 +2,12 @@ from __future__ import annotations
 import os
 import sys
 import subprocess as sp
+import collections.abc as c
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 # pylint: disable=import-error
+from ansible.errors import AnsiblePromptInterrupt # type: ignore
 from ansible.utils.color import parsecolor # type: ignore
 from ansible.utils.display import Display # type: ignore
 try: # for Ansible 2.16
@@ -274,6 +276,50 @@ class MoultiDisplay(Display):
 
 		return result
 
+	def byte_to_text(self, byte: bytes) -> str:
+		try:
+			return byte.decode().upper()
+		except UnicodeDecodeError:
+			return str(byte)
+
+	def prompt_until(
+		self,
+		msg: str,
+		private: bool = False,
+		seconds: int | None = None,
+		interrupt_input: c.Container[bytes] | None = None,
+		complete_input: c.Container[bytes] | None = None,
+	) -> bytes:
+		cmd_args = []
+		if private:
+			cmd_args.append('--password')
+		if complete_input is not None and hasattr(complete_input, '__iter__'):
+			for key in complete_input:
+				key_text = self.byte_to_text(key)
+				cmd_args += ['--button', '{input}', 'success', key_text]
+		else:
+			cmd_args += ['--button', '{input}', 'success', 'Enter']
+
+		if interrupt_input is not None and hasattr(interrupt_input, '__iter__'):
+			for key in interrupt_input:
+				key_text = self.byte_to_text(key)
+				cmd_args += ['--button', ':interrupt:', 'error', key_text]
+		else:
+			cmd_args += ['--button', ':interrupt:', 'error', 'Interrupt']
+
+		question_id = self.new_widget('question', msg, 'warning', *cmd_args)
+		self.moulti(['scroll', question_id, '-1'])
+
+		command = ['question', 'get-answer', '--wait', question_id]
+		try:
+			cpe = self.moulti(command, capture_output=True, timeout=seconds)
+			answer = cpe.stdout.rstrip(b'\n')
+		except sp.TimeoutExpired:
+			return b''
+		if answer == b':interrupt:':
+			raise AnsiblePromptInterrupt('user interrupt')
+		return answer
+
 class CallbackModule(DefaultCallbackModule):
 	"""
 	Same as Ansible's default callback module, with a "MoultiDisplay" instead of a regular Display.
@@ -292,3 +338,4 @@ class CallbackModule(DefaultCallbackModule):
 		# Hijack its do_var_prompt() method (+prompt(), just in case) to handle vars_prompt:
 		original_display.do_var_prompt = self._display.do_var_prompt
 		original_display.prompt = self._display.prompt
+		original_display.prompt_until = self._display.prompt_until

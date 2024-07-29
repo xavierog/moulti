@@ -3,5 +3,6 @@ WIDGET_MODULES = [
 	'step',
 	'buttonquestion',
 	'inputquestion',
+	'question',
 	'divider',
 ]

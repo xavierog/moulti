@@ -504,6 +504,38 @@ Here is how to use them:
    craig
    $
    ```
+
+5. `question` combines the abilities of `buttonquestion` and `inputquestion`:
+   ```shell
+   moulti question add my_third_question \
+       --title='My third question with Moulti' \
+       --text='What is your name?' \
+       --bottom-text='I live on the second floor' \
+       --placeholder='Enter your name in this input field, or click a button' \
+       --button 'My name is Alice' default Alice \
+       --button 'My name is Bob' default Bob \
+       --button 'My name is {input}' success 'Neither, use input'
+   ```
+
+   ![step 5](https://xavier.kindwolf.org/p/moulti/doc/img/questions-step05.png)
+
+   `{input}` is an optional placeholder that gets replaced with the input field value.
+
+6. That makes it possible to return a value that reflects both the input field value and the button that was clicked:
+   ```console
+   $ moulti question get-answer my_third_question --wait
+   My name is Luka
+   $
+   ```
+
+The table below offers a summary of "question" widgets and their features:
+
+| widget \ feature | input field | buttons    |
+|------------------|-------------|------------|
+| inputquestion    |     yes     |     no     |
+| buttonquestion   |      no     | at least 1 |
+| question         |     Yes     | at least 1 |
+
 ## Dividers
 
 Dividers are simplistic steps that exist solely for cosmetic purposes, like displaying static text or acting as visual separator between two groups of steps (hence the name).

@@ -9,7 +9,7 @@ COMMAND = 'step'
 
 def add_cli_arguments(subparsers: _SubParsersAction) -> None:
 	# moulti step:
-	step_parser = subparsers.add_parser(COMMAND, help='Create and manage steps shown by Moulti.')
+	step_parser = subparsers.add_parser(COMMAND, help='create and manage steps shown by Moulti')
 	step_subparsers = step_parser.add_subparsers(required=True)
 	add_step_commands(step_subparsers)
 	# moulti pass:
@@ -17,36 +17,36 @@ def add_cli_arguments(subparsers: _SubParsersAction) -> None:
 
 def add_step_commands(step_subparsers: _SubParsersAction) -> None:
 	# moulti step add
-	step_add_parser = step_subparsers.add_parser('add', help='Add a new step to Moulti.')
+	step_add_parser = step_subparsers.add_parser('add', help='add a new step to Moulti')
 	step_add_parser.set_defaults(func=send_to_moulti_and_handle_reply, command=COMMAND, action='add')
 	step_add_parser.add_argument('id', type=str, help='unique identifier')
 	add_step_options(step_add_parser)
 
 	# moulti step update
-	step_update_parser = step_subparsers.add_parser('update', help='Update an existing Moulti step.')
+	step_update_parser = step_subparsers.add_parser('update', help='update an existing Moulti step')
 	step_update_parser.set_defaults(func=send_no_none_to_moulti_and_handle_reply, command=COMMAND, action='update')
 	step_update_parser.add_argument('id', type=str, help='unique identifier')
 	add_step_options(step_update_parser, none=True)
 
 	# moulti step delete
-	step_delete_parser = step_subparsers.add_parser('delete', help='Delete an existing Moulti step.')
+	step_delete_parser = step_subparsers.add_parser('delete', help='delete an existing Moulti step')
 	step_delete_parser.set_defaults(func=send_to_moulti_and_handle_reply, command=COMMAND, action='delete')
 	step_delete_parser.add_argument('id', type=str, help='unique identifier')
 
 	# moulti step clear
-	step_clear_parser = step_subparsers.add_parser('clear', help='Clear the contents of an existing Moulti step.')
+	step_clear_parser = step_subparsers.add_parser('clear', help='clear the contents of an existing Moulti step')
 	step_clear_parser.set_defaults(func=send_to_moulti_and_handle_reply, command=COMMAND, action='clear')
 	step_clear_parser.add_argument('id', type=str, help='unique identifier')
 
 	# moulti step append
-	step_append_parser = step_subparsers.add_parser('append', help='Append the given contents to an existing Moulti step.')
+	step_append_parser = step_subparsers.add_parser('append', help='append the given contents to an existing Moulti step')
 	step_append_parser.set_defaults(func=send_to_moulti_and_handle_reply, command=COMMAND, action='append')
 	step_append_parser.add_argument('id', type=str, help='unique identifier')
 	step_append_parser.add_argument('text', type=str, nargs='+', help='strings to append')
 
 def add_pass_command(subparsers: _SubParsersAction) -> None:
 	# moulti pass
-	pass_parser = subparsers.add_parser('pass', help='Pass standard input to an existing Moulti step')
+	pass_parser = subparsers.add_parser('pass', help='pass standard input to an existing Moulti step')
 	pass_parser.set_defaults(func=pass_stdin)
 	pass_parser.add_argument('id', type=str, help='unique identifier')
 	pass_parser.add_argument('--append', '--no-clear', '-a', dest='append', action='store_true', help='do not clear the target step')

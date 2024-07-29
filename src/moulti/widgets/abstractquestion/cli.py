@@ -5,7 +5,7 @@ from ..collapsiblestep.cli import add_collapsiblestep_options
 
 def add_abstractquestion_options(parser: ArgumentParser, none: bool = False) -> None:
 	add_collapsiblestep_options(parser, none)
-	parser.add_argument('--text', '-t', type=str, default=None if none else '', help='Question text')
+	parser.add_argument('--text', '-t', type=str, default=None if none else '', help='question text')
 
 def question_get_answer(args: Args) -> None:
 	reply = send_to_moulti(args)

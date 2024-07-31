@@ -12,6 +12,7 @@ class QuitDialog(ModalScreen):
 	"""
 	def __init__(self, message: str = '') -> None:
 		self.message = message
+		self.quit_request_count = 1
 		super().__init__()
 
 	def compose(self) -> ComposeResult:
@@ -23,6 +24,7 @@ class QuitDialog(ModalScreen):
 			yield Button('Do not quit', variant='primary', id='do_not_quit')
 			yield Button('Quit and leave the process running in the background', variant='warning', id='quit')
 			yield Button('Terminate the process and quit', variant='error', id='terminate_and_quit')
+			yield Label('', id='extra_info')
 
 	class ExitRequest(Message):
 		def __init__(self, exit_first_policy: str):
@@ -34,7 +36,21 @@ class QuitDialog(ModalScreen):
 			self.app.pop_screen()
 		else:
 			policy = 'terminate' if event.button.id == 'terminate_and_quit' else ''
-			self.post_message(self.ExitRequest(policy))
+			self.exit(policy)
+
+	def exit(self, policy: str) -> None:
+		self.post_message(self.ExitRequest(policy))
+
+	def new_quit_request(self) -> None:
+		self.quit_request_count += 1
+		if self.quit_request_count == 2:
+			self.query_one('#quit').focus()
+		elif self.quit_request_count == 3:
+			x = self.query_one('#extra_info', Label)
+			x.update('Hitting Ctrl+c again will terminate the process and quit.')
+			self.query_one('#terminate_and_quit').focus()
+		elif self.quit_request_count > 3:
+			self.exit('terminate')
 
 	DEFAULT_CSS = """
 		QuitDialog {
@@ -45,18 +61,17 @@ class QuitDialog(ModalScreen):
 		}
 
 		#quit_dialog_grid {
-			grid-size: 1 4;
+			grid-size: 1 5;
 			grid-gutter: 1 2;
-			grid-rows: 1fr 1fr 1fr;
+			grid-rows: 1fr 1fr 1fr 1fr 1;
 			padding: 0 1;
 			width: 65;
-			height: 18;
+			height: 19;
 			border: thick $background 80%;
 			background: $surface;
 		}
 
-		#quit_dialog_question {
-			column-span: 2;
+		#quit_dialog_question, #extra_info {
 			height: 1fr;
 			width: 100%;
 			content-align: center middle;

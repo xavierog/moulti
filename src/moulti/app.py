@@ -339,7 +339,7 @@ class Moulti(App):
 		"""Quit Moulti."""
 		if self.init_command is not None and self.init_command_running:
 			try:
-				self.query('QuitDialog').first()
+				self.query_one('QuitDialog', QuitDialog).new_quit_request()
 			except NoMatches:
 				message = 'The command passed to "moulti run" is still running.'
 				self.push_screen(QuitDialog(message))

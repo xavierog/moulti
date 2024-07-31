@@ -16,6 +16,7 @@ Although Moulti's Python packages, modules and functions are obviously available
 ### Changed
 
 - `moulti pass --read-size` now defaults to `8192`.
+- `moulti run`: hitting `Ctrl+c` multiple times now navigates through the quit dialog and eventually terminates the process before exiting.
 
 ### Fixed
 

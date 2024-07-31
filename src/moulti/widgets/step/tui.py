@@ -1,4 +1,5 @@
 import os
+import selectors
 from queue import Queue, Empty
 from time import monotonic_ns
 from typing import Any, Callable
@@ -6,6 +7,7 @@ from textual import work
 from textual.app import ComposeResult
 from textual.worker import get_current_worker
 from rich.text import Text
+from . import MOULTI_PASS_DEFAULT_READ_SIZE
 from ..collapsiblestep.tui import CollapsibleStep
 from ..moultilog import MoultiLog
 
@@ -20,10 +22,10 @@ class ThrottledAppender:
 		self.step = step
 		self.call_from_thread = step.app.call_from_thread
 		self.delay_ns = delay_ms * 1_000_000
-		self.buffers: list[list[str]] = []
+		self.buffers: list[list[bytes]] = []
 		self.last_append = 0
 
-	def new_data(self, buffer: list[str], force: bool = False) -> None:
+	def new_data(self, buffer: list[bytes], force: bool = False) -> None:
 		self.buffers.append(buffer)
 		self.append(force)
 
@@ -31,7 +33,7 @@ class ThrottledAppender:
 		if self.buffers:
 			now = monotonic_ns()
 			if force or (now - self.last_append >= self.delay_ns):
-				if buffered_string := ''.join([c for b in self.buffers for c in b]):
+				if buffered_string := b''.join([c for b in self.buffers for c in b]).decode('utf-8', errors='surrogateescape'):
 					self.call_from_thread(self.step.append, buffered_string)
 				self.buffers.clear()
 				self.last_append = now
@@ -158,23 +160,43 @@ class Step(CollapsibleStep):
 		current_worker = get_current_worker()
 		error = None
 		try:
-			file_desc = helpers['file_descriptors'][0]
-			# Read lines from the given file descriptor:
-			if isinstance(file_desc, int):
-				actual_file_desc = os.fdopen(file_desc, encoding='utf-8', errors='surrogateescape')
-			else:
-				actual_file_desc = file_desc
-			with actual_file_desc as text_io:
-				# Syscall-wise, Python will read(fd, buffer, count) where count = max(8192, read_size) - read_bytes.
-				# But it will NOT return anything unless it has reached the hinted read size.
-				# Out of the box, Moulti should strive to display lines as soon as possible, hence the default value of
-				# 1. It remains possible to specify a larger value, e.g. when one knows there are going to be many
-				# lines over a short timespan, e.g. "find / -ls".
-				read_size = int(kwargs.get('read_size', 1))
-				while data := text_io.read(read_size):
-					if current_worker.is_cancelled:
-						break
-					queue.put_nowait(data)
+			file_descriptor = helpers['file_descriptors'][0]
+			assert isinstance(file_descriptor, int)
+			# Although this thread is dedicated to reading from a single file descriptor, it should:
+			# - not block indefinitely on a read()
+			# - check is_cancelled at regular intervals
+			# This ensures Moulti exits correctly.
+			# To this end, use non-blocking mode along with a select()-like interface:
+			os.set_blocking(file_descriptor, False)
+			output_selector = selectors.DefaultSelector()
+			try:
+				output_selector.register(file_descriptor, selectors.EVENT_READ)
+				def can_read() -> bool:
+					return bool(output_selector.select(0.5))
+			except Exception:
+				# register() may fail: for instance, on Linux, epoll() does not support regular files and returns EPERM.
+				def can_read() -> bool:
+					return True
+			# Read binary data from the given file descriptor using a FileIO (raw binary stream whose methods only make
+			# one system call):
+			with os.fdopen(file_descriptor, mode='rb', buffering=0) as binary_stream:
+				read_size = int(kwargs.get('read_size', MOULTI_PASS_DEFAULT_READ_SIZE))
+				if read_size <= 0:
+					read_size = MOULTI_PASS_DEFAULT_READ_SIZE
+				end_of_file = False
+				# Outer loop: check for worker cancellation and rely on select() to detect activity:
+				while not current_worker.is_cancelled and not end_of_file:
+					if can_read():
+						# Inner loop: read data until it would block, keep checking for worker cancellation:
+						# "If the object is in non-blocking mode and no bytes are available, None is returned."
+						while (data := binary_stream.read(read_size)) is not None:
+							# "If 0 bytes are returned, and size was not 0, this indicates end of file."
+							if not data:
+								end_of_file = True
+								break
+							queue.put_nowait(data)
+							if current_worker.is_cancelled:
+								break
 				queue.put_nowait(None)
 		except Exception as exc:
 			error = str(exc)
@@ -199,7 +221,7 @@ class Step(CollapsibleStep):
 						# Buffer data to avoid queuing partial lines as, down the
 						# line, RichLog.write() only handles complete lines:
 						# look for the position of \n from the end of the string :
-						eol = data.rfind('\n')
+						eol = data.rfind(b'\n')
 						if eol == -1: # no \n found, buffer the whole string:
 							buffer.append(data)
 						else:

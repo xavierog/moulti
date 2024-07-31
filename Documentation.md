@@ -756,7 +756,7 @@ ping example.org | moulti pass my_step
 find /sys -ls | moulti pass my_step --read-size=131072
 ```
 
-On the other hand, if you absolutely want to see the very latest line output by a process, ensure `--read-size` is not set or explicitly force it to `--read-size=1`.
+Passing `--read-size=0` or not mentioning `--read-size` at all is equivalent to `--read-size=8192`.
 
 ## moulti pass: gotchas
 

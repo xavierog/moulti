@@ -13,6 +13,10 @@ Although Moulti's Python packages, modules and functions are obviously available
 - CLI command `moulti question {add,update,get-answer,delete}`
 - Ansible callback plugin: support `prompt_until()` and the `pause` module
 
+### Changed
+
+- `moulti pass --read-size` now defaults to `8192`.
+
 ## [1.13.0] - 2024-07-21
 
 ### Added

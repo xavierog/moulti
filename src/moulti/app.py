@@ -218,9 +218,7 @@ class Moulti(App):
 			return {
 				'stdout': subprocess.PIPE,
 				'stderr': subprocess.STDOUT,
-				'text': True,
-				'encoding': 'utf-8',
-				'errors': 'surrogateescape',
+				'text': False,
 			}
 		# discard:
 		return {'stdout': subprocess.DEVNULL, 'stderr': subprocess.DEVNULL}
@@ -249,7 +247,7 @@ class Moulti(App):
 			pass
 		def debug(line: str) -> None:
 			self.logconsole(f'exec: {line}')
-		helpers = {'file_descriptors': [filedesc], 'debug': debug, 'reply': reply}
+		helpers = {'file_descriptors': [filedesc.fileno()], 'debug': debug, 'reply': reply}
 		step.append_from_queue(queue, helpers)
 		queue.put_nowait(initial_data)
 		step.append_from_file_descriptor_to_queue(queue, {}, helpers)

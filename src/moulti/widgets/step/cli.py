@@ -3,6 +3,7 @@ from argparse import ArgumentParser, _SubParsersAction
 from moulti.helpers import Args, pint, handle_reply
 from moulti.helpers import send_to_moulti_and_handle_reply, send_no_none_to_moulti_and_handle_reply
 from moulti.protocol import moulti_connect, send_json_message, recv_json_message
+from . import MOULTI_PASS_DEFAULT_READ_SIZE
 from ..collapsiblestep.cli import add_collapsiblestep_options
 
 COMMAND = 'step'
@@ -50,7 +51,7 @@ def add_pass_command(subparsers: _SubParsersAction) -> None:
 	pass_parser.set_defaults(func=pass_stdin)
 	pass_parser.add_argument('id', type=str, help='unique identifier')
 	pass_parser.add_argument('--append', '--no-clear', '-a', dest='append', action='store_true', help='do not clear the target step')
-	pass_parser.add_argument('--read-size', '-rs', dest='read_size', type=pint, default=1, help='read size')
+	pass_parser.add_argument('--read-size', '-rs', dest='read_size', type=pint, default=MOULTI_PASS_DEFAULT_READ_SIZE, help='read size')
 
 def add_step_options(parser: ArgumentParser, none: bool = False) -> None:
 	"""Options common to step add (with actual default values) and step update (with None default values)."""

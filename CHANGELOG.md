@@ -17,6 +17,10 @@ Although Moulti's Python packages, modules and functions are obviously available
 
 - `moulti pass --read-size` now defaults to `8192`.
 
+### Fixed
+
+- `moulti run`: `MOULTI_RUN_OUTPUT=harvest moulti run -- bash -c 'echo a; sleep 3600'` would block upon selecting "Quit and leave the process running in the background".
+
 ## [1.13.0] - 2024-07-21
 
 ### Added

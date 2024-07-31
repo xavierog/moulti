@@ -267,15 +267,21 @@ class Moulti(App):
 			process = subprocess.Popen(command, **popen_args, **self.output_policy_popen_args())
 			self.logconsole(f'exec: {command} launched with PID {process.pid}')
 			returncode = None
-			watch_output = bool(self.output_policy())
+			output_selector = None
+			if self.output_policy(): # Harvest stdout/stderr lines
+				output_selector = selectors.DefaultSelector()
+				assert process.stdout is not None # for mypy
+				output_selector.register(process.stdout, selectors.EVENT_READ)
+
 			while not worker.is_cancelled:
-				if watch_output: # Harvest stdout/stderr lines
-					# If the child process outputs anything, pass it to a special step:
-					assert process.stdout is not None # for mypy
-					if (data := process.stdout.read(1)) and (step := self.output_policy_step()):
-						self.output_policy_pass(step, process.stdout, data)
-						# We no longer need to watch output in this loop:
-						watch_output = False
+				if output_selector is not None and output_selector.select(0):
+					# If the child process outputs anything other than end-of-file, pass it to a special step:
+					assert process.stdout is not None and hasattr(process.stdout, 'raw') # for mypy
+					if initial_data := process.stdout.raw.read(1):
+						step = self.output_policy_step()
+						self.output_policy_pass(step, process.stdout, initial_data)
+					# We no longer need to watch output in this loop:
+					output_selector = None
 				returncode = process.poll() # non-blocking wait(), e.g. wait4(process.pid, result_addr, WNOHANG, NULL)
 				if returncode is not None:
 					self.init_command_running = False

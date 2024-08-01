@@ -1,5 +1,6 @@
 from textual.app import ComposeResult
 from textual.containers import Grid
+from textual.events import Key
 from textual.message import Message
 from textual.screen import ModalScreen
 from textual.widgets import Button, Label
@@ -21,9 +22,9 @@ class QuitDialog(ModalScreen):
 			base_message += '\n' + self.message
 		with Grid(id='quit_dialog_grid'):
 			yield Label(base_message, id='quit_dialog_question')
-			yield Button('Do not quit', variant='primary', id='do_not_quit')
-			yield Button('Quit and leave the process running in the background', variant='warning', id='quit')
-			yield Button('Terminate the process and quit', variant='error', id='terminate_and_quit')
+			yield Button('Do not quit (esc)', variant='primary', id='do_not_quit')
+			yield Button('Quit and leave the process running in the background (l)', variant='warning', id='quit')
+			yield Button('Terminate the process and quit (t)', variant='error', id='terminate_and_quit')
 			yield Label('', id='extra_info')
 
 	class ExitRequest(Message):
@@ -37,6 +38,15 @@ class QuitDialog(ModalScreen):
 		else:
 			policy = 'terminate' if event.button.id == 'terminate_and_quit' else ''
 			self.exit(policy)
+
+	def on_key(self, event: Key) -> None:
+		buttons = {
+			'escape': '#do_not_quit',
+			'l': '#quit',
+			't': '#terminate_and_quit',
+		}
+		if button_id := buttons.get(event.key.lower()):
+			self.query_one(button_id, Button).action_press()
 
 	def exit(self, policy: str) -> None:
 		self.post_message(self.ExitRequest(policy))

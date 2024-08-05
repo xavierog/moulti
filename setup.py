@@ -44,6 +44,7 @@ setup(
 	license='MIT',
 	keywords=['cli', 'tui', 'curses', 'terminal', 'multiplex', 'script', 'output', 'steps', 'textual', 'collapsible', 'ansible', 'diff'],
 	package_dir={'': 'src'},
+	python_requires='>=3.10',
 	install_requires=['textual>=0.53', 'pyperclip', 'argcomplete', 'unidiff'],
 	entry_points={
 		'console_scripts': [

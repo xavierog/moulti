@@ -13,6 +13,7 @@ class HelpScreen(ModalScreen):
 
 [u]Keybindings[/]:
   [key]tab[/], [key]shift+tab[/]: next/previous step/component
+  [key]ctrl+y[/], [key]ctrl+t[/]: next/previous unanswered question
   [key]enter[/]: collapse/expand the current step
          submit the current input field
   [key]home[/], [key]pgup[/], [key]up[/], [key]down[/], [key]pgdn[/], [key]end[/]: vertical scroll

@@ -1,17 +1,22 @@
 from typing import Any, Iterator, Sequence, cast
 from textual import on
+from textual.binding import Binding
+from textual.css.query import NoMatches
 from textual.geometry import Region
 from textual.reactive import Reactive
 from textual.widget import AwaitMount
 from .vertscroll import VertScroll
 from .abstractstep.tui import AbstractStep
+from .abstractquestion.tui import AbstractQuestion
 
 class StepContainer(VertScroll):
 	"""
 	Vertical scrollable container for steps.
 	"""
 	BINDINGS = [
-		('l', 'toggle_scrolling', 'Lock scroll')
+		Binding('l', 'toggle_scrolling', 'Lock scroll'),
+		Binding("ctrl+t", "focus_question(True, False)", "Previous unanswered question", show=False),
+		Binding("ctrl+y", "focus_question(False, False)", "Next unanswered question", show=False),
 	]
 
 	DEFAULT_CSS = """
@@ -56,6 +61,33 @@ class StepContainer(VertScroll):
 			yield from steps
 		else:
 			yield from reversed(steps)
+
+	def focus_step(self) -> AbstractStep|None:
+		try:
+			return self.query_one('AbstractStep:focus-within', AbstractStep)
+		except NoMatches:
+			return None
+
+	def get_question(self, backward: bool = False, answered: bool|None = False) -> AbstractQuestion|None:
+		steps = list(self.ordered_steps())
+		if backward:
+			steps = list(reversed(steps))
+		if current := self.focus_step():
+			try:
+				index = steps.index(current)
+				steps = steps[index+1:] + steps[:index]
+			except ValueError:
+				pass
+		for step in steps:
+			if isinstance(step, AbstractQuestion):
+				if answered is None or answered == step.answered():
+					return step
+		return None
+
+	def action_focus_question(self, backward: bool = False, answered: bool|None = False) -> None:
+		question = self.get_question(backward=backward, answered=answered)
+		if question is not None:
+			question.focus_input_widget()
 
 	def add_step(self, step: AbstractStep) -> AwaitMount:
 		return self.mount(step, before=None if self.layout_direction_is_down else 0)

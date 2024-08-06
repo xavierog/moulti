@@ -69,6 +69,13 @@ class AbstractQuestion(CollapsibleStep):
 				widget.blur()
 				widget.disabled = True
 
+	def focus_input_widget(self) -> None:
+		self.collapsible.collapsed = False
+		for widget in self.collapsible.query('Collapsible > Contents Widget').results(Widget):
+			if widget.focusable:
+				widget.focus()
+				break
+
 	def got_answer(self, answer: str) -> None:
 		# Disable the question to ensure users answer only once:
 		self.disable()
@@ -77,6 +84,9 @@ class AbstractQuestion(CollapsibleStep):
 		self.flush_waiting_clients()
 		# Emit a GotAnswer message so other components react to the event:
 		self.post_message(GotAnswer(self, self.answer))
+
+	def answered(self) -> bool:
+		return self.answer is not None
 
 class GotAnswer(Message):
 	def __init__(self, origin: AbstractQuestion, answer: str) -> None:

@@ -17,6 +17,7 @@ from rich.markup import MarkupError
 from textual import work
 from textual import __version__ as TEXTUAL_VERSION
 from textual.app import App, ComposeResult
+from textual.binding import Binding
 from textual.css.query import NoMatches
 from textual.dom import BadIdentifier
 from textual.widgets import Label, ProgressBar
@@ -98,6 +99,8 @@ class Moulti(App):
 		("n", "toggle_console", "Console"),
 		("x", "collapse_all(False)", "Expand all"),
 		("o", "collapse_all(True)", "Collapse all"),
+		Binding("X", "collapse_new(False)", "Expand new widgets", show=False),
+		Binding("O", "collapse_new(True)", "Collapse new widgets", show=False),
 		("d", "toggle_dark", "Dark/Light"),
 		("h", "help", "Help"),
 		("q", "quit", "Quit"),
@@ -117,6 +120,13 @@ class Moulti(App):
 		self.save_lock = Lock()
 		"""
 		Lock that ensures Moulti does not generate multiple exports of the current instance at a time.
+		"""
+		self.enforce_collapsible: bool|None = self.init_enforce_collapsible()
+		"""
+		Whether to enforce the state of new collapsible widgets.
+		None: do not enforce
+		True: force-collapse new collapsible widgets
+		False: force-expand new collapsible widgets
 		"""
 		super().__init__()
 		self.dark = os.environ.get('MOULTI_MODE', 'dark') != 'light'
@@ -142,6 +152,14 @@ class Moulti(App):
 		self.steps_container = StepContainer()
 		self.progress_bar = ProgressBar(id='progress_bar', show_eta=False)
 		self.footer = Footer()
+
+	def init_enforce_collapsible(self) -> bool|None:
+		mec_env_var = os.environ.get('MOULTI_ENFORCE_COLLAPSIBLE')
+		if mec_env_var == 'collapse':
+			return True
+		if mec_env_var == 'expand':
+			return False
+		return None
 
 	def setup_ansi_behavior(self) -> None:
 		"""
@@ -327,9 +345,21 @@ class Moulti(App):
 		self.end_user_console.toggle_class('hidden')
 
 	def action_collapse_all(self, collapsed: bool = True) -> None:
-		"""Collapse all steps."""
+		"""Collapse all existing steps."""
 		for step in self.steps_container.query('CollapsibleStep').results(CollapsibleStep):
 			step.collapsible.collapsed = collapsed
+
+	def action_collapse_new(self, enforce: bool) -> None:
+		"""Collapse new steps."""
+		action = {True: 'collapsing', False: 'expanding'}
+		desc = ''
+		if self.enforce_collapsible == enforce:
+			desc = f'No longer {action[self.enforce_collapsible]}'
+			self.enforce_collapsible = None
+		else:
+			self.enforce_collapsible = enforce
+			desc = action[self.enforce_collapsible].capitalize()
+		self.notify(f'{desc} new steps')
 
 	def action_help(self) -> None:
 		"""Display the help screen."""
@@ -457,6 +487,8 @@ class Moulti(App):
 					if message['id'] == MOULTI_RUN_OUTPUT_STEP_ID and message['command'] != 'step':
 						err = f'{MOULTI_RUN_OUTPUT_STEP_ID} is a reserved id that must be assigned to a step'
 						raise MoultiMessageException(err)
+					if self.enforce_collapsible is not None:
+						message['collapsed'] = self.enforce_collapsible
 					calls.append((self.steps_container.add_step, command_class(**message)))
 				else:
 					# All other actions require an existing step:
@@ -466,6 +498,8 @@ class Moulti(App):
 						raise MoultiMessageException(f'{message.get("id")} is not a {command}')
 					if action == 'update':
 						step.check_properties(message)
+						if self.enforce_collapsible is not None and message.get('collapsed') is not None:
+							del message['collapsed']
 						calls.append((step.update_properties, message))
 					elif action == 'delete':
 						if step.prevent_deletion:

@@ -917,6 +917,9 @@ Moulti currently offers no suport for programmatic scrolling inside steps.
    - Setting `MOULTI_ANSI_THEME_*` defines a Moulti theme but does not use it; to use it, set `MOULTI_ANSI`.
    - Theme names are case-sensitive: if you define `MOULTI_ANSI_THEME_AlphaBeta`, be sure to mention e.g. `MOULTI_ANSI=dark=AlphaBeta`, not `MOULTI_ANSI=dark=ALPHABETA`.
 - `MOULTI_CUSTOM_CSS`: absolute filepath to a custom TCSS file; see "How to define my own step classes ?"
+- `MOULTI_ENFORCE_COLLAPSIBLE`: enforce the way new collapsible widgets are displayed and prevent client tools from collapsing or expanding existing widgets:
+   - `collapse`: always collapse new collapsible widgets
+   - `expand`: always expand new collapsible widgets
 
 About colors in `MOULTI_ANSI*`:
 - colors may be prefixed with `#`;

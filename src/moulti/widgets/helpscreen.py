@@ -21,8 +21,8 @@ class HelpScreen(ModalScreen):
   [key]l[/]: lock scroll: ignore programmatic scrolling
   [key]s[/]: save the current state to the filesystem
   [key]n[/]: show/hide the console
-  [key]x[/]: expand all steps
-  [key]o[/]: collapse all steps
+  [key]o[/], [key]x[/]: collapse/expand existing steps
+  [key]O[/], [key]X[/]: collapse/expand new steps
   [key]d[/]: switch between dark and light modes
   [key]c[/]: copy the contents of the current step
   [key]w[/]: same + preserve colors/include metadata (e.g. the question)

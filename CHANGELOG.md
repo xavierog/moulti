@@ -11,6 +11,8 @@ Although Moulti's Python packages, modules and functions are obviously available
 ### Added
 
 - `Ctrl+t` / `Ctrl+y` jumps to the previous/next unanswered question
+- `O` / `X` collapses/expands new steps
+- the environment variable `MOULTI_ENFORCE_COLLAPSIBLE` does the same as soon as Moulti starts
 
 ## [1.14.0] - 2024-08-04
 

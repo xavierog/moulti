@@ -23,6 +23,7 @@ class HelpScreen(ModalScreen):
   [key]n[/]: show/hide the console
   [key]o[/], [key]x[/]: collapse/expand existing steps
   [key]O[/], [key]X[/]: collapse/expand new steps
+  [key]ctrl+o[/], [key]ctrl+x[/]: collapse/expand both existing and new steps
   [key]d[/]: switch between dark and light modes
   [key]c[/]: copy the contents of the current step
   [key]w[/]: same + preserve colors/include metadata (e.g. the question)

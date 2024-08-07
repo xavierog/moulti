@@ -101,6 +101,8 @@ class Moulti(App):
 		("o", "collapse_all(True)", "Collapse all"),
 		Binding("X", "collapse_new(False)", "Expand new widgets", show=False),
 		Binding("O", "collapse_new(True)", "Collapse new widgets", show=False),
+		Binding("ctrl+x", "collapse_both(False)", "Expand", show=False),
+		Binding("ctrl+o", "collapse_both(True)", "Collapse", show=False),
 		("d", "toggle_dark", "Dark/Light"),
 		("h", "help", "Help"),
 		("q", "quit", "Quit"),
@@ -360,6 +362,12 @@ class Moulti(App):
 			self.enforce_collapsible = enforce
 			desc = action[self.enforce_collapsible].capitalize()
 		self.notify(f'{desc} new steps')
+
+	def action_collapse_both(self, collapsed: bool) -> None:
+		"""Collapse both existing and new steps."""
+		if self.enforce_collapsible != collapsed:
+			self.action_collapse_new(collapsed)
+		self.action_collapse_all(collapsed)
 
 	def action_help(self) -> None:
 		"""Display the help screen."""

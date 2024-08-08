@@ -5,12 +5,24 @@ from textual.containers import Horizontal
 from textual.reactive import Reactive
 from textual.widgets import Button, Static
 from ..abstractquestion.tui import AbstractQuestion
+from .. import MoultiWidgetInvalidPropertyException
 
 DEFAULT_BUTTONS = [
 	['yes', 'success', 'Yes'],
 	['no', 'error', 'No'],
 	['cancel', 'primary', 'Cancel'],
 ]
+
+DUMMY_BUTTON = Button()
+
+def check_button_variant(variant: str) -> bool:
+	try:
+		Button.validate_variant(DUMMY_BUTTON, variant)
+		return True
+	# The actual exception is private:
+	except Exception as exc:
+		msg = f"invalid style '{variant}'. {exc}"
+		raise MoultiWidgetInvalidPropertyException(msg) from exc
 
 class ButtonQuestion(AbstractQuestion):
 	"""
@@ -50,7 +62,8 @@ class ButtonQuestion(AbstractQuestion):
 
 	def check_properties(self, kwargs: dict[str, Any]) -> None:
 		super().check_properties(kwargs)
-		for _, _, label in kwargs.get('button', []):
+		for _, style, label in kwargs.get('button', []):
+			check_button_variant(style)
 			self.check_markup(label)
 
 	def export_properties(self) -> dict[str, Any]:

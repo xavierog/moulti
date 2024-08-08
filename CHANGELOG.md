@@ -15,6 +15,10 @@ Although Moulti's Python packages, modules and functions are obviously available
 - the environment variable `MOULTI_ENFORCE_COLLAPSIBLE` does the same as soon as Moulti starts
 - `Ctrl+o` / `Ctrl+x` collapses/expands both existing and new steps
 
+### Fixed
+
+- `moulti question add id --button value invalid_style label` now returns an error
+
 ## [1.14.0] - 2024-08-04
 
 ### Added

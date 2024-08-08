@@ -29,6 +29,7 @@ from .protocol import PRINTABLE_MOULTI_SOCKET, clean_socket, current_instance
 from .protocol import moulti_listen, get_unix_credentials, send_json_message
 from .protocol import MoultiConnectionClosedException, MoultiProtocolException, Message, FDs
 from .protocol import MoultiTLVReader, data_to_message, getraddr
+from .widgets import MoultiWidgetException
 from .widgets.tui import MoultiWidgets
 from .widgets.footer import Footer
 from .widgets.stepcontainer import StepContainer
@@ -573,7 +574,7 @@ class Moulti(App):
 			# At this stage, the analysis is complete; perform the required action and reply accordingly:
 			if calls:
 				self.call_from_thread(call_all, calls)
-		except (BadIdentifier, MarkupError, MoultiMessageException, ValueError) as exc:
+		except (BadIdentifier, MarkupError, MoultiMessageException, MoultiWidgetException, ValueError) as exc:
 			# If we catch an exception, then we systematically assume we should handle the reply:
 			finally_reply = True
 			error = str(exc)

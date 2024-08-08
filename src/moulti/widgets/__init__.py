@@ -6,3 +6,13 @@ WIDGET_MODULES = [
 	'question',
 	'divider',
 ]
+
+class MoultiWidgetException(Exception):
+	"""
+	Generic exception that widgets may raise.
+	"""
+
+class MoultiWidgetInvalidPropertyException(MoultiWidgetException):
+	"""
+	Exception widgets may raise to indicate they were passed an invalid property.
+	"""

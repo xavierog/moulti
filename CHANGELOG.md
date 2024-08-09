@@ -15,6 +15,11 @@ Although Moulti's Python packages, modules and functions are obviously available
 - the environment variable `MOULTI_ENFORCE_COLLAPSIBLE` does the same as soon as Moulti starts
 - `Ctrl+o` / `Ctrl+x` collapses/expands both existing and new steps
 
+## Changed
+
+- Moulti now requires Textual >= 0.76.0
+- Footer: the `Dark/Light` keybinding now displays either "Dark" or "Light"
+
 ### Fixed
 
 - `moulti question add id --button value invalid_style label` now returns an error

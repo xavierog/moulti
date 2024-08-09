@@ -104,10 +104,12 @@ class Moulti(App):
 		Binding("O", "collapse_new(True)", "Collapse new widgets", show=False),
 		Binding("ctrl+x", "collapse_both(False)", "Expand", show=False),
 		Binding("ctrl+o", "collapse_both(True)", "Collapse", show=False),
-		("d", "toggle_dark", "Dark/Light"),
+		Binding("d", "light_mode", "Light"),
+		Binding("d", "dark_mode", "Dark"),
 		("h", "help", "Help"),
 		("q", "quit", "Quit"),
 	]
+
 	# Disable Textual's command palette; it may come back if Moulti ends up with too many commands though:
 	ENABLE_COMMAND_PALETTE = False
 
@@ -342,6 +344,21 @@ class Moulti(App):
 				worker = None
 			if worker and not worker.is_cancelled:
 				self.call_from_thread(self.end_user_console.write, line)
+
+	def action_light_mode(self) -> None:
+		self.dark = False
+		self.refresh_bindings()
+
+	def action_dark_mode(self) -> None:
+		self.dark = True
+		self.refresh_bindings()
+
+	def check_action(self, action: str, _parameters: tuple[object, ...]) -> bool:
+		if action == 'light_mode':
+			return self.dark
+		if action == 'dark_mode':
+			return not self.dark
+		return True
 
 	def action_toggle_console(self) -> None:
 		"""Toggle the console."""

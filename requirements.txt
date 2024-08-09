@@ -6,6 +6,6 @@ pylint
 pyperclip
 ruff
 textual-dev
-textual>=0.53
+textual>=0.76
 twine
 unidiff

@@ -44,11 +44,6 @@ class StepContainer(VertScroll):
 		self.prevent_programmatic_scrolling = not self.prevent_programmatic_scrolling
 		# Visual toggle:
 		self.set_class(self.prevent_programmatic_scrolling, 'prevent_programmatic_scrolling')
-		# Workaround for the scrollbar to change color immediately:
-		scrollbar = self.vertical_scrollbar
-		value = scrollbar.mouse_over
-		scrollbar.mouse_over = not value
-		scrollbar.mouse_over = value
 
 	layout_direction_is_down = Reactive(True)
 

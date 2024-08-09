@@ -19,6 +19,7 @@ Although Moulti's Python packages, modules and functions are obviously available
 
 - Moulti now requires Textual >= 0.76.0
 - Footer: the `Dark/Light` keybinding now displays either "Dark" or "Light"
+- Footer: the `Lock scroll` keybinding now displays either "Lock scroll" or "Unlock scroll"
 
 ### Fixed
 

@@ -14,7 +14,8 @@ class StepContainer(VertScroll):
 	Vertical scrollable container for steps.
 	"""
 	BINDINGS = [
-		Binding('l', 'toggle_scrolling', 'Lock scroll'),
+		Binding('l', 'toggle_scrolling(True)', 'Lock scroll'),
+		Binding('l', 'toggle_scrolling(False)', 'Unlock scroll'),
 		Binding("ctrl+t", "focus_question(True, False)", "Previous unanswered question", show=False),
 		Binding("ctrl+y", "focus_question(False, False)", "Next unanswered question", show=False),
 	]
@@ -39,11 +40,17 @@ class StepContainer(VertScroll):
 		super().__init__(*args, **kwargs)
 		self.prevent_programmatic_scrolling = False
 
-	def action_toggle_scrolling(self) -> None:
+	def action_toggle_scrolling(self, prevent: bool) -> None:
 		# Actual toggle:
-		self.prevent_programmatic_scrolling = not self.prevent_programmatic_scrolling
+		self.prevent_programmatic_scrolling = prevent
 		# Visual toggle:
+		self.refresh_bindings()
 		self.set_class(self.prevent_programmatic_scrolling, 'prevent_programmatic_scrolling')
+
+	def check_action(self, action: str, parameters: tuple[object, ...]) -> bool:
+		if action == 'toggle_scrolling':
+			return parameters[0] != self.prevent_programmatic_scrolling
+		return True
 
 	layout_direction_is_down = Reactive(True)
 

@@ -1,7 +1,6 @@
 import json
 from operator import attrgetter
 from typing import Any, Callable
-from rich.errors import MarkupError
 from textual.message import Message
 from textual.widgets import Static
 from moulti.clipboard import copy
@@ -46,11 +45,7 @@ class AbstractStep(Static):
 
 	def check_markup(self, value: str|int|bool) -> None:
 		value = str(value)
-		text = self.render_str(value)
-		# Extra check to work around https://github.com/Textualize/textual/issues/4248:
-		for span in text.spans:
-			if hasattr(span.style, 'meta') and span.style.meta.get('@click') == ():
-				raise MarkupError('problematic @click tag')
+		self.render_str(value)
 
 	def check_markup_dict(self, check_dict: dict[str, str|int|bool], *keys: str) -> None:
 		for key in keys:

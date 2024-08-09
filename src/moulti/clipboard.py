@@ -9,11 +9,8 @@ class ClipboardException(Exception):
 	pass
 
 def osc_52_copy(app: App, data: str) -> None:
-	if hasattr(app, 'copy_to_clipboard'):
-		app.copy_to_clipboard(data)
-		# Alas, it is not possible to determine whether this method actually succeeded.
-	else:
-		raise ClipboardException('OSC 52 is not supported; please ensure you use Textual >= 0.57.0')
+	app.copy_to_clipboard(data)
+	# Alas, it is not possible to determine whether this method actually succeeded.
 
 def copy(app: App, data: str) -> None:
 	if COPY_POLICY == 'terminal-osc-52':

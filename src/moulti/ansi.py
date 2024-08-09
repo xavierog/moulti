@@ -15,9 +15,6 @@ TerminalThemeCollection = dict[str, TerminalTheme]
 COLOR_RE = r'#?(?P<color>[0-9a-f]{6})'
 OVERRIDE_RE = r'^(?P<name>(?:dark|light)[bf]g)=' + COLOR_RE + '$'
 
-def textual_supports_dark_light_ansi_themes() -> bool:
-	return hasattr(TextualApp, 'ansi_theme_dark') and hasattr(TextualApp, 'ansi_theme_light')
-
 def dump_filters(app: TextualApp) -> str:
 	if not hasattr(app, '_filters'):
 		return 'App._filters no longer exists'

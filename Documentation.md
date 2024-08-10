@@ -397,6 +397,7 @@ Tips:
 - Depending on its verbosity level (from `-v` to `-vvvvv`), Ansible is liable to output lines before Moulti's stdout callback plugin is invoked.
   Therefore, it is recommended to set `MOULTI_RUN_OUTPUT=harvest`.
 - By default, the callback plugin changes the title of the Moulti instance; set the environment variable `MOULTI_ANSIBLE_NO_TITLE` to any value to prevent that.
+- By default, all widgets appear expanded; set the environment variable `MOULTI_ANSIBLE_COLLAPSE=task` to collapse tasks from the start.
 
 ## Python scripting
 
@@ -920,6 +921,7 @@ Moulti currently offers no suport for programmatic scrolling inside steps.
 - `MOULTI_ENFORCE_COLLAPSIBLE`: enforce the way new collapsible widgets are displayed and prevent client tools from collapsing or expanding existing widgets:
    - `collapse`: always collapse new collapsible widgets
    - `expand`: always expand new collapsible widgets
+- `MOULTI_ANSIBLE_COLLAPSE`: Ansible-specific: comma-separated list of Ansible parts that should appear collapsed, e.g. `MOULTI_ANSIBLE_COLLAPSE=prompt,recap,task`
 
 About colors in `MOULTI_ANSI*`:
 - colors may be prefixed with `#`;

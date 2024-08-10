@@ -14,6 +14,7 @@ Although Moulti's Python packages, modules and functions are obviously available
 - `O` / `X` collapses/expands new steps
 - the environment variable `MOULTI_ENFORCE_COLLAPSIBLE` does the same as soon as Moulti starts
 - `Ctrl+o` / `Ctrl+x` collapses/expands both existing and new steps
+- Ansible callback plugin: the environment variable `MOULTI_ANSIBLE_COLLAPSE` specifies parts that should appear collapsed
 
 ## Changed
 

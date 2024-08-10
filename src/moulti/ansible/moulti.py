@@ -37,6 +37,10 @@ The first element of the tuple is the answer itself.
 The second element is the list of inputquestion widgets created to obtain this answer.
 """
 
+COLLAPSIBLE = ('prompt', 'recap', 'task')
+COLLAPSE = [part for part in os.environ.get('MOULTI_ANSIBLE_COLLAPSE', '').split(',') if part in COLLAPSIBLE]
+COLLAPSE = ['ansible_' + part for part in COLLAPSE]
+
 def escape_rich_tags(value: str) -> str:
 	return value.replace('[', r'\[')
 
@@ -90,6 +94,10 @@ class MoultiDisplay(Display):
 		all_classes = 'ansible ' + classes
 		final_title = escape_rich_tags(title)
 		moulti_args = [widget_type, 'add', widget_id, '--title', final_title, '--classes', all_classes]
+		for one_class in classes.split():
+			if one_class in COLLAPSE:
+				moulti_args += ['--collapsed']
+				break
 		moulti_args += ['--scroll-on-activity=-1']
 		moulti_args += [*args]
 		self.moulti(moulti_args)
@@ -229,7 +237,7 @@ class MoultiDisplay(Display):
 			cmd_args.append('--password')
 		if default is not None and not private:
 			cmd_args.append(f'--bottom-text=Default value: {default}')
-		question_id = self.new_widget('inputquestion', msg, 'warning', *cmd_args)
+		question_id = self.new_widget('inputquestion', msg, 'ansible_prompt warning', *cmd_args)
 		self.moulti(['scroll', question_id, '-1'])
 		answer = self.get_answer(question_id, default)
 		return (answer, [question_id])
@@ -246,7 +254,7 @@ class MoultiDisplay(Display):
 			if answer1 == answer2:
 				return (answer1, widgets)
 			for widget_id in (id1[0], id2[0]):
-				self.moulti(['inputquestion', 'update', '--classes=error', mismatch, widget_id])
+				self.moulti(['inputquestion', 'update', '--classes=ansible_prompt error', mismatch, widget_id])
 
 	def prompt(self, msg: str, private: bool = False, default: str | None = None) -> str:
 		return self.simple_prompt(msg, private=private, default=default)[0]
@@ -307,7 +315,7 @@ class MoultiDisplay(Display):
 		else:
 			cmd_args += ['--button', ':interrupt:', 'error', 'Interrupt']
 
-		question_id = self.new_widget('question', msg, 'warning', *cmd_args)
+		question_id = self.new_widget('question', msg, 'ansible_prompt warning', *cmd_args)
 		self.moulti(['scroll', question_id, '-1'])
 
 		command = ['question', 'get-answer', '--wait', question_id]

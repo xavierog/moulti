@@ -4,26 +4,18 @@ from rich.console import Console
 from rich.style import Style
 from textual.color import Color
 from textual.events import MouseScrollUp, Click
-from textual.geometry import Size
 from textual.widgets import RichLog
 
 class MoultiLog(RichLog):
 	"""
-	This widget is a variant of RichLog that tries to prevent vertical
-	scrollbars when max-height is not set.
+	This widget is a variant of RichLog with:
+	- the ability to use the App's ANSI theme (background and foreground)
+	- custom scrolling behaviour
+	- a focus indicator on the left
 	"""
 	def __init__(self, *args: Any, **kwargs: Any) -> None:
 		super().__init__(*args, **kwargs)
 		self.follow_ansi_theme = True
-
-	def get_content_height(self, container: Size, viewport: Size, width: int) -> int:
-		height = super().get_content_height(container, viewport, width)
-		if self.show_horizontal_scrollbar:
-			# When RichLog is assigned "height: auto;", the horizontal
-			# scrollbar consumes lines from the widget itself, resulting in
-			# the apparition of a vertical scrollbar.
-			height += self.styles.scrollbar_size_horizontal
-		return height
 
 	def on_mount(self) -> None:
 		if self.follow_ansi_theme:

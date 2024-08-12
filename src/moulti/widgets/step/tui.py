@@ -74,6 +74,8 @@ class Step(CollapsibleStep):
 
 	def update_properties(self, kwargs: dict[str, str|int|bool]) -> None:
 		super().update_properties(kwargs)
+		if 'auto_scroll' in kwargs:
+			self.log_widget.auto_scroll = self.log_widget.default_auto_scroll = bool(kwargs['auto_scroll'])
 		if 'text' in kwargs:
 			self.clear()
 			self.append(str(kwargs['text']))
@@ -86,6 +88,7 @@ class Step(CollapsibleStep):
 
 	def export_properties(self) -> dict[str, Any]:
 		prop = super().export_properties()
+		prop['auto_scroll'] = self.log_widget.default_auto_scroll
 		prop['min_height'] = self.min_height
 		prop['max_height'] = self.max_height
 		return prop

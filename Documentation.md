@@ -845,17 +845,26 @@ moulti pass foo --append <<< 'do not scroll!'
 
 ### Manually scrolling inside steps
 
-By default, Moulti strives to display the latest lines it received and thus keeps scrolling down as long as lines keep coming.
-This constant scrolling stops as soon as you scroll up:
+By default, Moulti enables auto-scrolling, i.e. it strives to display the latest lines it received and thus keeps scrolling down as long as lines keep coming.
+Auto-scrolling stops as soon as you scroll up:
 - using the mouse wheel (or its laptop equivalent);
 - by grabbing the scrollbar handle using the mouse pointer;
 - by hitting the `Up`, `PgUp` or `Home` key.
 
-The constant scrolling resumes when you hit the `End` key.
+If enabled (cf next section), auto-scrolling resumes when you hit the `End` key.
 
 ### Programmatically scrolling inside steps
 
-Moulti currently offers no suport for programmatic scrolling inside steps.
+Moulti currently offers no support for programmatic scrolling inside steps.
+It is, however, possible to enable or disable auto-scrolling:
+```
+# Disable auto-scroll:
+moulti step add foo --no-auto-scroll
+yes 'Do not scroll.' | nl -ba | head -500 | moulti pass foo
+# Enable auto-scroll again:
+moulti step update foo --auto-scroll
+moulti pass --append foo <<< 'Now, scroll!'
+```
 
 ## Environment variables
 

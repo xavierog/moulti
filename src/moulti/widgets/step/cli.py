@@ -1,5 +1,5 @@
 import sys
-from argparse import ArgumentParser, _SubParsersAction
+from argparse import ArgumentParser, BooleanOptionalAction, _SubParsersAction
 from moulti.helpers import Args, pint, handle_reply
 from moulti.helpers import send_to_moulti_and_handle_reply, send_no_none_to_moulti_and_handle_reply
 from moulti.protocol import moulti_connect, send_json_message, recv_json_message
@@ -57,6 +57,7 @@ def add_step_options(parser: ArgumentParser, none: bool = False) -> None:
 	"""Options common to step add (with actual default values) and step update (with None default values)."""
 	add_collapsiblestep_options(parser, none)
 	parser.add_argument('--text', '-t', type=str, default=None if none else '', help='content')
+	parser.add_argument('--auto-scroll', action=BooleanOptionalAction, default=None if none else True, help='enable or disable inner auto-scrolling')
 	parser.add_argument('--min-height', '-mh', type=pint, default=None if none else  1, help='minimum content height')
 	parser.add_argument('--max-height', '-Mh', type=pint, default=None if none else 25, help='maximum content height; 0 to disable')
 

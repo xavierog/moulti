@@ -8,6 +8,10 @@ Although Moulti's Python packages, modules and functions are obviously available
 
 ## Unreleased
 
+### Added
+
+- `moulti step`: add options `--auto-scroll` and `--no-auto-scroll` to control inner auto-scrolling
+
 ### Fixed
 
 - Steps with a horizontal scrollbar had an extra line above it

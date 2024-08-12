@@ -16,6 +16,7 @@ class MoultiLog(RichLog):
 	def __init__(self, *args: Any, **kwargs: Any) -> None:
 		super().__init__(*args, **kwargs)
 		self.follow_ansi_theme = True
+		self.default_auto_scroll = True
 
 	def on_mount(self) -> None:
 		if self.follow_ansi_theme:
@@ -28,7 +29,7 @@ class MoultiLog(RichLog):
 		self.styles.background = Color(*theme.background_color)
 
 	def clear(self) -> Self:
-		self.auto_scroll = True
+		self.auto_scroll = self.default_auto_scroll
 		return super().clear()
 
 	def watch_scroll_y(self, old_value: float, new_value: float) -> None:
@@ -49,17 +50,20 @@ class MoultiLog(RichLog):
 		"""Turn auto_scroll off as soon as users hit the Up key."""
 		self.auto_scroll = False
 		super().action_scroll_up(*args, **kwargs)
+
 	def action_page_up(self, *args: Any, **kwargs: Any) -> None:
 		"""Turn auto_scroll off as soon as users hit the PgUp key."""
 		self.auto_scroll = False
 		super().action_page_up(*args, **kwargs)
+
 	def action_scroll_home(self, *args: Any, **kwargs: Any) -> None:
 		"""Turn auto_scroll off as soon as users hit the Home key."""
 		self.auto_scroll = False
 		super().action_scroll_home(*args, **kwargs)
+
 	def action_scroll_end(self, *args: Any, **kwargs: Any) -> None:
 		"""Turn auto_scroll on again as soon as users hit the End key."""
-		self.auto_scroll = True
+		self.auto_scroll = self.default_auto_scroll
 		super().action_scroll_end(*args, **kwargs)
 
 	async def on_click(self, event: Click) -> None:

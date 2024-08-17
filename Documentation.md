@@ -889,6 +889,8 @@ moulti pass --append foo <<< 'Now, scroll!'
 #### Appearance, look and feel
 
 - `MOULTI_MODE`: `light` to start Moulti in light mode, `dark` to start Moulti in dark mode; defaults to `dark`.
+- `MOULTI_TAB_SIZE`: when passing text to steps, tab characters are expanded into a fixed number of spaces, which defaults to 8.
+  Use e.g. `MOULTI_TAB_SIZE=4` or `MOULTI_TAB_SIZE=2` to control that behaviour.
 - `MOULTI_ANSI`: define whether and how Moulti alters the 16 standard ANSI colors. There are three available policies:
   - `verbatim`: (default value since v1.5.0) ANSI colors appear the same way inside Moulti as outside Moulti.
     However, Moulti does not try to guess the background and foreground colors of your terminal. That may affect readability.

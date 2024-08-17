@@ -2,40 +2,44 @@ import os
 import selectors
 from queue import Queue, Empty
 from time import monotonic_ns
-from typing import Any, Callable
+from typing import Any, Callable, Iterable, Sequence
 from textual import work
 from textual.app import ComposeResult
+from textual.strip import Strip
 from textual.worker import get_current_worker
 from rich.text import Text
+from rich.cells import get_character_cell_size
+from moulti.helpers import ANSI_ESCAPE_SEQUENCE_BYTES, TAB_SPACES_BYTES
 from . import MOULTI_PASS_DEFAULT_READ_SIZE
 from ..collapsiblestep.tui import CollapsibleStep
 from ..moultilog import MoultiLog
 
-ANSI_ESCAPE_SEQUENCE = '\x1b'
-
 class ThrottledAppender:
 	"""
-	This class uses Textual's call_from_thread() to schedule calls to "step.append(buffer)" inside Textual's asyncio
+	This class uses Textual's call_from_thread() to schedule calls to "step.append_lines()" inside Textual's asyncio
 	event loop in a thread-safe manner. These calls are throttled so as not to flood the event loop.
 	"""
 	def __init__(self, step: 'Step', delay_ms: int):
 		self.step = step
 		self.call_from_thread = step.app.call_from_thread
 		self.delay_ns = delay_ms * 1_000_000
-		self.buffers: list[list[bytes]] = []
+		self.lines: list[str|Text] = []
+		self.max_cell_len = -1
 		self.last_append = 0
 
-	def new_data(self, buffer: list[bytes], force: bool = False) -> None:
-		self.buffers.append(buffer)
+	def new_data(self, lines: Iterable[str|Text], max_cell_len: int, force: bool = False) -> None:
+		self.lines.extend(lines)
+		if max_cell_len > self.max_cell_len: # pylint: disable=consider-using-min-builtin
+			self.max_cell_len = max_cell_len
 		self.append(force)
 
 	def append(self, force: bool = False) ->  None:
-		if self.buffers:
+		if self.lines:
 			now = monotonic_ns()
 			if force or (now - self.last_append >= self.delay_ns):
-				if buffered_string := b''.join([c for b in self.buffers for c in b]).decode('utf-8', errors='surrogateescape'):
-					self.call_from_thread(self.step.append, buffered_string)
-				self.buffers.clear()
+				self.call_from_thread(self.step.append_lines, self.lines, self.max_cell_len)
+				self.lines = []
+				self.max_cell_len = -1
 				self.last_append = now
 
 class Step(CollapsibleStep):
@@ -51,7 +55,7 @@ class Step(CollapsibleStep):
 	]
 
 	def __init__(self, id: str, **kwargs: str|int|bool): # pylint: disable=redefined-builtin
-		self.log_widget = MoultiLog(highlight=False)
+		self.log_widget = MoultiLog()
 
 		self.min_height = 1
 		self.max_height = 25
@@ -112,23 +116,17 @@ class Step(CollapsibleStep):
 		self.color = ''
 
 	def append(self, text: str) -> None:
-		# RichLog does not handle partial lines and thus always adds a trailing \n; therefore, we must strip one (and
-		# only one) trailing \n, if present:
-		if text and text[-1] == '\n':
-			text = text[:-1]
-		# If necessary, prepend the ANSI escape code for the color inherited from the last line:
-		if self.color:
-			text = self.color + text
-		# Deal with colored text; the text_to_write variable is made necessary by mypy.
-		text_to_write: str | Text = text
-		if ANSI_ESCAPE_SEQUENCE in text:
-			# Convert text and an extra character from ANSI to Rich Text
-			text_to_write = Text.from_ansi(text + '_')
-			# The extra character reflects the color the next line should inherit:
-			self.color = Step.last_character_color(text_to_write)
-			# Strip the extra character:
-			text_to_write.right_crop(1)
-		self.log_widget.write(text_to_write)
+		if not text:
+			return
+		if text[-1] != '\n':
+			text += '\n'
+		# This looks silly, but our main ingestion function takes bytes, not strings:
+		text_bytes = text.encode('utf-8')
+		lines, max_cell_len, _, _ = Step.bytes_to_lines(text_bytes, b'', 'utf-8')
+		self.append_lines(lines, max_cell_len)
+
+	def append_lines(self, lines: Iterable[str|Text|Strip], max_cell_len: int) -> None:
+		self.log_widget.write_lines(lines, max_cell_len)
 		self.activity()
 
 	@classmethod
@@ -206,10 +204,72 @@ class Step(CollapsibleStep):
 			helpers['debug'](f'pass: {error}')
 		helpers['reply'](done=error is None, error=error)
 
+	@classmethod
+	def bytes_to_lines(
+		cls,
+		data: bytes,
+		color: bytes = b'',
+		encoding: str = 'utf-8'
+	) -> tuple[Sequence[str|Text], int, bytes, bytes]:
+		lines: list[str|Text] = []
+		max_cell_len: int = -1
+		leftover: bytes = b''
+		if data:
+			# Deal only with lines ending with a line feed (lf, \n) and return leftover bytes:
+			if data[-1] != b'\n':
+				last_lf_index = data.rfind(b'\n')
+				leftover = data[last_lf_index+1:]
+				data = data[:last_lf_index]
+			if data:
+				# At this stage, all lines end with \n.
+				for line_bytes in data.split(b'\n'):
+					# Expand tabs into spaces: both Rich and Textual provide frighteningly
+					# complex methods to do it the right way. But Text.expand_tabs()
+					# dramatically and negatively affects performance.
+					line_bytes = line_bytes.replace(b'\t', TAB_SPACES_BYTES)
+
+					if ANSI_ESCAPE_SEQUENCE_BYTES in line_bytes:
+						# The trailing underscore will determine the next line's color:
+						line_bytes = color + line_bytes + b'_'
+						line_str = line_bytes.decode(encoding, errors='surrogateescape')
+						# ANSI sequences are tricky: better call Text.from_ansi() even if it is expensive:
+						line_text = Text.from_ansi(line_str)
+						line_plain = line_text.plain
+						color = cls.last_character_color(line_text).encode('ascii') # analyse the trailing underscore
+						line_text.right_crop(1) # remove the trailing underscore
+						lines.append(line_text)
+					else:
+						line_str = line_bytes.decode(encoding, errors='surrogateescape')
+						line_plain = line_str
+						if color:
+							line_str = color.decode('ascii') + line_str
+						lines.append(line_str)
+
+					max_cell_len = Step.update_max_cell_len(max_cell_len, line_plain)
+		return lines, max_cell_len, leftover, color
+
+	@classmethod
+	def update_max_cell_len(cls, max_cell_len: int, line_plain: str) -> int:
+		line_plain_char_len = len(line_plain)
+		# Worst-case: each character takes two cells:
+		if (2 * line_plain_char_len) > max_cell_len:
+			current_cell_len = 0
+			for position, char in enumerate(line_plain):
+				# Every 10 characters, evaluate the worst-case scenario again:
+				if (position % 10) == 0 and position:
+					if (current_cell_len + 2 * (line_plain_char_len - position)) <= max_cell_len:
+						break
+				current_cell_len += get_character_cell_size(char)
+			else:
+				if current_cell_len > max_cell_len: # pylint: disable=consider-using-max-builtin
+					max_cell_len = current_cell_len
+		return max_cell_len
+
 	@work(thread=True)
 	async def append_from_queue(self, queue: Queue, helpers: dict[str, Any]) -> None:
 		current_worker = get_current_worker()
 		self.prevent_deletion += 1
+		color = b''
 		try:
 			throttling_ms = 25
 			throttling_s = throttling_ms / 1000
@@ -221,22 +281,21 @@ class Step(CollapsibleStep):
 				try:
 					data = queue.get(block=True, timeout=throttling_s)
 					if data is not None:
-						# Buffer data to avoid queuing partial lines as, down the
-						# line, RichLog.write() only handles complete lines:
-						# look for the position of \n from the end of the string :
-						eol = data.rfind(b'\n')
-						if eol == -1: # no \n found, buffer the whole string:
-							buffer.append(data)
-						else:
-							before = data[:eol+1]
-							after = data[eol+1:]
-							buffer.append(before)
-							appender.new_data(buffer)
-							buffer = []
-							if after:
-								buffer.append(after)
+						buffer.append(data)
+						all_data = b''.join(buffer)
+						lines, max_cell_len, leftover, color = Step.bytes_to_lines(all_data, color)
+						if lines:
+							appender.new_data(lines, max_cell_len)
+						buffer.clear()
+						if leftover:
+							buffer.append(leftover)
 					else: # Reached EOF: flush buffer and exit:
-						appender.new_data(buffer, True)
+						if buffer:
+							buffer.append(b'\n')
+							all_data = b''.join(buffer)
+							lines, max_cell_len, _, _ = Step.bytes_to_lines(all_data, color)
+							appender.new_data(lines, max_cell_len)
+						appender.append(True)
 						break
 				except Empty:
 					# No data: there may be data left in the appender's buffer:

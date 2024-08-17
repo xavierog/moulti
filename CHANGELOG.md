@@ -11,6 +11,8 @@ Although Moulti's Python packages, modules and functions are obviously available
 ### Added
 
 - `moulti step`: add options `--auto-scroll` and `--no-auto-scroll` to control inner auto-scrolling
+- `moulti pass`: significant performance improvements
+- the environment variable `MOULTI_TAB_SIZE` controls the expansion of tab characters passed to steps
 
 ### Fixed
 

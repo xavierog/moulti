@@ -1,3 +1,4 @@
+import os
 import sys
 from typing import Any, cast
 from argparse import ArgumentTypeError
@@ -40,3 +41,18 @@ def send_no_none_to_moulti_and_handle_reply(args: Args) -> None:
 def call_all(calls: list[Any]) -> None:
 	for call in calls:
 		call[0](*call[1:])
+
+DEFAULT_TAB_SIZE = 8
+
+def get_tab_size() -> int:
+	try:
+		return pint(os.environ.get('MOULTI_TAB_SIZE', ''))
+	except Exception:
+		return DEFAULT_TAB_SIZE
+
+TAB_SIZE = get_tab_size()
+TAB_SPACES_STR = ' '*TAB_SIZE
+TAB_SPACES_BYTES = b' '*TAB_SIZE
+
+ANSI_ESCAPE_SEQUENCE_STR = '\x1b'
+ANSI_ESCAPE_SEQUENCE_BYTES = b'\x1b'

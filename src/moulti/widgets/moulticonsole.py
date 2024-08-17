@@ -4,10 +4,10 @@ from rich.highlighter import Highlighter, RegexHighlighter, ReprHighlighter
 from rich.text import Text
 from rich.theme import Theme
 from textual.app import ComposeResult
-from textual.events import Click
-from textual.widgets import Label, Static
+from textual.events import MouseScrollUp, Click
+from textual.widgets import Label, RichLog, Static
 from moulti.clipboard import copy
-from .moultilog import MoultiLog
+from moulti.widgets.mixin import ToLinesMixin
 
 MOULTI_THEME = Theme({
 	'moulti.date': 'orchid2',
@@ -35,8 +35,7 @@ class MoultiConsole(Static):
 
 	def __init__(self, *args: Any, **kwargs: Any) -> None:
 		super().__init__(*args, **kwargs)
-		self.log_widget = MoultiLog()
-		self.log_widget.follow_ansi_theme = False
+		self.log_widget = MoultiConsoleLog()
 		self.log_widget.highlighter = MoultiConsoleHighlighter()
 		self.log_widget.highlight = True
 
@@ -70,7 +69,7 @@ class MoultiConsole(Static):
 			background: $moulti_console_color;
 			color: auto;
 		}
-		MoultiLog {
+		MoultiConsoleLog {
 			min-height: 5;
 			max-height: 15;
 			border-bottom: none;
@@ -82,6 +81,56 @@ class MoultiConsole(Static):
 		&.hidden {
 			display: none;
 		}
+	}
+	"""
+
+class MoultiConsoleLog(RichLog, ToLinesMixin):
+	"""
+	Moulti's console leverages RichLog and its highlighter
+	"""
+	def watch_scroll_y(self, old_value: float, new_value: float) -> None:
+		"""
+		Adjust the behavior of the vertical scrollbar so users can scroll freely despite incoming new lines.
+		"""
+		# If users grab the vertical scrollbar, auto_scroll should turn off:
+		if self.auto_scroll and self.is_vertical_scrollbar_grabbed:
+			self.auto_scroll = False
+		# ScrollView also implements this watch method: call it or it breaks the entire scrolling.
+		super().watch_scroll_y(old_value, new_value)
+
+	# pylint: disable=duplicate-code; copy/paste so as to get the same scrolling behaviour as MoultiLog.
+	# Moving duplicate code to a common Mixin works but does not please mypy.
+	def on_mouse_scroll_up(self, _: MouseScrollUp) -> None:
+		"""Turn auto_scroll off as soon as users scroll up using the mouse wheel."""
+		self.auto_scroll = False
+
+	def action_scroll_up(self, *args: Any, **kwargs: Any) -> None:
+		"""Turn auto_scroll off as soon as users hit the Up key."""
+		self.auto_scroll = False
+		super().action_scroll_up(*args, **kwargs)
+
+	def action_page_up(self, *args: Any, **kwargs: Any) -> None:
+		"""Turn auto_scroll off as soon as users hit the PgUp key."""
+		self.auto_scroll = False
+		super().action_page_up(*args, **kwargs)
+
+	def action_scroll_home(self, *args: Any, **kwargs: Any) -> None:
+		"""Turn auto_scroll off as soon as users hit the Home key."""
+		self.auto_scroll = False
+		super().action_scroll_home(*args, **kwargs)
+
+	def action_scroll_end(self, *args: Any, **kwargs: Any) -> None:
+		"""Turn auto_scroll on again as soon as users hit the End key."""
+		self.auto_scroll = True
+		super().action_scroll_end(*args, **kwargs)
+
+	DEFAULT_CSS = """
+	MoultiConsoleLog {
+		height: auto;
+		border-left: blank;
+	}
+	MoultiConsoleLog:focus {
+		border-left: thick $accent-lighten-3;
 	}
 	"""
 

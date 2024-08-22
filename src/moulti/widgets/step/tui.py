@@ -7,9 +7,10 @@ from textual import work
 from textual.app import ComposeResult
 from textual.strip import Strip
 from textual.worker import get_current_worker
+from rich.ansi import re_ansi
 from rich.text import Text
 from rich.cells import get_character_cell_size
-from moulti.helpers import ANSI_ESCAPE_SEQUENCE_BYTES, TAB_SPACES_BYTES
+from moulti.helpers import ANSI_ESCAPE_SEQUENCE_BYTES, ANSI_RESET_SEQUENCES_BYTES, TAB_SPACES_BYTES
 from . import MOULTI_PASS_DEFAULT_READ_SIZE
 from ..collapsiblestep.tui import CollapsibleStep
 from ..moultilog import MoultiLog
@@ -229,15 +230,23 @@ class Step(CollapsibleStep):
 					line_bytes = line_bytes.replace(b'\t', TAB_SPACES_BYTES)
 
 					if ANSI_ESCAPE_SEQUENCE_BYTES in line_bytes:
-						# The trailing underscore will determine the next line's color:
-						line_bytes = color + line_bytes + b'_'
-						line_str = line_bytes.decode(encoding, errors='surrogateescape')
-						# ANSI sequences are tricky: better call Text.from_ansi() even if it is expensive:
-						line_text = Text.from_ansi(line_str)
-						line_plain = line_text.plain
-						color = cls.last_character_color(line_text).encode('ascii') # analyse the trailing underscore
-						line_text.right_crop(1) # remove the trailing underscore
-						lines.append(line_text)
+						if Step.ends_with_ansi_reset(line_bytes):
+							# Simple case: the last ANSI sequence in the line resets all styles:
+							line_bytes = color + line_bytes
+							line_str = line_bytes.decode(encoding, errors='surrogateescape')
+							line_plain = re_ansi.sub('', line_str)
+							lines.append(line_str)
+							color = b''
+						else:
+							# The trailing underscore will determine the next line's color:
+							line_bytes = color + line_bytes + b'_'
+							line_str = line_bytes.decode(encoding, errors='surrogateescape')
+							# ANSI sequences can be tricky: better call Text.from_ansi() even if it is expensive:
+							line_text = Text.from_ansi(line_str)
+							line_plain = line_text.plain
+							color = cls.last_character_color(line_text).encode('ascii') # analyse the trailing underscore
+							line_text.right_crop(1) # remove the trailing underscore
+							lines.append(line_text)
 					else:
 						line_str = line_bytes.decode(encoding, errors='surrogateescape')
 						line_plain = line_str
@@ -247,6 +256,16 @@ class Step(CollapsibleStep):
 
 					max_cell_len = Step.update_max_cell_len(max_cell_len, line_plain)
 		return lines, max_cell_len, leftover, color
+
+	@classmethod
+	def ends_with_ansi_reset(cls, line: bytes) -> bool:
+		index = line.rfind(ANSI_ESCAPE_SEQUENCE_BYTES)
+		rest_of_line = line[index:]
+		for reset_seq in ANSI_RESET_SEQUENCES_BYTES:
+			if rest_of_line.startswith(reset_seq):
+				return True
+		return False
+
 
 	@classmethod
 	def update_max_cell_len(cls, max_cell_len: int, line_plain: str) -> int:

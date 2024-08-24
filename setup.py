@@ -50,6 +50,8 @@ setup(
 		'console_scripts': [
 			'moulti = moulti.precli:main',
 			'moulti-askpass = moulti.askpass:main',
+			'moulti-askpass-become-password = moulti.askpass:main',
+			'moulti-askpass-connection-password = moulti.askpass:main',
 		]
 	},
 	scripts=[

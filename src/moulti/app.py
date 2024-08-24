@@ -56,6 +56,12 @@ def timestamp() -> str:
 def is_ansible(command: list[str]) -> bool:
 	return bool(len(command)) and 'ansible' in command[0]
 
+def add_abs_path_to_environment(env: dict[str, str], env_var: str, command: str) -> bool:
+	if abs_path := which(command):
+		env[env_var] = abs_path
+		return True
+	return False
+
 def run_environment(command: list[str], copy: bool = True) -> dict[str, str]:
 	"""
 	Return environment variables set by "Moulti run <command>".
@@ -72,8 +78,7 @@ def run_environment(command: list[str], copy: bool = True) -> dict[str, str]:
 
 	if 'SUDO_ASKPASS' not in os.environ:
 		# sudo requires an absolute path:
-		if moulti_askpass_abspath := which('moulti-askpass'):
-			environment['SUDO_ASKPASS'] = moulti_askpass_abspath
+		add_abs_path_to_environment(environment, 'SUDO_ASKPASS', 'moulti-askpass')
 
 	if (ansible_policy := os.environ.get('MOULTI_ANSIBLE', 'default')) != 'no':
 		if ansible_policy == 'force' or (is_ansible(command) and 'ANSIBLE_STDOUT_CALLBACK' not in os.environ):
@@ -83,6 +88,18 @@ def run_environment(command: list[str], copy: bool = True) -> dict[str, str]:
 			ansible_callback_paths += ansible.__path__[0]
 			environment['ANSIBLE_CALLBACK_PLUGINS'] = ansible_callback_paths
 			environment['ANSIBLE_STDOUT_CALLBACK'] = 'moulti'
+			# ansible-playbook may still read from /dev/tty through getpass.getpass():
+			ansible_askpass = {
+				'ANSIBLE_CONNECTION_PASSWORD_FILE': {'args': ('-k', '--ask-pass'), 'suffix': 'connection-password'},
+				'ANSIBLE_BECOME_PASSWORD_FILE': {'args': ('-K', '--ask-become-pass'), 'suffix': 'become-password'},
+			}
+			for env_var, conf in ansible_askpass.items():
+				if env_var in environment:
+					continue
+				for arg in conf['args']:
+					if arg in command:
+						add_abs_path_to_environment(environment, env_var, f'moulti-askpass-{conf["suffix"]}')
+						del command[command.index(arg)]
 
 	return environment
 
@@ -284,8 +301,12 @@ class Moulti(App):
 		worker = get_current_worker()
 		try:
 			self.init_command_running = True
-			self.logconsole(f'exec: about to run {command}')
+			original_command = command.copy()
+			self.logconsole(f'exec: about to run {original_command}')
 			popen_args: dict[str, Any] = {'env': run_environment(command), 'stdin': subprocess.DEVNULL}
+			# Important: run_environment() may have modified command:
+			if command != original_command:
+				self.logconsole(f'exec: command changed to {command}')
 			# Not using 'with' because that waits for the process to exit; pylint: disable=consider-using-with
 			process = subprocess.Popen(command, **popen_args, **self.output_policy_popen_args())
 			self.logconsole(f'exec: {command} launched with PID {process.pid}')

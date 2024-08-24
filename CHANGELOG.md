@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for its CLI (Command-Line Interface), i.e. for the `moulti` command.
 Although Moulti's Python packages, modules and functions are obviously available, they do not constitute a public API yet.
 
+## Unreleased
+
+### Added
+
+- the environment variable `MOULTI_ASKPASS_DEFAULT_PROMPT` defines the prompt shown by `moulti-askpass` if none was passed on the command line
+- Ansible-specific variants of `moulti-askpass`:
+  - `moulti-askpass-become-password`
+  - `moulti-askpass-connection-password`
+
+# Fixed
+
+- Ansible callback plugin: override these `ansible-playbook` command-line options to prevent it from reading passwords through the current tty:
+  - `-k`, `-ask-pass`
+  - `-K`, `--ask-become-pass`
+
 ## [1.16.0] - 2024-08-23
 
 ### Added

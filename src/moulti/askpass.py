@@ -2,6 +2,7 @@
 A simple "askpass" program for Moulti, compatible with ssh and sudo.
 """
 import os
+import re
 import sys
 import random
 from typing import Callable
@@ -13,8 +14,15 @@ class NoAnswerException(Exception):
 def generate_step_id(prefix: str = '') -> str:
 	return prefix + str(random.randint(10_000_000, 99_999_999))
 
+def get_default_prompt() -> str:
+	# If moulti-askpass was invoked with a suffix, turn it into a prompt:
+	if sys.argv and (rem := re.search(r'moulti-askpass-(?P<suffix>[^/]+)$', sys.argv[0])):
+		return rem.group('suffix').replace('-', ' ').capitalize() + '?'
+	# Otherwise, check environment variables; use a dummy prompt as a last resort:
+	return os.environ.get('MOULTI_ASKPASS_DEFAULT_PROMPT', 'askpass')
+
 def get_prompt() -> tuple[str, str, bool]:
-	prompt = sys.argv[1] if len(sys.argv) >= 2 else 'askpass'
+	prompt = sys.argv[1] if len(sys.argv) >= 2 else get_default_prompt()
 	# Assume the user is prompted for a secret value, unless the prompt says otherwise:
 	ask_secret = 'fingerprint' not in prompt
 	# Escape '[' characters so Textual does not interpret them as Rich tags:

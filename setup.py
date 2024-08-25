@@ -52,6 +52,7 @@ setup(
 			'moulti-askpass = moulti.askpass:main',
 			'moulti-askpass-become-password = moulti.askpass:main',
 			'moulti-askpass-connection-password = moulti.askpass:main',
+			'moulti-askpass-vault-client = moulti.askpass:main',
 		]
 	},
 	scripts=[

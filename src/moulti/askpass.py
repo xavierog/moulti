@@ -1,5 +1,5 @@
 """
-A simple "askpass" program for Moulti, compatible with ssh and sudo.
+A simple "askpass" program for Moulti, compatible with ssh, Ansible and sudo.
 """
 import os
 import re
@@ -22,9 +22,17 @@ def get_default_prompt() -> str:
 	return os.environ.get('MOULTI_ASKPASS_DEFAULT_PROMPT', 'askpass')
 
 def get_prompt() -> tuple[str, str, bool]:
+	# Assume the user is prompted for a secret value:
+	ask_secret = True
+	# Ideally, the prompt should be provided as first command-line argument:
 	prompt = sys.argv[1] if len(sys.argv) >= 2 else get_default_prompt()
-	# Assume the user is prompted for a secret value, unless the prompt says otherwise:
-	ask_secret = 'fingerprint' not in prompt
+	# Ansible-specific:
+	if prompt == '--vault-id' and len(sys.argv) >= 3:
+		vault_id = sys.argv[2]
+		prompt = f'Password for vault {vault_id}?'
+	else:
+		# SSH-specific: askpass is also used to accept or refuse host key fingerprints:
+		ask_secret = 'fingerprint' not in prompt
 	# Escape '[' characters so Textual does not interpret them as Rich tags:
 	prompt = prompt.replace('[', r'\[')
 	# For proper alignment, use the first line as title and the rest as top-text:

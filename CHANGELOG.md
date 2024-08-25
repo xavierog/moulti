@@ -14,12 +14,14 @@ Although Moulti's Python packages, modules and functions are obviously available
 - Ansible-specific variants of `moulti-askpass`:
   - `moulti-askpass-become-password`
   - `moulti-askpass-connection-password`
+  - `moulti-askpass-vault-client`
 
 # Fixed
 
 - Ansible callback plugin: override these `ansible-playbook` command-line options to prevent it from reading passwords through the current tty:
   - `-k`, `-ask-pass`
   - `-K`, `--ask-become-pass`
+  - `-J`, `--ask-vault-pass`, `--ask-vault-password`
 
 ## [1.16.0] - 2024-08-23
 

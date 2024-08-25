@@ -92,6 +92,10 @@ def run_environment(command: list[str], copy: bool = True) -> dict[str, str]:
 			ansible_askpass = {
 				'ANSIBLE_CONNECTION_PASSWORD_FILE': {'args': ('-k', '--ask-pass'), 'suffix': 'connection-password'},
 				'ANSIBLE_BECOME_PASSWORD_FILE': {'args': ('-K', '--ask-become-pass'), 'suffix': 'become-password'},
+				'ANSIBLE_VAULT_PASSWORD_FILE': {
+					'args': ('-J', '--ask-vault-pass', '--ask-vault-password'),
+					'suffix': 'vault-client',
+				},
 			}
 			for env_var, conf in ansible_askpass.items():
 				if env_var in environment:

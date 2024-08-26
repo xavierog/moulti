@@ -17,7 +17,7 @@ class HelpScreen(ModalScreen):
   [key]enter[/]: collapse/expand the current step
          submit the current input field
   [key]home[/], [key]pgup[/], [key]up[/], [key]down[/], [key]pgdn[/], [key]end[/]: vertical scroll
-  [key]left[/], [key]right[/]: horizontal scroll
+  [key]ctrl+pgup[/], [key]left[/], [key]right[/], [key]ctrl+pgdn[/]: horizontal scroll
   [key]l[/]: lock scroll: ignore programmatic scrolling
   [key]s[/]: save the current state to the filesystem
   [key]n[/]: show/hide the console

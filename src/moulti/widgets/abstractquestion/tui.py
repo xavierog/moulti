@@ -26,7 +26,7 @@ class AbstractQuestion(CollapsibleStep):
 			helpers['reply'](answer=self.answer, done=True, error=None)
 		return ()
 
-	@work(thread=True)
+	@work(thread=True, group='question-flush', name='flush-answers')
 	def flush_waiting_clients(self) -> None:
 		for _kwargs, helpers in self.waiting:
 			try:

@@ -296,7 +296,7 @@ class Moulti(App):
 		queue.put_nowait(initial_data)
 		step.append_from_file_descriptor_to_queue(queue, {}, helpers)
 
-	@work(thread=True)
+	@work(thread=True, group='app-exec', name='moulti-run')
 	def exec(self, command: list[str]) -> None:
 		"""
 		Launch the given command with the assumption it is meant to drive the current Moulti instance.
@@ -432,7 +432,7 @@ class Moulti(App):
 		self.exit_first_policy = exit_request.exit_first_policy
 		self.exit()
 
-	@work(thread=True)
+	@work(thread=True, group='app-save', name='save')
 	def action_save(self) -> None:
 		"""
 		Export everything currently shown by the instance as a bunch of files in a directory.
@@ -629,7 +629,7 @@ class Moulti(App):
 		allowed = uid in self.allowed_uids or gid in self.allowed_gids
 		return allowed, uid, gid
 
-	@work(thread=True)
+	@work(thread=True, group='app-network', name='network-loop')
 	async def network_loop(self) -> None:
 		current_worker = get_current_worker()
 

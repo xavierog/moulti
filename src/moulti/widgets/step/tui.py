@@ -152,7 +152,7 @@ class Step(CollapsibleStep):
 		self.append_from_file_descriptor_to_queue(queue, kwargs, helpers)
 		return ()
 
-	@work(thread=True)
+	@work(thread=True, group='step-ingestion', name='fd-to-queue')
 	async def append_from_file_descriptor_to_queue(
 		self,
 		queue: Queue,
@@ -284,7 +284,7 @@ class Step(CollapsibleStep):
 					max_cell_len = current_cell_len
 		return max_cell_len
 
-	@work(thread=True)
+	@work(thread=True, group='step-ingestion', name='queue-to-step')
 	async def append_from_queue(self, queue: Queue, helpers: dict[str, Any]) -> None:
 		current_worker = get_current_worker()
 		self.prevent_deletion += 1

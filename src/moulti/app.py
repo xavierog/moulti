@@ -156,6 +156,7 @@ class Moulti(App):
 		"""
 		super().__init__()
 		self.dark = os.environ.get('MOULTI_MODE', 'dark') != 'light'
+		self.set_title('Moulti')
 
 	def init_security(self) -> None:
 		def ids_from_env(env_var_name: str) -> list[int]:
@@ -173,7 +174,7 @@ class Moulti(App):
 		self.allowed_gids.extend(ids_from_env('MOULTI_ALLOWED_GID'))
 
 	def init_widgets(self) -> None:
-		self.title_label = Label('Moulti', id='header')
+		self.title_label = Label('Title', id='header')
 		self.title_label.tooltip = f'Instance name: {current_instance()}'
 		self.steps_container = StepContainer()
 		self.progress_bar = ProgressBar(id='progress_bar', show_eta=False)
@@ -186,6 +187,10 @@ class Moulti(App):
 		if mec_env_var == 'expand':
 			return False
 		return None
+
+	def set_title(self, title: str) -> None:
+		self.title = title
+		self.title_label.update(title)
 
 	def setup_ansi_behavior(self) -> None:
 		"""
@@ -350,7 +355,7 @@ class Moulti(App):
 
 	def export_properties(self) -> dict[str, Any]:
 		prop: dict[str, Any] = {}
-		prop['title'] = str(self.title_label.renderable)
+		prop['title'] = self.title
 		prop['progress_bar'] = self.progress_bar.styles.display == 'block'
 		prop['progress_target'] = self.progress_bar.total
 		prop['progress'] = self.progress_bar.progress
@@ -580,7 +585,7 @@ class Moulti(App):
 							finally_reply = False
 			elif command == 'set':
 				if message.get('title') is not None:
-					calls.append((self.title_label.update, str(message['title'])))
+					calls.append((self.set_title, str(message['title'])))
 				if message.get('step_position') is not None:
 					calls.append((self.steps_container.set_class, message['step_position'] == 'bottom', 'bottom'))
 				if message.get('step_direction') is not None:

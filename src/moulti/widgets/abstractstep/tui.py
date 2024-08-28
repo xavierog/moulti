@@ -1,7 +1,9 @@
 import json
 from operator import attrgetter
 from typing import Any, Callable
+from textual.geometry import Region
 from textual.message import Message
+from textual.widget import Widget
 from textual.widgets import Static
 from moulti.clipboard import copy
 
@@ -14,6 +16,13 @@ class AbstractStep(Static):
 		def __init__(self, step: 'AbstractStep', *args: Any, **kwargs: Any):
 			self.step = step
 			super().__init__(*args, **kwargs)
+
+	class ScrollRequest(Message):
+		def __init__(self, step: 'AbstractStep', target: Widget|Region|None = None, **scroll_kwargs: Any):
+			self.step = step
+			self.target = target
+			self.scroll_kwargs = scroll_kwargs
+			super().__init__()
 
 	def __init__(self, id: str, **kwargs: Any): # pylint: disable=redefined-builtin
 		self.title = id

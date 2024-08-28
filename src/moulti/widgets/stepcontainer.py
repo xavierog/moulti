@@ -118,3 +118,17 @@ class StepContainer(VertScroll):
 			def do_scroll() -> None:
 				self.scroll_to_step(step, scroll_on_activity)
 			self.set_timer(0.05, do_scroll)
+
+	@on(AbstractStep.ScrollRequest)
+	def on_scroll_request(self, request: AbstractStep.ScrollRequest) -> None:
+		# Consume the event:
+		request.prevent_default()
+		request.stop()
+		if isinstance(request.target, Region):
+			# The provided region must be mapped to this container's coordinates:
+			region = request.target # relative to the AbstractStep widget
+			region = region.translate(request.step.virtual_region.offset) # relative to this StepContainer
+			self.scroll_to_region(region, **request.scroll_kwargs)
+			return
+		target_widget = request.step if request.target is None else request.target
+		self.scroll_to_widget(target_widget, **request.scroll_kwargs)

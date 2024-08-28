@@ -55,7 +55,7 @@ class InputQuestion(AbstractQuestion):
 	@AbstractQuestion.copy_to_clipboard
 	def action_to_clipboard(self, with_question: bool = False) -> tuple[bool, str, str]:
 		answer = self.input.value
-		data = f'Q: {self.question()}\nA: {answer}\n' if with_question else answer
+		data = f'Q: {self.question}\nA: {answer}\n' if with_question else answer
 		return True, data, ''
 
 MoultiWidgetClass = InputQuestion

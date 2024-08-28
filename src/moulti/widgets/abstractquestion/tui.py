@@ -11,7 +11,8 @@ class AbstractQuestion(CollapsibleStep):
 	This widget represents an interactive question in a script, program or process.
 	"""
 	def __init__(self, id: str, **kwargs: str|int|bool): # pylint: disable=redefined-builtin
-		self.question_label = Static('', classes='question_text')
+		self.question = ''
+		self.question_label = Static(self.question, classes='question_text')
 		self.answer: str|None = None
 		self.waiting: list[Any] = []
 		super().__init__(id=id, **kwargs)
@@ -53,15 +54,13 @@ class AbstractQuestion(CollapsibleStep):
 	def update_properties(self, kwargs: dict[str, str|int|bool]) -> None:
 		super().update_properties(kwargs)
 		if 'text' in kwargs:
-			self.question_label.update(str(kwargs['text']))
+			self.question = str(kwargs['text'])
+			self.question_label.update(self.question)
 
 	def export_properties(self) -> dict[str, Any]:
 		prop = super().export_properties()
 		prop['text'] = str(self.question_label.renderable)
 		return prop
-
-	def question(self) -> str:
-		return str(self.question_label.renderable)
 
 	def disable(self) -> None:
 		for widget in self.collapsible.query('Collapsible > Contents Widget').results(Widget):

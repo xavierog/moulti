@@ -76,7 +76,7 @@ class ButtonQuestion(AbstractQuestion):
 	def action_to_clipboard(self, with_question: bool = False) -> tuple[bool, str, str]:
 		if self.answer is None:
 			return False, '', 'Answer not available yet'
-		data = f'Q: {self.question()}\nA: {self.answer}\n' if with_question else self.answer
+		data = f'Q: {self.question}\nA: {self.answer}\n' if with_question else self.answer
 		return True, data, ''
 
 	def measure_buttons(self) -> None:

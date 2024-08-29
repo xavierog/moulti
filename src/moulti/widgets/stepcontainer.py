@@ -4,7 +4,7 @@ from textual.binding import Binding
 from textual.css.query import NoMatches
 from textual.geometry import Region
 from textual.reactive import Reactive
-from textual.widget import AwaitMount
+from textual.widget import AwaitMount, AwaitRemove
 from .vertscroll import VertScroll
 from .abstractstep.tui import AbstractStep
 from .abstractquestion.tui import AbstractQuestion
@@ -93,6 +93,12 @@ class StepContainer(VertScroll):
 
 	def add_step(self, step: AbstractStep) -> AwaitMount:
 		return self.mount(step, before=None if self.layout_direction_is_down else 0)
+
+	def remove_step(self, step: AbstractStep) -> AwaitRemove|None:
+		if step in self.children:
+			removal = step.remove()
+			return removal
+		return None
 
 	def scroll_to_step(self, step: AbstractStep, where: bool|int = True) -> None:
 		if self.prevent_programmatic_scrolling or where is False:

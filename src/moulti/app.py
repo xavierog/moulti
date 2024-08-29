@@ -562,7 +562,7 @@ class Moulti(App):
 							err = 'cannot proceed with deletion as '
 							err += f'{step.prevent_deletion} ongoing operations prevent it'
 							raise MoultiMessageException(err)
-						calls.append((step.remove,))
+						calls.append((self.steps_container.remove_step, step))
 					else:
 						# For actions other than add/update/delete, the widget class is expected to provide a
 						# "cli_action_{action}" method:

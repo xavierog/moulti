@@ -1,4 +1,5 @@
 from typing import Any
+from typing_extensions import Self
 from textual.app import ComposeResult
 from textual.events import Click
 from textual.widgets import Static, Collapsible
@@ -32,11 +33,15 @@ class CollapsibleStep(AbstractStep):
 	def on_mount(self) -> None:
 		self.query_one('CollapsibleTitle').tooltip = f'Step id: {self.title_from_id()}'
 
+	def focus(self, scroll_visible: bool = True) -> Self:
+		self.query_one('CollapsibleTitle').focus(scroll_visible)
+		return self
+
 	async def on_click(self, _: Click) -> None:
 		"""
 		Steps are meant to be focusable but it is actually the CollapsibleTitle that holds the focus.
 		"""
-		self.query_one('CollapsibleTitle').focus()
+		self.focus()
 
 	def check_properties(self, kwargs: dict[str, str|int|bool]) -> None:
 		self.check_markup_dict(kwargs, 'top_text', 'bottom_text')

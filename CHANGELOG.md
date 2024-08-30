@@ -11,6 +11,7 @@ Although Moulti's Python packages, modules and functions are obviously available
 ### Changed
 
 - The console is now shown or hidden using `z` instead of `n`.
+- The console now grabs the focus, which makes it easier to scroll.
 
 ### Fixed
 

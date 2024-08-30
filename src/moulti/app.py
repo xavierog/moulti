@@ -393,6 +393,14 @@ class Moulti(App):
 	def action_toggle_console(self) -> None:
 		"""Toggle the console."""
 		self.end_user_console.toggle_class('hidden')
+		if self.end_user_console.has_class('hidden'):
+			# Not ideal but reasonable:
+			self.steps_container.focus(False)
+			# Work around a rendering issue after the console is hidden:
+			self.refresh(layout=True)
+		else:
+			# It is often necessary to scroll the console, so give it the focus:
+			self.end_user_console.log_widget.focus(False)
 
 	def action_collapse_all(self, collapsed: bool = True) -> None:
 		"""Collapse all existing steps."""

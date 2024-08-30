@@ -8,6 +8,10 @@ Although Moulti's Python packages, modules and functions are obviously available
 
 ## [Unreleased]
 
+### Changed
+
+- The console is now shown or hidden using `z` instead of `n`.
+
 ### Fixed
 
 - Help screen: mention `ctrl+pgup` and `ctrl+pgdn`.

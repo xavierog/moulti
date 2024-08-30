@@ -118,7 +118,7 @@ class Moulti(App):
 	"""
 	BINDINGS = [
 		("s", "save", "Save"),
-		("n", "toggle_console", "Console"),
+		Binding("z", "toggle_console", "Console"),
 		("x", "collapse_all(False)", "Expand all"),
 		("o", "collapse_all(True)", "Collapse all"),
 		Binding("X", "collapse_new(False)", "Expand new widgets", show=False),

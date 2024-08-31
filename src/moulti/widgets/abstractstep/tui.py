@@ -1,11 +1,13 @@
 import json
 from operator import attrgetter
 from typing import Any, Callable
+from rich.text import Text
 from textual.geometry import Region
 from textual.message import Message
 from textual.widget import Widget
 from textual.widgets import Static
 from moulti.clipboard import copy
+from moulti.search import MatchSpan, TextSearch
 
 class AbstractStep(Static):
 	"""
@@ -30,6 +32,9 @@ class AbstractStep(Static):
 		# This attribute is meant to prevent deletion of a step while content
 		# is being appended to it:
 		self.prevent_deletion = 0
+
+		# This attribute is used by the search_label() method.
+		self.label_search_cursor: MatchSpan = None
 
 		self.scroll_on_activity: bool|int = False
 		self.check_properties(kwargs)
@@ -116,6 +121,16 @@ class AbstractStep(Static):
 	def activity(self) -> None:
 		msg = AbstractStep.StepActivity(self)
 		self.call_after_refresh(self.post_message, msg)
+
+	def search_label(self, label: str, search: TextSearch) -> tuple[bool, Text]:
+		"""
+		Helper to search labels.
+		"""
+		text = Text.from_markup(label)
+		self.label_search_cursor = search.search(text.plain, self.label_search_cursor)
+		if self.label_search_cursor is None:
+			return False, text
+		return True, search.highlight(text, *self.label_search_cursor)
 
 	DEFAULT_COLORS = """
 	$step_default: $primary;

@@ -4,6 +4,7 @@ from textual.app import ComposeResult
 from textual.message import Message
 from textual.widget import Widget
 from textual.widgets import Static
+from moulti.search import TextSearch
 from ..collapsiblestep.tui import CollapsibleStep
 
 class AbstractQuestion(CollapsibleStep):
@@ -43,6 +44,14 @@ class AbstractQuestion(CollapsibleStep):
 	def subcompose(self) -> ComposeResult:
 		yield self.question_label
 		yield from self.compose_question()
+
+	def subsearch(self, search: TextSearch) -> bool:
+		found, text = self.search_label(self.question, search)
+		self.question_label.update(text)
+		if found:
+			self.focus(False)
+			self.post_message(self.ScrollRequest(self, self.question_label, center=True, animate=False))
+		return found
 
 	def compose_question(self) -> ComposeResult:
 		return []

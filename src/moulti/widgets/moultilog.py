@@ -3,9 +3,10 @@ from typing_extensions import Self
 from rich.text import Text
 from textual.color import Color
 from textual.events import MouseScrollUp, Click
-from textual.geometry import Size
+from textual.geometry import Region, Size, Spacing
 from textual.scroll_view import ScrollView
 from textual.strip import Strip
+from moulti.search import MatchSpan, TextSearch
 from moulti.widgets.mixin import ToLinesMixin
 
 class MoultiLog(ScrollView, ToLinesMixin, can_focus=True):
@@ -29,6 +30,12 @@ class MoultiLog(ScrollView, ToLinesMixin, can_focus=True):
 		self.max_width: int = 0
 		self.auto_scroll = self.default_auto_scroll = auto_scroll
 		self.follow_ansi_theme = True
+		self.search_cursor: tuple[int|None, MatchSpan] = (None, None)
+		self.searched_line_backup: tuple[int, str|Text|Strip] = (-1, '')
+
+	def clear_search(self) -> None:
+		self.search_cursor = (None, None)
+		self.searched_line_backup = (-1, '')
 
 	def on_mount(self) -> None:
 		if self.follow_ansi_theme:
@@ -75,6 +82,7 @@ class MoultiLog(ScrollView, ToLinesMixin, can_focus=True):
 		super().action_scroll_end(*args, **kwargs)
 
 	def clear(self) -> Self:
+		self.clear_search()
 		self.lines.clear()
 		self.max_width = 0
 		self.virtual_size = Size(self.max_width, len(self.lines))
@@ -105,6 +113,75 @@ class MoultiLog(ScrollView, ToLinesMixin, can_focus=True):
 		line = self.line_to_strip(scroll_y + y, True)
 		line = line.crop_extend(scroll_x, scroll_x + self.size.width, self.rich_style)
 		return line.apply_style(self.rich_style)
+
+	def backup_line(self, line_number: int) -> None:
+		line = self.lines[line_number]
+		# str and Strip are immutable but Text is mutable and thus must be explicitly copied:
+		backup_line = line.copy() if isinstance(line, Text) else line
+		self.searched_line_backup = (line_number, backup_line)
+
+	def restore_line(self, line_number: int) -> None:
+		backup_line_number, backup_line = self.searched_line_backup
+		if line_number != backup_line_number:
+			return
+		restore_line = backup_line.copy() if isinstance(backup_line, Text) else backup_line
+		self.lines[line_number] = restore_line
+
+	def search_one_line(self, search: TextSearch) -> bool:
+		line_number, highlight = self.search_cursor
+		assert line_number is not None
+		first_occurrence_on_this_line = highlight is None
+		self.restore_line(line_number)
+		plain_text, text = self.line_to_plain_text(line_number, True)
+		result = search.search(plain_text, highlight)
+		if result is None:
+			self.restore_line(line_number)
+			self.refresh()
+			return False
+		# Occurrence found!
+		self.search_cursor = (line_number, result)
+		# Highlight:
+		if text is None:
+			text = self.line_to_text(line_number, True)
+		if first_occurrence_on_this_line:
+			self.backup_line(line_number)
+		self.lines[line_number] = search.highlight(text, *result)
+		return True
+
+	def search(self, search: TextSearch) -> bool:
+		if search.next_result:
+			first_line, next_line = 0, 1
+		else:
+			first_line, next_line = len(self.lines) - 1, -1
+		if self.search_cursor[0] is None:
+			self.search_cursor = (first_line, None)
+		line_number = self.search_cursor[0]
+		assert line_number is not None
+		while 0 <= line_number < len(self.lines):
+			if self.search_one_line(search):
+				return True
+			line_number += next_line
+			self.search_cursor = (line_number, None)
+		self.clear_search()
+		return False
+
+	def scroll_to_search_highlight(self) -> tuple[Region, Spacing]|None:
+		line_number, highlight = self.search_cursor
+		if line_number is None or highlight is None:
+			return None
+		highlight_region = Region(
+			highlight[0],
+			line_number,
+			highlight[1] - highlight[0],
+			1
+		)
+		highlight_spacing = Spacing(1, 5, 1, 10)
+		self.auto_scroll = False
+		self.scroll_to_region(highlight_region, spacing=highlight_spacing, animate=False)
+		self.refresh()
+		# Return the highlighted region relatively to this widget:
+		highlight_region = highlight_region.translate(-self.scroll_offset)
+		return highlight_region, highlight_spacing
 
 	DEFAULT_CSS = """
 	MoultiLog {

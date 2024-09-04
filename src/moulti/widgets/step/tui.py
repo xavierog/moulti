@@ -11,6 +11,7 @@ from rich.ansi import re_ansi
 from rich.text import Text
 from rich.cells import get_character_cell_size
 from moulti.helpers import ANSI_ESCAPE_SEQUENCE_BYTES, ANSI_RESET_SEQUENCES_BYTES, TAB_SPACES_BYTES
+from moulti.search import TextSearch
 from . import MOULTI_PASS_DEFAULT_READ_SIZE
 from ..collapsiblestep.tui import CollapsibleStep
 from ..moultilog import MoultiLog
@@ -76,6 +77,32 @@ class Step(CollapsibleStep):
 
 	def subcompose(self) -> ComposeResult:
 		yield self.log_widget
+
+	def subsearch(self, search: TextSearch) -> bool:
+		if found := self.log_widget.search(search):
+			# We found a match inside the log widget:
+			if self.collapsible.collapsed:
+				self.ensure_expanded()
+			self.show_search_highlight()
+		return found
+
+	def ensure_expanded(self, expanded: bool = True) -> None:
+		self.collapsible.collapsed = not expanded
+		# Collapsible rely on CSS: this step is not actually expanded until CSS is refreshed:
+		self.app.refresh_css(animate=False)
+
+	def show_search_highlight(self) -> None:
+		region_spacing = self.log_widget.scroll_to_search_highlight()
+		# To make scrolling more convenient, give the focus to the log widget if and only if it can be scrolled:
+		if self.log_widget.max_scroll_x or self.log_widget.max_scroll_y:
+			self.log_widget.focus(False)
+		else: # otherwise, focus the step, thus enabling scrolling the StepContainer:
+			self.focus(False)
+		if region_spacing is not None:
+			region, _ = region_spacing # relative to the MoultiLog widget
+			log_widget_offset = self.log_widget.region.offset - self.region.offset
+			region = region.translate(log_widget_offset) # relative to this Step widget
+			self.post_message(self.ScrollRequest(self, region, center=True, animate=False))
 
 	def update_properties(self, kwargs: dict[str, str|int|bool]) -> None:
 		super().update_properties(kwargs)

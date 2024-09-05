@@ -5,6 +5,7 @@ from textual.css.query import NoMatches
 from textual.geometry import Region
 from textual.reactive import Reactive
 from textual.widget import AwaitMount, AwaitRemove
+from moulti.search import TextSearch
 from .vertscroll import VertScroll
 from .abstractstep.tui import AbstractStep
 from .abstractquestion.tui import AbstractQuestion
@@ -39,6 +40,10 @@ class StepContainer(VertScroll):
 	def __init__(self, *args: Any, **kwargs: Any):
 		super().__init__(*args, **kwargs)
 		self.prevent_programmatic_scrolling = False
+		self.search_cursor = -1
+		"""
+		Index of the widget that last returned a positive search result.
+		"""
 
 	def action_toggle_scrolling(self, prevent: bool) -> None:
 		# Actual toggle:
@@ -63,6 +68,14 @@ class StepContainer(VertScroll):
 			yield from steps
 		else:
 			yield from reversed(steps)
+
+	def ordered_index(self, step: AbstractStep) -> int:
+		try:
+			if self.layout_direction_is_down:
+				return self.children.index(step)
+			return len(self.children) - 1 - self.children.index(step)
+		except ValueError:
+			return -1
 
 	def focus_step(self) -> AbstractStep|None:
 		try:
@@ -95,10 +108,26 @@ class StepContainer(VertScroll):
 		return self.mount(step, before=None if self.layout_direction_is_down else 0)
 
 	def remove_step(self, step: AbstractStep) -> AwaitRemove|None:
-		if step in self.children:
+		deleted_index = self.ordered_index(step)
+		if deleted_index != -1:
 			removal = step.remove()
+			if deleted_index <= self.search_cursor:
+				self.search_cursor -= 1
 			return removal
 		return None
+
+	def search(self, search: TextSearch) -> bool:
+		steps = list(enumerate(self.ordered_steps()))
+		if self.search_cursor != -1:
+			steps = steps[self.search_cursor:] + steps[:self.search_cursor+1]
+		iter_steps = iter(steps) if search.next_result else reversed(steps)
+		for index, widget in iter_steps:
+			if not hasattr(widget, 'search'):
+				continue
+			if widget.search(search):
+				self.search_cursor = index
+				return True
+		return False
 
 	def scroll_to_step(self, step: AbstractStep, where: bool|int = True) -> None:
 		if self.prevent_programmatic_scrolling or where is False:

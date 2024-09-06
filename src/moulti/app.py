@@ -13,7 +13,7 @@ from socket import socket as Socket
 from shutil import which
 from time import time_ns, localtime, strftime
 from threading import get_ident, Lock
-from rich.markup import MarkupError
+from rich.markup import MarkupError, escape
 from textual import work
 from textual import __version__ as TEXTUAL_VERSION
 from textual.app import App, ComposeResult
@@ -29,6 +29,7 @@ from .protocol import PRINTABLE_MOULTI_SOCKET, clean_socket, current_instance
 from .protocol import moulti_listen, get_unix_credentials, send_json_message
 from .protocol import MoultiConnectionClosedException, MoultiProtocolException, Message, FDs
 from .protocol import MoultiTLVReader, data_to_message, getraddr
+from .search import TextSearch
 from .widgets import MoultiWidgetException
 from .widgets.tui import MoultiWidgets
 from .widgets.footer import Footer
@@ -38,6 +39,7 @@ from .widgets.collapsiblestep.tui import CollapsibleStep
 from .widgets.step.tui import Step
 from .widgets.moulticonsole import MoultiConsole
 from .widgets.quitdialog import QuitDialog
+from .widgets.searchinput import SearchInputWidget
 from .widgets.helpscreen import HelpScreen
 
 
@@ -129,6 +131,10 @@ class Moulti(App):
 		Binding("d", "dark_mode", "Dark"),
 		("h", "help", "Help"),
 		("q", "quit", "Quit"),
+		Binding("/", "search(True)", "Search forward", show=False),
+		Binding("?", "search(False)", "Search backward", show=False),
+		Binding("N", "search_previous(False)", "Previous search result", show=False),
+		Binding("n", "search_next(False)", "Next search result", show=False),
 	]
 
 	# Disable Textual's command palette; it may come back if Moulti ends up with too many commands though:
@@ -154,6 +160,10 @@ class Moulti(App):
 		True: force-collapse new collapsible widgets
 		False: force-expand new collapsible widgets
 		"""
+		self.current_search: TextSearch|None = None
+		"""
+		Current text search.
+		"""
 		super().__init__()
 		self.dark = os.environ.get('MOULTI_MODE', 'dark') != 'light'
 		self.set_title('Moulti')
@@ -177,6 +187,7 @@ class Moulti(App):
 		self.title_label = Label('Title', id='header')
 		self.title_label.tooltip = f'Instance name: {current_instance()}'
 		self.steps_container = StepContainer()
+		self.search_input = SearchInputWidget(id='search_bar')
 		self.progress_bar = ProgressBar(id='progress_bar', show_eta=False)
 		self.footer = Footer()
 
@@ -223,6 +234,7 @@ class Moulti(App):
 		"""Create child widgets for the app."""
 		yield self.title_label
 		yield self.steps_container
+		yield self.search_input
 		yield self.progress_bar
 		yield self.footer
 		yield self.end_user_console
@@ -235,6 +247,18 @@ class Moulti(App):
 		widget_list = ' '.join(MoultiWidgets.registry().keys())
 		self.logconsole(f'known widgets: {widget_list}')
 		self.network_loop()
+
+	def on_search_input_widget_new_search(self, message: SearchInputWidget.NewSearch) -> None:
+		self.current_search = message.search
+		self.search(self.current_search)
+
+	@work(exclusive=True, group='search', name='search')
+	async def search(self, search: TextSearch) -> bool:
+		if self.steps_container.search(search):
+			return True
+		search_str = escape(str(search))
+		self.notify(f'{search_str}: not found', title='Text search: pattern not found', severity='error')
+		return False
 
 	def network_loop_is_ready(self) -> None:
 		if self.init_command is not None:
@@ -401,6 +425,21 @@ class Moulti(App):
 		else:
 			# It is often necessary to scroll the console, so give it the focus:
 			self.end_user_console.log_widget.focus(False)
+
+	def action_search(self, next_result: bool) -> None:
+		self.search_input.action_pop(next_result)
+		# Work around a rendering issue when the search bar appears:
+		self.refresh(layout=True)
+
+	def action_search_previous(self) -> None:
+		if self.current_search is not None:
+			search_copy = self.current_search.copy()
+			search_copy.next_result = not search_copy.next_result
+			self.search(search_copy)
+
+	def action_search_next(self) -> None:
+		if self.current_search is not None:
+			self.search(self.current_search)
 
 	def action_collapse_all(self, collapsed: bool = True) -> None:
 		"""Collapse all existing steps."""

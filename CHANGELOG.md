@@ -8,6 +8,10 @@ Although Moulti's Python packages, modules and functions are obviously available
 
 ## [Unreleased]
 
+### Added
+
+- Text search: it is now possible to search steps for a given pattern (plain or regex, case-sensitive or not).
+
 ### Changed
 
 - The console is now shown or hidden using `z` instead of `n`.

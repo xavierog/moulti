@@ -1,4 +1,6 @@
 import re
+from collections import deque
+from dataclasses import dataclass
 from typing import Any
 from textual.app import ComposeResult
 from textual.binding import Binding
@@ -17,13 +19,20 @@ def regex_is_valid(regex: str) -> bool:
 		return False
 
 REGEX_VALIDATOR = Function(regex_is_valid)
+SEARCH_HISTORY_SIZE = 500 # The search history is not persisted so this should be plenty.
 
 class SearchInput(Input):
 	class CancelSearch(Message):
 		pass
 
+	@dataclass
+	class HistoryMove(Message):
+		move: int
+
 	BINDINGS = [
 		Binding('escape', 'exit', 'Cancel', priority=True),
+		Binding('up', 'history(-1)', 'Previous', priority=True),
+		Binding('down', 'history(+1)', 'Next', priority=True),
 	]
 
 	def action_exit(self) -> None:
@@ -37,6 +46,9 @@ class SearchInput(Input):
 			super().action_delete_left()
 		else:
 			self.action_exit()
+
+	def action_history(self, move: int) -> None:
+		self.post_message(self.HistoryMove(move))
 
 	DEFAULT_CSS = """
 	SearchInput {
@@ -143,10 +155,36 @@ class SearchInputWidget(Static):
 	def to_search(self) -> TextSearch:
 		return TextSearch(self.input.value, self.regex, self.case_insensitive, self.next_result)
 
+	def setup_history(self) -> None:
+		# Copy the history into the editable history:
+		self.editable_history.clear()
+		self.editable_history.extend(entry.copy() for entry in self.history)
+		# Append a new empty entry:
+		self.editable_history.append(TextSearch('', self.regex, self.case_insensitive, self.next_result))
+		# This new entry is at index -1:
+		self.history_index = -1
+
 	def action_pop(self, next_result: bool = True) -> None:
 		self.next_result = next_result
+		self.setup_history()
 		self.styles.display = 'block'
 		self.input.focus()
+
+	def set_search(self, search: TextSearch) -> None:
+		self.regex = search.regex
+		self.case_insensitive = search.case_insensitive
+		# NOT setting self.next_result.
+		self.input.value = search.pattern
+		self.input.validate(self.input.value)
+
+	def set_search_by_index(self, index: int = -1) -> None:
+		if index >= 0:
+			return
+		try:
+			self.set_search(self.editable_history[index])
+			self.history_index = index
+		except IndexError:
+			pass
 
 	def action_exit(self) -> None:
 		self.input.clear()
@@ -154,6 +192,10 @@ class SearchInputWidget(Static):
 
 	async def on_search_input_cancel_search(self, _event: SearchInput.CancelSearch) -> None:
 		self.action_exit()
+
+	def on_search_input_history_move(self, event: SearchInput.HistoryMove) -> None:
+		self.editable_history[self.history_index] = self.to_search()
+		self.set_search_by_index(self.history_index + event.move)
 
 	async def on_input_submitted(self, event: Input.Submitted) -> None:
 		if not event.value:
@@ -163,6 +205,7 @@ class SearchInputWidget(Static):
 				search = self.to_search()
 				self.action_exit()
 				self.post_message(self.NewSearch(search))
+				self.history.append(search)
 
 	DEFAULT_CSS = """
 		#search_regex_label {

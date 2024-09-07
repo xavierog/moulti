@@ -10,7 +10,7 @@ Although Moulti's Python packages, modules and functions are obviously available
 
 ### Added
 
-- Text search: it is now possible to search steps for a given pattern (plain or regex, case-sensitive or not).
+- Text search: it is now possible to search steps (+ the title) for a given pattern (plain or regex, case-sensitive or not).
 - The search widget offers an in-memory, non-persistent history.
 
 ### Changed

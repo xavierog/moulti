@@ -870,6 +870,7 @@ moulti pass --append foo <<< 'Now, scroll!'
 ## Text search
 
 Moulti offers text search, i.e. the ability to find and iterate over all occurrences of a given pattern found in the contents displayed by Moulti:
+- instance title
 - step titles
 - step top and bottom texts
 - questions and logs

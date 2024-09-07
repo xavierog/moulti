@@ -14,6 +14,7 @@ from shutil import which
 from time import time_ns, localtime, strftime
 from threading import get_ident, Lock
 from rich.markup import MarkupError, escape
+from rich.text import Text
 from textual import work
 from textual import __version__ as TEXTUAL_VERSION
 from textual.app import App, ComposeResult
@@ -29,7 +30,7 @@ from .protocol import PRINTABLE_MOULTI_SOCKET, clean_socket, current_instance
 from .protocol import moulti_listen, get_unix_credentials, send_json_message
 from .protocol import MoultiConnectionClosedException, MoultiProtocolException, Message, FDs
 from .protocol import MoultiTLVReader, data_to_message, getraddr
-from .search import TextSearch
+from .search import TextSearch, MatchSpan
 from .widgets import MoultiWidgetException
 from .widgets.tui import MoultiWidgets
 from .widgets.footer import Footer
@@ -164,6 +165,11 @@ class Moulti(App):
 		"""
 		Current text search.
 		"""
+		self.title_search_cursor: MatchSpan = None
+		self.search_cursor: bool|None = None
+		"""
+		False: search the title; True: search steps; None: decide based on search.next_result.
+		"""
 		super().__init__()
 		self.dark = os.environ.get('MOULTI_MODE', 'dark') != 'light'
 		self.set_title('Moulti')
@@ -252,10 +258,30 @@ class Moulti(App):
 		self.current_search = message.search
 		self.search(self.current_search)
 
+	def search_title(self, search: TextSearch) -> bool:
+		text = Text.from_markup(self.title)
+		self.title_search_cursor = search.search(text.plain, self.title_search_cursor)
+		if found := self.title_search_cursor is not None:
+			search.highlight(text, *self.title_search_cursor)
+		self.title_label.update(text)
+		return found
+
 	@work(exclusive=True, group='search', name='search')
 	async def search(self, search: TextSearch) -> bool:
-		if self.steps_container.search(search):
-			return True
+		if self.search_cursor is None:
+			self.search_cursor = not search.next_result
+			parts_to_search = 2 # Only 2 parts to search here
+		else:
+			# This is a 3-part search:
+			# 1. from the latest result to the end of the current part
+			# 2. inside the other part
+			# 3. from the start of the current part to the latest result
+			parts_to_search = 3
+		for _ in range(parts_to_search):
+			found = self.steps_container.search(search) if self.search_cursor else self.search_title(search)
+			if found:
+				return True
+			self.search_cursor = not self.search_cursor
 		search_str = escape(str(search))
 		self.notify(f'{search_str}: not found', title='Text search: pattern not found', severity='error')
 		return False

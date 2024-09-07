@@ -119,7 +119,7 @@ class StepContainer(VertScroll):
 	def search(self, search: TextSearch) -> bool:
 		steps = list(enumerate(self.ordered_steps()))
 		if self.search_cursor != -1:
-			steps = steps[self.search_cursor:] + steps[:self.search_cursor+1]
+			steps = steps[self.search_cursor:] if search.next_result else steps[:self.search_cursor+1]
 		iter_steps = iter(steps) if search.next_result else reversed(steps)
 		for index, widget in iter_steps:
 			if not hasattr(widget, 'search'):
@@ -127,6 +127,7 @@ class StepContainer(VertScroll):
 			if widget.search(search):
 				self.search_cursor = index
 				return True
+		self.search_cursor = -1
 		return False
 
 	def scroll_to_step(self, step: AbstractStep, where: bool|int = True) -> None:

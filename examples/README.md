@@ -16,6 +16,7 @@ Descriptions:
 |------------------|-------|-------|---------|--------|---------|
 | debian-upgrade   | ⚠️  [1]|  ❌   |   ❌    |   ❌   |   ❌    |
 | many-buttons     | ✅    |  ✅   |   ✅    |   ✅   |   ✅    |
+| needle-haystack  | ✅    |  ✅   |   ✅    |   ✅   |   ✅    |
 | pass-concurrency | ✅    |  ✅   |   ✅    |   ✅   |   ✅    |
 | progressbar      | ✅    |  ✅   |   ✅    |   ✅   |   ✅    |
 | python-checks    | ✅    |  ✅   |   ✅    |   ✅   |   ✅    |

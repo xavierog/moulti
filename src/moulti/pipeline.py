@@ -5,7 +5,7 @@ from .protocol import moulti_connect, send_json_message, recv_json_message
 def pipeline(messages: Generator, read_size: int = 1024**2) -> int:
 	"""
 	Pipeline multiple messages to a Moulti instance.
-	messages shuld be a generator that yields triplets:
+	messages should be a generator that yields triplets:
 	- step id (str; None for instance properties)
 	- Moulti message to send (dict[str, Any])
 	- file descriptor number (int) if it is necessary to pass data, None otherwise

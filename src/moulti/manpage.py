@@ -33,14 +33,19 @@ def dissect_manpage(filedesc: Any) -> dict:
 
 	sections: list[dict] = []
 	current_section = {'title': '', 'text': ''}
+
+	def add_section(section: dict[str, str]) -> None:
+		section['text'] = section['text'].strip('\n')
+		if section['title'] or section['text']:
+			sections.append(section)
+
 	for line in all_lines:
 		if line.startswith(' ') or line == '\n': # regular line
 			current_section['text'] += line
 		else: # section title
-			current_section['text'] = current_section['text'].strip('\n')
-			if current_section['title'] or current_section['text']:
-				sections.append(current_section)
+			add_section(current_section)
 			current_section = {'title': line.strip('\n'), 'text': ''}
+	add_section(current_section) # Handle the last section
 
 	return {
 		'title': title,

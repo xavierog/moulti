@@ -48,6 +48,16 @@ def commands(title: str, header: str, diff: PatchSet) -> Generator:
 	if 'MOULTI_DIFF_NO_TITLE' not in os.environ:
 		yield None, {'command': 'set', 'title': title}, None
 
+	delta_lines: list[str] = []
+	if 'MOULTI_DIFF_NO_DELTA' not in os.environ:
+		try:
+			delta = ['delta', '--color-only']
+			diff_s = str(diff)
+			delta_output = subprocess.check_output(delta, input=diff_s, encoding=ENCODING, errors='surrogateescape')
+			delta_lines = delta_output.splitlines()
+		except Exception:
+			pass
+
 	pid = os.getpid()
 	counter = {'step': 1}
 	def step(cmd: str, title: str, **kwargs: Any) -> tuple[str, dict, None]:
@@ -85,7 +95,12 @@ def commands(title: str, header: str, diff: PatchSet) -> Generator:
 			source = f'{hunk.source_start},{hunk.source_length}'
 			target = f'{hunk.target_start},{hunk.target_length}'
 			title = f' [yellow1]@@ {source} {target} @@[/] [gray]{hunk.section_header}[/]'
-			text = colorize_hunk(str(hunk), True)
+			if delta_lines:
+				hunk_first_line = hunk[0].diff_line_no
+				hunk_last_line = hunk[-1].diff_line_no
+				text = '\n'.join(delta_lines[hunk_first_line-1:hunk_last_line])
+			else:
+				text = colorize_hunk(str(hunk), True)
 			yield step('step', title, text=text, bottom_text=' ', collapsed=False, max_height=0)
 
 def handle_diff_from_file_descriptor(title: str, filedesc: Any) -> None:

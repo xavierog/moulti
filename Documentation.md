@@ -698,6 +698,17 @@ changed by setting the environment variable `MOULTI_DIFF_ENCODING`, e.g.
 By default, `moulti diff` changes the title of the Moulti instance; set the
 environment variable `MOULTI_DIFF_NO_TITLE` to any value to prevent that.
 
+### Delta integration
+
+By default, `moulti diff` tries to pass diff data to [delta](https://github.com/dandavison/delta), specifically `delta --color-only`.
+This provides:
+- language-specific syntax highlighting (e.g. C, Python, etc.);
+- within-line difference highlighting.
+
+If this fails (e.g. because `delta` is not available on the system), Moulti resorts to simpler colors: red for removed lines, green for added lines.
+
+If that attempt to run `delta --color-only` somehow proves undesirable, set the environment variable `MOULTI_DIFF_NO_DELTA` to any value to prevent it.
+
 ## Moulti manpage
 
 Like `moulti diff`, `moulti manpage` offers two subcommands (`parse` and `run`) that make it possible to load and read
@@ -970,6 +981,7 @@ About colors in `MOULTI_ANSI*`:
 
 - `MOULTI_SAVE_PATH`: base path under which export directories are created when saving a Moulti instance; defaults to `.` i.e. the instance's current working directory.
 - `MOULTI_RUN_OUTPUT`: see [moulti run: dealing with stdin, stdout, stderr](#moulti-run-dealing-with-stdin-stdout-stderr)
+- `MOULTI_DIFF_NO_DELTA` see [moulti diff: delta integration](#delta-integration)
 - `MOULTI_DIFF_ENCODING`: see [moulti diff: encoding](#encoding)
 - `MOULTI_MANPAGE_ENCODING`: same as `MOULTI_DIFF_ENCODING` for `moulti manpage`
 - `MOULTI_CLIPBOARD_COPY`: see [Saving a single Moulti step](#saving-a-single-moulti-step)

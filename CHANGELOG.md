@@ -11,6 +11,7 @@ Although Moulti's Python packages, modules and functions are obviously available
 ### Added
 
 - `moulti diff`: [delta](https://github.com/dandavison/delta) integration
+- `moulti diff`: display number of added (+) and removed (-) lines for each hunk
 
 ## [1.18.1] - 2024-09-09
 

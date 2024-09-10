@@ -94,7 +94,9 @@ def commands(title: str, header: str, diff: PatchSet) -> Generator:
 			# One step per hunk:
 			source = f'{hunk.source_start},{hunk.source_length}'
 			target = f'{hunk.target_start},{hunk.target_length}'
-			title = f' [yellow1]@@ {source} {target} @@[/] [gray]{hunk.section_header}[/]'
+			# Green and pink colors with a 7.3 contrast ratio, assuming background color #004578:
+			stats = f'[#00FF66]+{hunk.added}[/][#FFD0EB]-{hunk.removed}[/]'
+			title = f' [yellow1]@@ {source} {target} @@[/] {stats} [gray]{hunk.section_header}[/]'
 			if delta_lines:
 				hunk_first_line = hunk[0].diff_line_no
 				hunk_last_line = hunk[-1].diff_line_no

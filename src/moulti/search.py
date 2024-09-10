@@ -9,11 +9,12 @@ END = 2**63-1
 MatchSpan = tuple[int, int]|None
 
 class TextSearch:
-	def __init__(self, pattern: str, regex: bool, case_insensitive: bool, next_result: bool) -> None:
+	def __init__(self, pattern: str, regex: bool, case_insensitive: bool, next_result: bool, reset: bool = False) -> None:
 		self.pattern = pattern
 		self.regex = regex
 		self.case_insensitive = case_insensitive
 		self.next_result = next_result
+		self.is_reset = reset
 		if self.regex:
 			re_flags = re.IGNORECASE if self.case_insensitive else 0
 			self._pattern = re.compile(self.pattern, re_flags)
@@ -21,6 +22,8 @@ class TextSearch:
 			self._casefold_pattern = self.pattern.casefold()
 
 	def __str__(self) -> str:
+		if self.is_reset:
+			return 'reset text search'
 		pattern_type = 'regex' if self.regex else 'basic'
 		cs_type = 'case-insensitive' if self.case_insensitive else 'case-sensitive'
 		direction = 'Forward' if self.next_result else 'Backward'
@@ -32,8 +35,15 @@ class TextSearch:
 	def copy(self) -> 'TextSearch':
 		return TextSearch(self.pattern, self.regex, self.case_insensitive, self.next_result)
 
+	@classmethod
+	def make_reset(cls) -> 'TextSearch':
+		return cls('', False, False, False, True)
+
+	def reset(self) -> bool:
+		return self.is_reset
+
 	def search(self, plain_text: str, highlight: MatchSpan) -> MatchSpan:
-		if not plain_text:
+		if not plain_text or self.is_reset:
 			return None
 		if self.regex:
 			return self.regex_search(plain_text, highlight)

@@ -47,6 +47,15 @@ class SearchInput(Input):
 		else:
 			self.action_exit()
 
+	async def action_submit(self) -> None:
+		"""
+		Hitting enter when the input is empty cancels the search.
+		"""
+		if self.value:
+			await super().action_submit()
+		else:
+			self.action_exit()
+
 	def action_history(self, move: int) -> None:
 		self.post_message(self.HistoryMove(move))
 

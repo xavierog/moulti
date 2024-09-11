@@ -65,6 +65,11 @@ class CollapsibleStep(AbstractStep):
 	def search(self, search: TextSearch) -> bool:
 		found = False
 		widget = None
+		if search.reset():
+			if self.search_cursor != SEARCH_RESET:
+				self.search_part(search)
+			self.search_cursor = SEARCH_RESET
+			return False
 		if search.next_result:
 			parts = (SEARCH_TITLE, SEARCH_TOP_TEXT, SEARCH_SUBWIDGETS, SEARCH_BOTTOM_TEXT, SEARCH_RESET)
 		else:

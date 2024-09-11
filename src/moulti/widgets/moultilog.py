@@ -149,6 +149,12 @@ class MoultiLog(ScrollView, ToLinesMixin, can_focus=True):
 		return True
 
 	def search(self, search: TextSearch) -> bool:
+		if search.reset():
+			if (line_number := self.search_cursor[0]) is not None:
+				self.restore_line(line_number)
+				self.refresh()
+				self.clear_search()
+			return False
 		if search.next_result:
 			first_line, next_line = 0, 1
 		else:

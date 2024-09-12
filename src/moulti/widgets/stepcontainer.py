@@ -4,6 +4,7 @@ from textual.binding import Binding
 from textual.css.query import NoMatches
 from textual.geometry import Region
 from textual.reactive import Reactive
+from textual.dom import DOMNode
 from textual.widget import AwaitMount, AwaitRemove
 from moulti.search import TextSearch
 from .vertscroll import VertScroll
@@ -116,7 +117,41 @@ class StepContainer(VertScroll):
 			return removal
 		return None
 
+	def parent_step(self, widget: DOMNode|None) -> AbstractStep|None:
+		while widget is not None and not isinstance(widget, AbstractStep):
+			widget = widget.parent
+		return widget
+
+	def search_maximized(self, search: TextSearch) -> bool:
+		# Is there a maximized widget?
+		maximized_widget = self.screen.maximized
+		if not maximized_widget:
+			return False
+		# Does the maximized widget belong to a step?
+		step = self.parent_step(maximized_widget)
+		if step is None:
+			return False
+		# Does that step belong to this container?
+		if step.parent != self:
+			return False
+		# Can this step handle the matter?
+		if hasattr(step, 'search_maximized') and step.search_maximized(search):
+			# A match was found inside the maximized widget:
+			# 1 - discard the previously highlighted match, if any:
+			step_index = self.ordered_index(step)
+			if self.search_cursor not in (-1, step_index):
+				steps = list(self.ordered_steps())
+				current_step = steps[self.search_cursor]
+				if hasattr(current_step, 'search'):
+					current_step.search(TextSearch.make_reset())
+			# 2 - update the search cursor so as to resume search from the maximized widget's parent step:
+			self.search_cursor = step_index
+			return True
+		return False
+
 	def search(self, search: TextSearch) -> bool:
+		if self.screen.maximized:
+			return self.search_maximized(search)
 		steps = list(enumerate(self.ordered_steps()))
 		if self.search_cursor != -1:
 			steps = steps[self.search_cursor:] if search.next_result else steps[:self.search_cursor+1]

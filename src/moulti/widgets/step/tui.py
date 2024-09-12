@@ -13,7 +13,7 @@ from rich.cells import get_character_cell_size
 from moulti.helpers import ANSI_ESCAPE_SEQUENCE_BYTES, ANSI_RESET_SEQUENCES_BYTES, TAB_SPACES_BYTES
 from moulti.search import TextSearch
 from . import MOULTI_PASS_DEFAULT_READ_SIZE
-from ..collapsiblestep.tui import CollapsibleStep
+from ..collapsiblestep.tui import CollapsibleStep, SEARCH_SUBWIDGETS
 from ..moultilog import MoultiLog
 
 class ThrottledAppender:
@@ -84,6 +84,19 @@ class Step(CollapsibleStep):
 			if self.collapsible.collapsed:
 				self.ensure_expanded()
 			self.show_search_highlight()
+		return found
+
+	def search_maximized(self, search: TextSearch) -> bool:
+		if self.screen.maximized != self.log_widget:
+			return False
+		if found := self.log_widget.search(search):
+			# A match was found inside the maximized widget:
+			# 1 - ensure no other part is highlighted:
+			if self.search_cursor != SEARCH_SUBWIDGETS:
+				self.search(TextSearch.make_reset())
+			# 2 - update the search cursor so as to resume search from it:
+			self.search_cursor = SEARCH_SUBWIDGETS
+			self.log_widget.scroll_to_search_highlight()
 		return found
 
 	def ensure_expanded(self, expanded: bool = True) -> None:

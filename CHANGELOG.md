@@ -13,6 +13,10 @@ Although Moulti's Python packages, modules and functions are obviously available
 - `moulti diff`: [delta](https://github.com/dandavison/delta) integration
 - `moulti diff`: display number of added (+) and removed (-) lines for each hunk
 
+## Changed
+
+- Moulti now requires Textual >= 0.79.0
+
 ## [1.18.1] - 2024-09-09
 
 ### Fixed

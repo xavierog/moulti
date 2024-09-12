@@ -20,6 +20,7 @@ class HelpScreen(ModalScreen):
   [key]ctrl+pgup[/], [key]left[/], [key]right[/], [key]ctrl+pgdn[/]: horizontal scroll
   [key]l[/]: lock scroll: ignore programmatic scrolling
   [key]s[/]: save the current state to the filesystem
+  [key]f[/]: maximize the focused log / exit maximized mode
   [key]z[/]: show/hide the console
   [key]o[/], [key]x[/]: collapse/expand existing steps
   [key]O[/], [key]X[/]: collapse/expand new steps

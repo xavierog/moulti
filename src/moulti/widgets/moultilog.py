@@ -16,6 +16,11 @@ class MoultiLog(ScrollView, ToLinesMixin, can_focus=True):
 	- custom scrolling behaviour
 	- a focus indicator on the left
 	"""
+	BINDINGS = [
+		("f", "maximize", "Maximize"),
+		("f", "minimize", "Exit maximized mode"),
+	]
+
 	def __init__(
 		self,
 		*,
@@ -32,6 +37,39 @@ class MoultiLog(ScrollView, ToLinesMixin, can_focus=True):
 		self.follow_ansi_theme = True
 		self.search_cursor: tuple[int|None, MatchSpan] = (None, None)
 		self.searched_line_backup: tuple[int, str|Text|Strip] = (-1, '')
+		self.max_height_backup: Any = None
+
+	def set_max_height(self, new_max_height: int|None) -> int|None:
+		if new_max_height is None:
+			actual_max_height = new_max_height
+		else:
+			actual_max_height = new_max_height if new_max_height > 0 else None
+
+		if self.is_maximized:
+			# Maximized mode should ignore `moulti step update id --max-height=42`:
+			self.max_height_backup = actual_max_height
+		else:
+			self.styles.max_height = actual_max_height
+
+		return actual_max_height
+
+	def action_maximize(self) -> None:
+		self.max_height_backup = self.styles.max_height
+		self.styles.max_height = '99h' # Leave some room for the search widget
+		self.screen.maximize(self)
+		self.refresh_bindings()
+
+	def action_minimize(self) -> None:
+		self.screen.minimize()
+		self.styles.max_height = self.max_height_backup
+		self.refresh_bindings()
+
+	def check_action(self, action: str, parameters: tuple[object, ...]) -> bool:
+		if action == 'maximize':
+			return not bool(self.screen.maximized)
+		if action == 'minimize':
+			return bool(self.screen.maximized)
+		return True
 
 	def clear_search(self) -> None:
 		self.search_cursor = (None, None)
@@ -40,6 +78,10 @@ class MoultiLog(ScrollView, ToLinesMixin, can_focus=True):
 	def on_mount(self) -> None:
 		if self.follow_ansi_theme:
 			self.watch(self.app, 'dark', self.apply_ansi_fgbg)
+
+	def on_unmount(self) -> None:
+		if self.is_maximized:
+			self.action_minimize()
 
 	def apply_ansi_fgbg(self, _old: bool, _new: bool) -> None:
 		theme = self.app.ansi_theme

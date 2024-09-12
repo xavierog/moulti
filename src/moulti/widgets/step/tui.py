@@ -129,7 +129,7 @@ class Step(CollapsibleStep):
 		if 'max_height' in kwargs:
 			self.max_height = int(kwargs['max_height'])
 		self.log_widget.styles.min_height = self.min_height
-		self.log_widget.styles.max_height = self.max_height if self.max_height > 0 else None
+		self.log_widget.set_max_height(self.max_height)
 
 	def export_properties(self) -> dict[str, Any]:
 		prop = super().export_properties()

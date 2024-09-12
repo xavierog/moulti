@@ -54,6 +54,8 @@ class StepContainer(VertScroll):
 		self.set_class(self.prevent_programmatic_scrolling, 'prevent_programmatic_scrolling')
 
 	def check_action(self, action: str, parameters: tuple[object, ...]) -> bool:
+		if self.screen.maximized:
+			return False
 		if action == 'toggle_scrolling':
 			return parameters[0] != self.prevent_programmatic_scrolling
 		return True

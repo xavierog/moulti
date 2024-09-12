@@ -21,6 +21,7 @@ from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.css.query import NoMatches
 from textual.dom import BadIdentifier
+from textual.screen import Screen
 from textual.widgets import Label, ProgressBar
 from textual.worker import get_current_worker, NoActiveWorker
 from . import __version__ as MOULTI_VERSION
@@ -40,7 +41,7 @@ from .widgets.collapsiblestep.tui import CollapsibleStep
 from .widgets.step.tui import Step
 from .widgets.moulticonsole import MoultiConsole
 from .widgets.quitdialog import QuitDialog
-from .widgets.searchinput import SearchInputWidget
+from .widgets.searchinput import SearchInput, SearchInputWidget
 from .widgets.helpscreen import HelpScreen
 
 
@@ -113,6 +114,9 @@ def run_environment(command: list[str], copy: bool = True) -> dict[str, str]:
 class MoultiMessageException(Exception):
 	pass
 
+# The header and search input widgets should remain visible in maximized mode:
+Screen.ALLOW_IN_MAXIMIZED_VIEW = '#header,SearchInputWidget,' + Screen.ALLOW_IN_MAXIMIZED_VIEW
+
 class Moulti(App):
 	"""
 	moulti is a Terminal User Interface (TUI) meant to display multiple outputs.
@@ -140,6 +144,8 @@ class Moulti(App):
 
 	# Disable Textual's command palette; it may come back if Moulti ends up with too many commands though:
 	ENABLE_COMMAND_PALETTE = False
+	# Do not minimize on 'escape' because widgets need to restore their max height:
+	ESCAPE_TO_MINIMIZE = False
 
 	def __init__(self, command: list[str]|None = None):
 		self.init_security()
@@ -254,8 +260,14 @@ class Moulti(App):
 		self.logconsole(f'known widgets: {widget_list}')
 		self.network_loop()
 
+	def on_search_input_cancel_search(self, _event: SearchInput.CancelSearch) -> None:
+		if self.screen.maximized:
+			self.screen.maximized.focus()
+
 	def on_search_input_widget_new_search(self, message: SearchInputWidget.NewSearch) -> None:
 		self.current_search = message.search
+		if self.screen.maximized:
+			self.screen.maximized.focus()
 		self.search(self.current_search)
 
 	def search_title(self, search: TextSearch) -> bool:
@@ -438,6 +450,8 @@ class Moulti(App):
 			return self.dark
 		if action == 'dark_mode':
 			return not self.dark
+		if self.screen.maximized and action in ('save', 'toggle_console', 'collapse_all'):
+			return False
 		return True
 
 	def action_toggle_console(self) -> None:
@@ -802,6 +816,7 @@ class Moulti(App):
 		width: 100%;
 		background: $accent;
 		color: auto;
+		dock: top; /* relevant in maximized mode */
 	}
 
 	/* Show the progress bar as a full-width extension of the footer: */

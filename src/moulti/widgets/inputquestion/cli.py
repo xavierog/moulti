@@ -1,5 +1,5 @@
 from argparse import ArgumentParser, BooleanOptionalAction, _SubParsersAction
-from moulti.helpers import pint, send_to_moulti_and_handle_reply, send_no_none_to_moulti_and_handle_reply
+from moulti.helpers import pint, send_delete, send_to_moulti_and_handle_reply, send_no_none_to_moulti_and_handle_reply
 from ..abstractquestion.cli import add_abstractquestion_options, question_get_answer
 
 COMMAND = 'inputquestion' # abridged 'iq' below
@@ -35,8 +35,8 @@ def add_iq_commands(iq_subparsers: _SubParsersAction) -> None:
 
 	# moulti inputquestion delete
 	iq_delete_parser = iq_subparsers.add_parser('delete', help='delete an existing input question')
-	iq_delete_parser.set_defaults(func=send_to_moulti_and_handle_reply, command=COMMAND, action='delete')
-	iq_delete_parser.add_argument('id', type=str, help='unique identifier')
+	iq_delete_parser.set_defaults(func=send_delete, command=COMMAND, action='delete')
+	iq_delete_parser.add_argument('id', type=str, nargs='+', help='unique identifier')
 
 def add_inputquestion_options(parser: ArgumentParser, none: bool = False) -> None:
 	parser.add_argument('--placeholder', default=None if none else '', help='placeholder')

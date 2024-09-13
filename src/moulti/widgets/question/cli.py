@@ -1,5 +1,5 @@
 from argparse import _SubParsersAction
-from moulti.helpers import send_to_moulti_and_handle_reply, send_no_none_to_moulti_and_handle_reply
+from moulti.helpers import send_delete, send_to_moulti_and_handle_reply, send_no_none_to_moulti_and_handle_reply
 from ..abstractquestion.cli import add_abstractquestion_options, question_get_answer
 from ..inputquestion.cli import add_inputquestion_options
 
@@ -39,5 +39,5 @@ def add_q_commands(q_subparsers: _SubParsersAction) -> None:
 
 	# moulti question delete
 	q_delete_parser = q_subparsers.add_parser('delete', help='delete an existing Moulti question')
-	q_delete_parser.set_defaults(func=send_to_moulti_and_handle_reply, command=COMMAND, action='delete')
-	q_delete_parser.add_argument('id', type=str, help='unique identifier')
+	q_delete_parser.set_defaults(func=send_delete, command=COMMAND, action='delete')
+	q_delete_parser.add_argument('id', type=str, nargs='+', help='unique identifier')

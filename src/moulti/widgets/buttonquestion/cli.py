@@ -1,5 +1,5 @@
 from argparse import _SubParsersAction
-from moulti.helpers import send_to_moulti_and_handle_reply, send_no_none_to_moulti_and_handle_reply
+from moulti.helpers import send_delete, send_to_moulti_and_handle_reply, send_no_none_to_moulti_and_handle_reply
 from ..abstractquestion.cli import add_abstractquestion_options, question_get_answer
 
 COMMAND = 'buttonquestion' # abridged 'bq' below
@@ -35,5 +35,5 @@ def add_bq_commands(bq_subparsers: _SubParsersAction) -> None:
 
 	# moulti buttonquestion delete
 	bq_delete_parser = bq_subparsers.add_parser('delete', help='delete an existing Moulti question')
-	bq_delete_parser.set_defaults(func=send_to_moulti_and_handle_reply, command=COMMAND, action='delete')
-	bq_delete_parser.add_argument('id', type=str, help='unique identifier')
+	bq_delete_parser.set_defaults(func=send_delete, command=COMMAND, action='delete')
+	bq_delete_parser.add_argument('id', type=str, nargs='+', help='unique identifier')

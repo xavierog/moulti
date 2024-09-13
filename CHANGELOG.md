@@ -12,6 +12,7 @@ Although Moulti's Python packages, modules and functions are obviously available
 
 - `moulti diff`: [delta](https://github.com/dandavison/delta) integration
 - `moulti diff`: display number of added (+) and removed (-) lines for each hunk
+- `delete` commands now accept multiple ids, e.g. `moulti step delete step_1 step_2 step_3`
 - Pressing `f` maximizes the currently focused step log (similar to zoom pane in tmux)
 
 ## Changed

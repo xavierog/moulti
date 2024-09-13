@@ -2,6 +2,7 @@ import os
 import sys
 from typing import Any, cast
 from argparse import ArgumentTypeError
+from .pipeline import pipeline
 from .protocol import Message, send_to_moulti
 Args = dict[str, Any]
 
@@ -37,6 +38,10 @@ def send_to_moulti_and_handle_reply(message: Message) -> None:
 def send_no_none_to_moulti_and_handle_reply(args: Args) -> None:
 	no_none_args = {k:v for (k,v) in args.items() if v is not None}
 	send_to_moulti_and_handle_reply(no_none_args)
+
+def send_delete(args: Args) -> None:
+	errors = pipeline((step_id, {**args, 'id': step_id}, None) for step_id in args['id'])
+	sys.exit(1 if errors else 0)
 
 def call_all(calls: list[Any]) -> None:
 	for call in calls:

@@ -1,7 +1,7 @@
 import sys
 from argparse import ArgumentParser, BooleanOptionalAction, _SubParsersAction
 from moulti.helpers import Args, pint, handle_reply
-from moulti.helpers import send_to_moulti_and_handle_reply, send_no_none_to_moulti_and_handle_reply
+from moulti.helpers import send_delete, send_to_moulti_and_handle_reply, send_no_none_to_moulti_and_handle_reply
 from moulti.protocol import moulti_connect, send_json_message, recv_json_message
 from . import MOULTI_PASS_DEFAULT_READ_SIZE
 from ..collapsiblestep.cli import add_collapsiblestep_options
@@ -31,8 +31,8 @@ def add_step_commands(step_subparsers: _SubParsersAction) -> None:
 
 	# moulti step delete
 	step_delete_parser = step_subparsers.add_parser('delete', help='delete an existing Moulti step')
-	step_delete_parser.set_defaults(func=send_to_moulti_and_handle_reply, command=COMMAND, action='delete')
-	step_delete_parser.add_argument('id', type=str, help='unique identifier')
+	step_delete_parser.set_defaults(func=send_delete, command=COMMAND, action='delete')
+	step_delete_parser.add_argument('id', type=str, nargs='+', help='unique identifier')
 
 	# moulti step clear
 	step_clear_parser = step_subparsers.add_parser('clear', help='clear the contents of an existing Moulti step')

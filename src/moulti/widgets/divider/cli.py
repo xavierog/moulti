@@ -1,5 +1,5 @@
 from argparse import _SubParsersAction
-from moulti.helpers import send_to_moulti_and_handle_reply, send_no_none_to_moulti_and_handle_reply
+from moulti.helpers import send_delete, send_to_moulti_and_handle_reply, send_no_none_to_moulti_and_handle_reply
 from ..abstractstep.cli import add_abstractstep_options
 
 COMMAND = 'divider'
@@ -25,5 +25,5 @@ def add_divider_commands(divider_subparsers: _SubParsersAction) -> None:
 
 	# moulti divider delete
 	divider_delete_parser = divider_subparsers.add_parser('delete', help='delete an existing Moulti divider')
-	divider_delete_parser.set_defaults(func=send_to_moulti_and_handle_reply, command=COMMAND, action='delete')
-	divider_delete_parser.add_argument('id', type=str, help='unique identifier')
+	divider_delete_parser.set_defaults(func=send_delete, command=COMMAND, action='delete')
+	divider_delete_parser.add_argument('id', type=str, nargs='+', help='unique identifier')

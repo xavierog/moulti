@@ -17,6 +17,7 @@ Although Moulti's Python packages, modules and functions are obviously available
 ## Changed
 
 - Moulti now requires Textual >= 0.79.0
+- pipeline() now writes errors on stderr; this affects moulti `load`, `diff` and `manpage` commands.
 
 ## [1.18.1] - 2024-09-09
 

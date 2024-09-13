@@ -1,4 +1,5 @@
 import os
+import sys
 from typing import Any, Generator
 from .protocol import moulti_connect, send_json_message, recv_json_message
 
@@ -32,7 +33,7 @@ def pipeline(messages: Generator, read_size: int = 1024**2) -> int:
 					send_message(moulti_socket, pass_msg, [fileno])
 			except Exception as exc:
 				errors += 1
-				print(f'Error with {step_id}/{data}/{fileno}: {exc}')
+				sys.stderr.write(f'Error with {step_id}/{data}/{fileno}: {exc}\n')
 		# Receive replies to all sent messages:
 		while not all(sent_messages.values()):
 			reply, _ = recv_json_message(moulti_socket, 0)
@@ -40,7 +41,7 @@ def pipeline(messages: Generator, read_size: int = 1024**2) -> int:
 				sent_messages[reply['msgid']] = True
 				if reply.get('done') is not True:
 					errors += 1
-					print(f'Error: {reply.get("error")}')
+					sys.stderr.write(f'Error: {reply.get("error")}\n')
 		for fileno in filenos:
 			os.close(fileno)
 	return errors

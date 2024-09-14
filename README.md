@@ -16,11 +16,11 @@ Not convinced yet? What if the output of your Ansible playbooks looked like this
 Moulti is a tool meant for people who write and execute shell scripts and/or Ansible playbooks.
 Specifically, if you find yourself scrolling up your terminal to ensure everything went fine while your script is still running, then Moulti is made for you.
 
-By the way, Moulti can also display man pages and unified diff files:
+By the way, Moulti can also display man pages and unified diff files (with colors courtesy of [delta](https://github.com/dandavison/delta):
 
 ![Moulti: man page](https://xavier.kindwolf.org/p/moulti/doc/img/moulti-man-bash.png?20240621)
 
-![Moulti: unified diff output](https://xavier.kindwolf.org/p/moulti/doc/img/moulti-diff.png?20240505)
+![Moulti: unified diff output](https://xavier.kindwolf.org/p/moulti/doc/img/moulti-diff.png?20240914)
 
 ## Installation
 
@@ -48,6 +48,8 @@ As shown in the demo, Moulti enables user interactions through **questions**:
 ![Moulti button question](https://xavier.kindwolf.org/p/moulti/doc/img/moulti-button-question.png?20240218)
 
 Moulti also features:
+- text **search**, similar to `less`: [documentation](Documentation.md#text-search)
+- ability to maximize a single step log, similar to tmux's zoom feature
 - a **progress bar**: [documentation](Documentation.md#progress-bar)
 - programmatic scrolling: [documentation](Documentation.md#programmatically-scrolling-through-steps)
 - an askpass helper named `moulti-askpass`: [documentation](Documentation.md#moulti-run-dealing-with-ssh)

@@ -16,7 +16,7 @@ Not convinced yet? What if the output of your Ansible playbooks looked like this
 Moulti is a tool meant for people who write and execute shell scripts and/or Ansible playbooks.
 Specifically, if you find yourself scrolling up your terminal to ensure everything went fine while your script is still running, then Moulti is made for you.
 
-By the way, Moulti can also display man pages and unified diff files (with colors courtesy of [delta](https://github.com/dandavison/delta):
+By the way, Moulti can also display man pages and unified diff files (with colors courtesy of [delta](https://github.com/dandavison/delta)):
 
 ![Moulti: man page](https://xavier.kindwolf.org/p/moulti/doc/img/moulti-man-bash.png?20240621)
 

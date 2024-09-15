@@ -58,12 +58,15 @@ def commands(title: str, header: str, diff: PatchSet) -> Generator:
 		except Exception:
 			pass
 
+	print_steps = bool(os.environ.get('MOULTI_DIFF_VERBOSE'))
 	pid = os.getpid()
 	counter = {'step': 1}
 	def step(cmd: str, title: str, **kwargs: Any) -> tuple[str, dict, None]:
 		step_id = f'diff_{pid}_{counter["step"]}'
 		counter['step'] += 1
 		step = {'command': cmd, 'action': 'add', 'id': step_id, 'title': title, 'classes': 'diff', **kwargs}
+		if print_steps:
+			print(f'{cmd} {step_id}')
 		return step_id, step, None
 
 	if header:

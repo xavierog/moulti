@@ -709,6 +709,22 @@ If this fails (e.g. because `delta` is not available on the system), Moulti reso
 
 If that attempt to run `delta --color-only` somehow proves undesirable, set the environment variable `MOULTI_DIFF_NO_DELTA` to any value to prevent it.
 
+### Generated widgets
+
+By default, `moulti diff` acts like a blackbox: it reads diff data, connects to the adequate Moulti instance, adds dividers and steps, then exits.
+That makes it hard (albeit not impossible) to determine the number and ids of dividers and steps added by `moulti diff`.
+
+If the environment variable `MOULTI_DIFF_VERBOSE` is set to any non-empty value, `moulti diff` outputs the type and id of each generated widget to stdout.
+Example:
+```console
+$ MOULTI_DIFF_VERBOSE=y moulti diff run -- git show
+step diff_352404_1
+divider diff_352404_2
+step diff_352404_3
+```
+
+That makes it possible to perform simple update/delete operations on these widgets.
+
 ## Moulti manpage
 
 Like `moulti diff`, `moulti manpage` offers two subcommands (`parse` and `run`) that make it possible to load and read
@@ -983,6 +999,7 @@ About colors in `MOULTI_ANSI*`:
 - `MOULTI_RUN_OUTPUT`: see [moulti run: dealing with stdin, stdout, stderr](#moulti-run-dealing-with-stdin-stdout-stderr)
 - `MOULTI_DIFF_NO_DELTA` see [moulti diff: delta integration](#delta-integration)
 - `MOULTI_DIFF_ENCODING`: see [moulti diff: encoding](#encoding)
+- `MOULTI_DIFF_VERBOSE`: see [moulti diff: generated widgets](#generated-widgets)
 - `MOULTI_MANPAGE_ENCODING`: same as `MOULTI_DIFF_ENCODING` for `moulti manpage`
 - `MOULTI_CLIPBOARD_COPY`: see [Saving a single Moulti step](#saving-a-single-moulti-step)
 - `MOULTI_ASKPASS_DEFAULT_PROMPT`: prompt shown by `moulti-askpass` if none was passed on the command line; defaults to `askpass`

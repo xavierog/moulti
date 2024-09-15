@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for its CLI (Command-Line Interface), i.e. for the `moulti` command.
 Although Moulti's Python packages, modules and functions are obviously available, they do not constitute a public API yet.
 
+## Unreleased
+
+### Added
+
+- `moulti diff` lists generated widgets if the environment variable `MOULTI_DIFF_VERBOSE` is set
+
+
 ## [1.19.0] - 2024-09-15
 
 ### Added

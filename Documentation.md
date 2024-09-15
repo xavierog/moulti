@@ -1001,6 +1001,7 @@ About colors in `MOULTI_ANSI*`:
 - `MOULTI_DIFF_ENCODING`: see [moulti diff: encoding](#encoding)
 - `MOULTI_DIFF_VERBOSE`: see [moulti diff: generated widgets](#generated-widgets)
 - `MOULTI_MANPAGE_ENCODING`: same as `MOULTI_DIFF_ENCODING` for `moulti manpage`
+- `MOULTI_MANPAGE_VERBOSE`: same as `MOULTI_DIFF_VERBOSE` for `moulti manpage`
 - `MOULTI_CLIPBOARD_COPY`: see [Saving a single Moulti step](#saving-a-single-moulti-step)
 - `MOULTI_ASKPASS_DEFAULT_PROMPT`: prompt shown by `moulti-askpass` if none was passed on the command line; defaults to `askpass`
 

@@ -11,6 +11,7 @@ Although Moulti's Python packages, modules and functions are obviously available
 ### Added
 
 - `moulti diff` lists generated widgets if the environment variable `MOULTI_DIFF_VERBOSE` is set
+- `moulti manpage` lists generated widgets if the environment variable `MOULTI_MANPAGE_VERBOSE` is set
 
 
 ## [1.19.0] - 2024-09-15

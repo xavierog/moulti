@@ -94,12 +94,15 @@ def commands(title: str, manpage: dict) -> Generator:
 	if 'MOULTI_MANPAGE_NO_TITLE' not in os.environ:
 		yield None, {'command': 'set', 'title': title}, None
 
+	print_steps = bool(os.environ.get('MOULTI_MANPAGE_VERBOSE'))
 	pid = os.getpid()
 	counter = {'step': 1}
 	def step(cmd: str, title: str, **kwargs: Any) -> tuple[str, dict, None]:
 		step_id = f'manpage_{pid}_{counter["step"]}'
 		counter['step'] += 1
 		step = {'command': cmd, 'action': 'add', 'id': step_id, 'title': title, 'classes': 'manpage', **kwargs}
+		if print_steps:
+			print(f'{cmd} {step_id}')
 		return step_id, step, None
 
 	yield step('divider', ansi_to_markup(manpage['title']), classes='manpage title')

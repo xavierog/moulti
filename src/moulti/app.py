@@ -149,6 +149,7 @@ class Moulti(App):
 
 	def __init__(self, command: list[str]|None = None):
 		self.init_security()
+		self.init_quit_policy()
 		self.init_widgets()
 		self.end_user_console = MoultiConsole('moulti_console', classes='hidden')
 		self.init_command = command
@@ -194,6 +195,23 @@ class Moulti(App):
 		# Make this behaviour configurable through environment variables:
 		self.allowed_uids.extend(ids_from_env('MOULTI_ALLOWED_UID'))
 		self.allowed_gids.extend(ids_from_env('MOULTI_ALLOWED_GID'))
+
+	def init_quit_policy(self) -> None:
+		"""
+		Initialize the quit policy, i.e. how Moulti should behave when end users request to quit.
+		"""
+		# Default quit policy: ask if the driving process is still running, otherwise quit directly:
+		self.quit_policy = {'running': 'ask', 'default': 'quit'}
+		# The default policy can be overridden through the environment variable MOULTI_QUIT_POLICY:
+		for override in os.environ.get('MOULTI_QUIT_POLICY', '').split(';'):
+			if override.startswith('running='):
+				override = override[8:]
+				if override in ('ask', 'leave', 'terminate'):
+					self.quit_policy['running'] = override
+			elif override.startswith('default='):
+				override = override[8:]
+				if override in ('ask', 'quit'):
+					self.quit_policy['default'] = override
 
 	def init_widgets(self) -> None:
 		self.title_label = Label('Title', id='header')
@@ -254,6 +272,7 @@ class Moulti(App):
 	def on_ready(self) -> None:
 		self.logconsole(f'Moulti v{MOULTI_VERSION}, Textual v{TEXTUAL_VERSION}, Python v{sys.version}')
 		self.logconsole(f'instance "{current_instance()}", PID {os.getpid()}')
+		self.logconsole(f'quit policy: {self.quit_policy}')
 		self.setup_ansi_behavior()
 		self.init_threads()
 		widget_list = ' '.join(MoultiWidgets.registry().keys())
@@ -510,13 +529,22 @@ class Moulti(App):
 
 	async def action_quit(self) -> None:
 		"""Quit Moulti."""
+		mode = 'default'
+		message = ''
+		allow_terminate = False
 		if self.init_command is not None and self.init_command_running:
+			mode = 'running'
+			message = 'The command passed to "moulti run" is still running.'
+			allow_terminate = True
+		policy = self.quit_policy[mode]
+		if policy == 'ask':
 			try:
 				self.query_one('QuitDialog', QuitDialog).new_quit_request()
 			except NoMatches:
-				message = 'The command passed to "moulti run" is still running.'
-				self.push_screen(QuitDialog(message))
+				self.push_screen(QuitDialog(message, allow_terminate))
 			return
+		# leave/quit, terminate:
+		self.exit_first_policy = policy
 		await super().action_quit()
 
 	def on_quit_dialog_exit_request(self, exit_request: QuitDialog.ExitRequest) -> None:

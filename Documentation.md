@@ -987,6 +987,33 @@ About colors in `MOULTI_ANSI*`:
 - colors may be prefixed with `#`;
 - hexadecimal digits may be specified as lower or uppercase but there must be exactly 6 digits.
 
+#### Quitting Moulti
+
+`MOULTI_QUIT_POLICY` defines how Moulti should behave upon quitting.
+Moulti considers two modes:
+
+- `running`: when the command launched by `moulti run` is still running;
+- `default`: any other situation.
+
+Each mode is assigned a "quit policy" among these:
+
+- `ask`: a modal dialog appears and asks end users whether they actually want to quit and whether it should kill the running script, if any;
+- `quit`: simply quit -- default mode only;
+- `leave`: leave the running script untouched and quit -- running mode only;
+- `terminate`: terminate the script (SIGTERM) and quit -- running mode only.
+
+Examples:
+```shell
+# Default policy:
+export MOULTI_QUIT_POLICY='running=ask;default=quit'
+# Always ask before quitting:
+export MOULTI_QUIT_POLICY='running=ask;default=ask'
+# Never ask, leave running processes untouched:
+export MOULTI_QUIT_POLICY='running=leave;default=quit'
+# Never ask, always kill:
+export MOULTI_QUIT_POLICY='running=terminate;default=quit'
+```
+
 #### Title
 
 - `MOULTI_ANSIBLE_NO_TITLE` to prevent the Ansible plugin from changing the title of the Moulti instance

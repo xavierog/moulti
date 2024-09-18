@@ -134,9 +134,9 @@ class AbstractStep(Static):
 
 	DEFAULT_COLORS = """
 	$step_default: $primary;
-	$step_success: ansi_bright_green;
-	$step_warning: orange;
-	$step_error: tomato;
+	$step_success: #00ff00; /* bright green */
+	$step_warning: #ffa500; /* orange */
+	$step_error: #ff6347; /* tomato */
 	"""
 	DEFAULT_CSS = DEFAULT_COLORS + """
 	AbstractStep {

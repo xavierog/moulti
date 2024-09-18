@@ -15,6 +15,9 @@ Although Moulti's Python packages, modules and functions are obviously available
 - the environment variable `MOULTI_QUIT_POLICY` defines how Moulti should behave upon quitting
 - steps can now be assigned the `inactive` class, which turns them gray
 
+### Changed
+
+- Ansible callback plugin: steps with "skipping" and "included" lines are affected the new `inactive` class
 
 ## [1.19.0] - 2024-09-15
 

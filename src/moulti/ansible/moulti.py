@@ -62,6 +62,7 @@ class MoultiDisplay(Display):
 			self.set_title_from_command_line()
 		self.is_task: bool = False
 		self.task_class: str|None = None
+		self.task_class_priority: int = -1
 		# Hijack sys.stdout and sys.stderr to harvest as much output as possible:
 		sys.stdout = sys.stderr = self
 
@@ -126,6 +127,7 @@ class MoultiDisplay(Display):
 		self.moulti(['step', 'update', task_id, '--top-text', f'Started {self.date_time(self.start_time)}'])
 		self.is_task = True
 		self.task_class = None
+		self.task_class_priority = -1
 		return task_id
 
 	def new_recap(self, title: str) -> str:
@@ -184,19 +186,23 @@ class MoultiDisplay(Display):
 		if screen_only or not log_only:
 			if not msg:
 				return
+			task_class, priority = None, -1
 			if color is not None:
 				color_code = parsecolor(color)
 				msg = '\n'.join([f'\033[{color_code}m{t}\033[0m' for t in msg.split('\n')])
-			step_id = self.write(msg)
-			if self.task_class != 'error':
-				task_class = None
 				if color in ('red', 'bright red'):
-					task_class = 'error'
+					task_class, priority = 'error', 10
 				elif color in ('yellow', 'bright yellow'):
-					task_class = 'warning'
-				if task_class is not None and task_class != self.task_class:
-					self.task_class = task_class
-					self.moulti(['step', 'update', step_id, '--classes', 'ansible ansible_task ' + self.task_class])
+					task_class, priority = 'warning', 5
+				elif color in ('green', 'bright green'):
+					task_class, priority = 'success', 3
+				elif color in ('cyan', 'bright cyan'): # "skipping" and "included" lines
+					task_class, priority = 'inactive', 0
+			step_id = self.write(msg)
+			if task_class is not None and task_class != self.task_class and priority > self.task_class_priority:
+				self.task_class = task_class
+				self.task_class_priority = priority
+				self.moulti(['step', 'update', step_id, '--classes', 'ansible ansible_task ' + self.task_class])
 
 	def banner(self, msg: str, color: str | None = None, _cows: bool = True) -> None:
 		if msg.startswith('TASK'):

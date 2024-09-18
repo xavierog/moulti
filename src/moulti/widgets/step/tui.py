@@ -378,6 +378,9 @@ class Step(CollapsibleStep):
 		&.error {
 			& MoultiLog { scrollbar-corner-color: $step_error; }
 		}
+		&.inactive {
+			& MoultiLog { scrollbar-corner-color: $step_inactive; }
+		}
 	}
 	"""
 MoultiWidgetClass = Step

@@ -137,6 +137,7 @@ class AbstractStep(Static):
 	$step_success: #00ff00; /* bright green */
 	$step_warning: #ffa500; /* orange */
 	$step_error: #ff6347; /* tomato */
+	$step_inactive: #bebebe; /* halfway between lightgray #d3d3d3 and darkgray #a9a9a9 */
 	"""
 	DEFAULT_CSS = DEFAULT_COLORS + """
 	AbstractStep {
@@ -148,6 +149,7 @@ class AbstractStep(Static):
 		&.success { background: $step_success; }
 		&.warning { background: $step_warning; }
 		&.error { background: $step_error; }
+		&.inactive { background: $step_inactive; }
 	}
 	AbstractStep:focus, AbstractStep:focus-within {
 		border-left: thick $accent-lighten-3;

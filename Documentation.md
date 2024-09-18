@@ -1066,11 +1066,12 @@ SUDO_ASKPASS=/usr/local/bin/moulti-askpass
 
 ## How to define my own step classes ?
 
-Out of the box, Moulti provides four step classes:
+Out of the box, Moulti provides five step classes:
 - `standard` (blue)
 - `success` (green)
 - `warning` (orange)
 - `error` (red)
+- `inactive` (gray)
 
 Here, "class" is a synonym for "style" or "color" and actually refers to the notion of CSS class. Moulti is based on the Textual framework, which borrows various principles from the world of web design, starting with their own variant of CSS: Textual CSS (TCSS).
 

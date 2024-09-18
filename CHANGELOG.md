@@ -13,6 +13,7 @@ Although Moulti's Python packages, modules and functions are obviously available
 - `moulti diff` lists generated widgets if the environment variable `MOULTI_DIFF_VERBOSE` is set
 - `moulti manpage` lists generated widgets if the environment variable `MOULTI_MANPAGE_VERBOSE` is set
 - the environment variable `MOULTI_QUIT_POLICY` defines how Moulti should behave upon quitting
+- steps can now be assigned the `inactive` class, which turns them gray
 
 
 ## [1.19.0] - 2024-09-15

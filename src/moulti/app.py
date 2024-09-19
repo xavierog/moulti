@@ -272,7 +272,7 @@ class Moulti(App):
 	def on_ready(self) -> None:
 		self.logconsole(f'Moulti v{MOULTI_VERSION}, Textual v{TEXTUAL_VERSION}, Python v{sys.version}')
 		self.logconsole(f'instance "{current_instance()}", PID {os.getpid()}')
-		self.logconsole(f'quit policy: {self.quit_policy}')
+		self.logconsole('quit policy: ' + ', '.join(f"{k}='{v}'" for k,v in self.quit_policy.items()))
 		self.setup_ansi_behavior()
 		self.init_threads()
 		widget_list = ' '.join(MoultiWidgets.registry().keys())

@@ -355,10 +355,11 @@ In practice, combining Ansible with Moulti is as simple as:
 moulti run -- ansible-playbook your-playbook.yaml
 ```
 
-Under the hood, `moulti run` performs some magic. It sets two environment variables:
+Under the hood, `moulti run` performs some magic. It sets three environment variables:
 - `ANSIBLE_STDOUT_CALLBACK`: id of the stdout callback plugin to use: `moulti`
 - `ANSIBLE_CALLBACK_PLUGINS`: colon-separated list of paths that Ansible searches for callback plugins.
   If this environment variable is set already, moulti simply appends its own plugin path to it.
+- `ANSIBLE_FORCE_COLOR=yes`: generate colors in "PLAY RECAP" and diff (`-D` command-line option)
 
 However, unlike SSH and sudo, this integration is not always desirable so `moulti run` relies on the following heuristics:
 - If the environment variable `MOULTI_ANSIBLE` is set to `force`, it systematically sets both environment variables.
@@ -379,6 +380,7 @@ $
 $ MOULTI_ANSIBLE=force moulti run --print-env -- your-script.sh | grep ^ANSIBLE
 ANSIBLE_CALLBACK_PLUGINS=/path/to/python/package/moulti/ansible
 ANSIBLE_STDOUT_CALLBACK=moulti
+ANSIBLE_FORCE_COLOR=yes
 $
 ```
 
@@ -387,9 +389,11 @@ $
 $ moulti run --print-env -- ansible-playbook your-playbook.yaml | grep ^ANSIBLE
 ANSIBLE_CALLBACK_PLUGINS=/path/to/python/package/moulti/ansible
 ANSIBLE_STDOUT_CALLBACK=moulti
+ANSIBLE_FORCE_COLOR=yes
 $ moulti run --print-env -- your-ansible-wrapper.sh | grep ^ANSIBLE
 ANSIBLE_CALLBACK_PLUGINS=/path/to/python/package/moulti/ansible
 ANSIBLE_STDOUT_CALLBACK=moulti
+ANSIBLE_FORCE_COLOR=yes
 $ moulti run --print-env -- your-script.sh | grep ^ANSIBLE
 $
 ```

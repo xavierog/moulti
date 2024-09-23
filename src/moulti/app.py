@@ -92,6 +92,7 @@ def run_environment(command: list[str], copy: bool = True) -> dict[str, str]:
 			ansible_callback_paths += ansible.__path__[0]
 			environment['ANSIBLE_CALLBACK_PLUGINS'] = ansible_callback_paths
 			environment['ANSIBLE_STDOUT_CALLBACK'] = 'moulti'
+			environment['ANSIBLE_FORCE_COLOR'] = 'yes'
 			# ansible-playbook may still read from /dev/tty through getpass.getpass():
 			ansible_askpass = {
 				'ANSIBLE_CONNECTION_PASSWORD_FILE': {'args': ('-k', '--ask-pass'), 'suffix': 'connection-password'},

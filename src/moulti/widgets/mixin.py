@@ -70,10 +70,16 @@ class ToLinesMixin:
 		color_system = Console()._color_system # pylint: disable=protected-access
 		style_render = Style.render
 		if keep_styles:
+			highlighter = None
+			if hasattr(self, 'highlight') and self.highlight and hasattr(self, 'highlighter'):
+				highlighter = self.highlighter
 			for line in self.lines: # type: ignore
 				if isinstance(line, str):
-					yield line
-					continue
+					if highlighter:
+						line = highlighter(Text(line))
+					else:
+						yield line
+						continue
 				if isinstance(line, Text):
 					segments = line.render(console)
 				else:

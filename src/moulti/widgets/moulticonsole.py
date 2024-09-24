@@ -5,7 +5,7 @@ from rich.text import Text
 from rich.theme import Theme
 from textual.app import ComposeResult
 from textual.events import MouseScrollUp, Click
-from textual.widgets import Label, RichLog, Static
+from textual.widgets import Label, Log, Static
 from moulti.clipboard import copy
 from moulti.widgets.mixin import ToLinesMixin
 
@@ -84,9 +84,9 @@ class MoultiConsole(Static):
 	}
 	"""
 
-class MoultiConsoleLog(RichLog, ToLinesMixin):
+class MoultiConsoleLog(Log, ToLinesMixin):
 	"""
-	Moulti's console leverages RichLog and its highlighter
+	Moulti's console leverages Log and its highlighter
 	"""
 	def watch_scroll_y(self, old_value: float, new_value: float) -> None:
 		"""

@@ -12,6 +12,12 @@ Although Moulti's Python packages, modules and functions are obviously available
 
 - `moulti run` now sets `ANSIBLE_FORCE_COLOR=yes` when Ansible is detected, thus generating colors in "PLAY RECAP" and diff (`-D` command-line option)
 
+### Fixed
+
+- The console is now based on Textual's `Log` widget instead of `RichLog`; this prevents a
+  [bug introduced in Textual 0.80.0](https://github.com/Textualize/textual/issues/5024) that affects the console when
+  it becomes visible for the first time.
+
 ## [1.20.0] - 2024-09-22
 
 ### Added

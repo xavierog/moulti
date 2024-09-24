@@ -446,7 +446,7 @@ class Moulti(App):
 		return prop
 
 	def logconsole(self, line: str) -> None:
-		line = timestamp() + line
+		line = timestamp() + line + '\n'
 		if self._thread_id == get_ident():
 			self.end_user_console.write(line)
 		else:

@@ -481,6 +481,7 @@ class Moulti(App):
 			# Not ideal but reasonable:
 			self.steps_container.focus(False)
 			# Work around a rendering issue after the console is hidden:
+			# Certainly https://github.com/Textualize/textual/issues/5056
 			self.refresh(layout=True)
 		else:
 			# It is often necessary to scroll the console, so give it the focus:
@@ -489,6 +490,7 @@ class Moulti(App):
 	def action_search(self, next_result: bool) -> None:
 		self.search_input.action_pop(next_result)
 		# Work around a rendering issue when the search bar appears:
+		# Likely https://github.com/Textualize/textual/issues/5056
 		self.refresh(layout=True)
 
 	def action_search_previous(self) -> None:

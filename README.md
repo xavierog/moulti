@@ -3,7 +3,7 @@
 Moulti changes the way your shell scripts (bash, zsh, etc.) display their output in your terminal.
 Moulti enables you to assign the numerous lines emitted by your scripts to "steps", i.e. visual, collapsible blocks featuring their own title and color.
 
-Here is how [upgrading a Debian system](examples/moulti-debian-upgrade.bash) looks like with Moulti:
+Here is what [upgrading a Debian system](examples/moulti-debian-upgrade.bash) looks like with Moulti:
 
 ![Moulti demo: Debian upgrade (Animated PNG)](https://xavier.kindwolf.org/p/moulti/doc/img/moulti-demo-debian-upgrade.png?20240218)
 

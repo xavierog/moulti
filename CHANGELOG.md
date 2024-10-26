@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for its CLI (Command-Line Interface), i.e. for the `moulti` command.
 Although Moulti's Python packages, modules and functions are obviously available, they do not constitute a public API yet.
 
+
+## Unreleased
+
+### Changed
+
+- Moulti now requires Textual >= 0.83.0
+
+### Fixed
+
+- `moulti init` used to crash with Textual >= 0.83.0:
+  ```
+  Screen.ALLOW_IN_MAXIMIZED_VIEW = '#header,SearchInputWidget,' + Screen.ALLOW_IN_MAXIMIZED_VIEW
+                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  TypeError: can only concatenate str (not "NoneType") to str
+  ```
+
 ## [1.21.0] - 2024-09-29
 
 ### Changed

@@ -21,7 +21,6 @@ from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.css.query import NoMatches
 from textual.dom import BadIdentifier
-from textual.screen import Screen
 from textual.widgets import Label, ProgressBar
 from textual.worker import get_current_worker, NoActiveWorker
 from . import __version__ as MOULTI_VERSION
@@ -115,15 +114,16 @@ def run_environment(command: list[str], copy: bool = True) -> dict[str, str]:
 class MoultiMessageException(Exception):
 	pass
 
-# The header and search input widgets should remain visible in maximized mode:
-Screen.ALLOW_IN_MAXIMIZED_VIEW = '#header,SearchInputWidget,' + Screen.ALLOW_IN_MAXIMIZED_VIEW
-
 class Moulti(App):
 	"""
 	moulti is a Terminal User Interface (TUI) meant to display multiple outputs.
 	It is visually similar to https://github.com/dankilman/multiplex but unlike
 	it, moulti does not do anything until instructed to.
 	"""
+
+	# The header and search input widgets should remain visible in maximized mode:
+	ALLOW_IN_MAXIMIZED_VIEW = '#header,SearchInputWidget,' + App.ALLOW_IN_MAXIMIZED_VIEW
+
 	BINDINGS = [
 		("s", "save", "Save"),
 		Binding("z", "toggle_console", "Console"),

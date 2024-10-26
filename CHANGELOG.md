@@ -56,7 +56,7 @@ Although Moulti's Python packages, modules and functions are obviously available
 - `delete` commands now accept multiple ids, e.g. `moulti step delete step_1 step_2 step_3`
 - Pressing `f` maximizes the currently focused step log (similar to zoom pane in tmux)
 
-## Changed
+### Changed
 
 - Moulti now requires Textual >= 0.79.0
 - pipeline() now writes errors on stderr; this affects moulti `load`, `diff` and `manpage` commands.
@@ -93,7 +93,7 @@ Although Moulti's Python packages, modules and functions are obviously available
   - `moulti-askpass-connection-password`
   - `moulti-askpass-vault-client`
 
-# Fixed
+### Fixed
 
 - Ansible callback plugin: override these `ansible-playbook` command-line options to prevent it from reading passwords through the current tty:
   - `-k`, `-ask-pass`
@@ -122,7 +122,7 @@ Although Moulti's Python packages, modules and functions are obviously available
 - `Ctrl+o` / `Ctrl+x` collapses/expands both existing and new steps
 - Ansible callback plugin: the environment variable `MOULTI_ANSIBLE_COLLAPSE` specifies parts that should appear collapsed
 
-## Changed
+### Changed
 
 - Moulti now requires Textual >= 0.76.0
 - Footer: the `Dark/Light` keybinding now displays either "Dark" or "Light"

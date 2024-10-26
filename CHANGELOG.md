@@ -7,7 +7,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 Although Moulti's Python packages, modules and functions are obviously available, they do not constitute a public API yet.
 
 
-## Unreleased
+## [1.22.0] - 2024-10-27
 
 ### Changed
 

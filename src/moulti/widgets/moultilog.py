@@ -56,7 +56,7 @@ class MoultiLog(ScrollView, ToLinesMixin, can_focus=True):
 	def action_maximize(self) -> None:
 		self.max_height_backup = self.styles.max_height
 		self.styles.max_height = '99h' # Leave some room for the search widget
-		self.screen.maximize(self)
+		self.screen.maximize(self, False)
 		self.refresh_bindings()
 
 	def action_minimize(self) -> None:

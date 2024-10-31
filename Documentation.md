@@ -1130,8 +1130,9 @@ Moulti requires Python ≥ 3.10 because:
 - Python 3.9 [isn't receiving regular bug fixes anymore](https://www.python.org/downloads/release/python-3918/).
 - Moulti type hints use PEP 604 (Allow writing union types as X | Y) syntax, which requires Python ≥ 3.10.
 
-The minimum version of Textual required to run Moulti is 0.83.
+The exact version of Textual required to run Moulti is 0.83.0.
 Details:
+- version 0.84.0 introduce a rendering issue that affects focus indicators
 - version 0.83.0 removes the need to override `Screen.ALLOW_IN_MAXIMIZED_VIEW`
 - version 0.79.0 supports maximizing widgets
 - version 0.76.0 supports dynamic keybindings

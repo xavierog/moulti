@@ -13,6 +13,17 @@ SEARCH_TOP_TEXT = 2
 SEARCH_SUBWIDGETS = 3
 SEARCH_BOTTOM_TEXT = 4
 
+class MoultiCollapsible(Collapsible):
+	"""
+	Moulti-specific variant of Textual's Collapsible widget.
+	"""
+
+	def _watch_collapsed(self, collapsed: bool) -> None:
+		"""Override so as not to scroll when expanding."""
+		self._update_collapsed(collapsed)
+		message = self.Collapsed(self) if self.collapsed else self.Expanded(self)
+		self.post_message(message)
+
 class CollapsibleStep(AbstractStep):
 	"""
 	This is the base class for all collapsible components end users may wish to
@@ -20,7 +31,7 @@ class CollapsibleStep(AbstractStep):
 	"""
 
 	def __init__(self, id: str, **kwargs: Any): # pylint: disable=redefined-builtin
-		self.collapsible = Collapsible(title=id)
+		self.collapsible = MoultiCollapsible(title=id)
 		self.top_label = Static('', classes='top_text')
 		self.bottom_label = Static('', classes='bottom_text')
 		self.search_cursor = SEARCH_RESET

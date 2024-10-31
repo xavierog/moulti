@@ -10,7 +10,7 @@ with open('README.md', 'r') as readme:
 
 setup(
 	name='moulti',
-	version='1.22.0',
+	version='1.23.0',
 	description=short_description,
 	long_description=long_description,
 	long_description_content_type='text/markdown',

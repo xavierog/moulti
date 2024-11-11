@@ -869,9 +869,9 @@ class Moulti(App):
 	CSS_PATH = os.environ.get('MOULTI_CUSTOM_CSS') or None
 
 def main(command: list[str]|None = None) -> None:
-	app = Moulti(command=command)
-	app.run()
-	sys.exit(app.return_code)
+	moulti_app = Moulti(command=command)
+	moulti_app.run()
+	sys.exit(moulti_app.return_code)
 
 if __name__ == '__main__':
 	main()

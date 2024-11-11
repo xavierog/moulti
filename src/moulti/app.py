@@ -803,7 +803,8 @@ class Moulti(App):
 			server_socket, server_socket_is_abstract = moulti_listen()
 		except Exception as exc:
 			# A Moulti instance is useless if it cannot listen:
-			self.exit(f'Fatal: {exc}')
+			tip = 'Tip: try setting the MOULTI_INSTANCE environment variable, e.g. MOULTI_INSTANCE=$$ moulti init'
+			self.exit(return_code=100, message=f'Fatal: {exc}\n{tip}')
 			return
 		socket_type = "abstract socket" if server_socket_is_abstract else "socket"
 		self.logconsole(f'listening on {socket_type} {PRINTABLE_MOULTI_SOCKET}')
@@ -868,9 +869,9 @@ class Moulti(App):
 	CSS_PATH = os.environ.get('MOULTI_CUSTOM_CSS') or None
 
 def main(command: list[str]|None = None) -> None:
-	reply = Moulti(command=command).run()
-	if reply is not None:
-		print(reply)
+	app = Moulti(command=command)
+	app.run()
+	sys.exit(app.return_code)
 
 if __name__ == '__main__':
 	main()

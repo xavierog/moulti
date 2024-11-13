@@ -27,6 +27,7 @@ from . import __version__ as MOULTI_VERSION
 from .ansi import AnsiThemePolicy, dump_filters
 from .helpers import call_all
 from .protocol import PRINTABLE_MOULTI_SOCKET, clean_socket, current_instance
+from .protocol import default_moulti_socket_path, from_printable
 from .protocol import moulti_listen, get_unix_credentials, send_json_message
 from .protocol import MoultiConnectionClosedException, MoultiProtocolException, Message, FDs
 from .protocol import MoultiTLVReader, data_to_message, getraddr
@@ -65,14 +66,14 @@ def add_abs_path_to_environment(env: dict[str, str], env_var: str, command: str)
 		return True
 	return False
 
-def run_environment(command: list[str], copy: bool = True) -> dict[str, str]:
+def run_environment(command: list[str], socket_path: str|None, copy: bool = True) -> dict[str, str]:
 	"""
 	Return environment variables set by "Moulti run <command>".
 	"""
 	environment = os.environ.copy() if copy else {}
 
 	environment['MOULTI_RUN'] = 'moulti'
-	environment['MOULTI_SOCKET_PATH'] = PRINTABLE_MOULTI_SOCKET
+	environment['MOULTI_SOCKET_PATH'] = socket_path or PRINTABLE_MOULTI_SOCKET
 	environment['MOULTI_INSTANCE_PID'] = str(os.getpid())
 
 	if 'SSH_ASKPASS' not in os.environ:
@@ -148,7 +149,9 @@ class Moulti(App):
 	# Do not minimize on 'escape' because widgets need to restore their max height:
 	ESCAPE_TO_MINIMIZE = False
 
-	def __init__(self, command: list[str]|None = None):
+	def __init__(self, command: list[str]|None = None, instance_name: str|None = None):
+		self.instance_name = instance_name
+		self.socket_path = default_moulti_socket_path(instance_name) if instance_name else PRINTABLE_MOULTI_SOCKET
 		self.init_security()
 		self.init_quit_policy()
 		self.init_widgets()
@@ -394,7 +397,8 @@ class Moulti(App):
 			self.init_command_running = True
 			original_command = command.copy()
 			self.logconsole(f'exec: about to run {original_command}')
-			popen_args: dict[str, Any] = {'env': run_environment(command), 'stdin': subprocess.DEVNULL}
+			environment = run_environment(command, self.socket_path)
+			popen_args: dict[str, Any] = {'env': environment, 'stdin': subprocess.DEVNULL}
 			# Important: run_environment() may have modified command:
 			if command != original_command:
 				self.logconsole(f'exec: command changed to {command}')
@@ -800,14 +804,14 @@ class Moulti(App):
 				self.logconsole(f'{raddr}: accept: {exc}')
 
 		try:
-			server_socket, server_socket_is_abstract = moulti_listen()
+			server_socket, server_socket_is_abstract = moulti_listen(bind=from_printable(self.socket_path))
 		except Exception as exc:
 			# A Moulti instance is useless if it cannot listen:
 			tip = 'Tip: try setting the MOULTI_INSTANCE environment variable, e.g. MOULTI_INSTANCE=$$ moulti init'
 			self.exit(return_code=100, message=f'Fatal: {exc}\n{tip}')
 			return
 		socket_type = "abstract socket" if server_socket_is_abstract else "socket"
-		self.logconsole(f'listening on {socket_type} {PRINTABLE_MOULTI_SOCKET}')
+		self.logconsole(f'listening on {socket_type} {self.socket_path}')
 
 		try:
 			server_selector = selectors.DefaultSelector()
@@ -824,7 +828,10 @@ class Moulti(App):
 		except Exception as exc:
 			self.logconsole(f'network loop: {exc}')
 		finally:
-			clean_socket(PRINTABLE_MOULTI_SOCKET)
+			clean_socket(self.socket_path)
+			# Explicitly stop listening: this makes sense when and if the
+			# Python process does not exit after this App has finished running.
+			server_socket.close()
 
 	DEFAULT_CSS = """
 	/* Styles inherited by all widgets: */

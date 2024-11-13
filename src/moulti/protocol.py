@@ -54,9 +54,9 @@ def make_socket_path(filename: str, abstract: bool, dirpath: str|None = None, pr
 		return ('@' if printable else '\0') + filename
 	return os.path.join(dirpath or run_dir(), filename)
 
-def default_moulti_socket_path() -> str:
+def default_moulti_socket_path(instance: str|None = None) -> str:
 	username = current_username()
-	instance = current_instance()
+	instance = instance or current_instance()
 	socket_filename = f'moulti-{username}-{instance}.socket'
 	return make_socket_path(socket_filename, abstract_unix_sockets_supported())
 

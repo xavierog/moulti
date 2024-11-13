@@ -157,7 +157,8 @@ class Moulti(App):
 		self.init_widgets()
 		self.end_user_console = MoultiConsole('moulti_console', classes='hidden')
 		self.init_command = command
-		self.init_command_running = False
+		self.init_command_running: bool|None = None
+		"""Whether the init command is running: None until it starts, True while it runs, False afterwards."""
 		self.exit_first_policy = ''
 		"""What to do when "moulti run" must exit before the process it launched? 'terminate' terminates the process,
 		any other value leaves it running in the background."""

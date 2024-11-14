@@ -11,6 +11,7 @@ Although Moulti's Python packages, modules and functions are obviously available
 ### Fixed
 
 - `moulti init` now exits with a non-zero return code when it cannot listen to clients.
+- Ansible callback plugin: fix `unexpected keyword argument 'caplevel'` warning
 
 ## [1.23.0] - 2024-10-31
 

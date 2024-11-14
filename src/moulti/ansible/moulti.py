@@ -177,11 +177,12 @@ class MoultiDisplay(Display):
 
 	@proxy_display
 	def display(self, msg: str, color: str | None = None, stderr: bool = False, screen_only: bool = False,
-		log_only: bool = False, newline: bool = True,
+		log_only: bool = False, newline: bool = True, **kwargs: Any
 	) -> None:
 		_ = stderr
 		if log_only or not screen_only:
-			super().display(msg, color, False, False, True, newline)
+			super().display(msg=msg, color=color, stderr=False, screen_only=False, log_only=True, newline=newline,
+				**kwargs)
 
 		if screen_only or not log_only:
 			if not msg:

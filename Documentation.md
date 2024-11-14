@@ -85,7 +85,7 @@ Limitation: shell completion will help typing subcommands and options but is tec
    
 8. And of course, you can add *multiple* such steps:
    ```shell
-   for class in warning error standard; do
+   for class in warning error inactive standard; do
        moulti step add "${class}_example" \
            --classes="${class}" \
            --title="${class^} step" \

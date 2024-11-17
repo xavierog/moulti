@@ -31,7 +31,7 @@ class ThrottledAppender:
 
 	def new_data(self, lines: Iterable[str|Text], max_cell_len: int, force: bool = False) -> None:
 		self.lines.extend(lines)
-		if max_cell_len > self.max_cell_len: # pylint: disable=consider-using-min-builtin
+		if max_cell_len > self.max_cell_len: # pylint: disable=consider-using-max-builtin
 			self.max_cell_len = max_cell_len
 		self.append(force)
 

@@ -1,5 +1,6 @@
 import os
 import sys
+from selectors import BaseSelector
 from typing import Any, cast
 from argparse import ArgumentTypeError
 from .pipeline import pipeline
@@ -46,6 +47,23 @@ def send_delete(args: Args) -> None:
 def call_all(calls: list[Any]) -> None:
 	for call in calls:
 		call[0](*call[1:])
+
+def clean_selector(selector: BaseSelector|None, close_fds: bool = False, close: bool = True) -> None:
+	"""
+	Clean a Selector object, as offered by the selectors module, by systematically unregistering and optionally
+	closing all registered file descriptors then closing the Selector object itself.
+	"""
+	if not selector:
+		return
+	for selectorkey in list(selector.get_map().values()):
+		selector.unregister(selectorkey.fileobj)
+		if close_fds:
+			if hasattr(selectorkey.fileobj, 'close'):
+				selectorkey.fileobj.close()
+			elif isinstance(selectorkey.fileobj, int):
+				os.close(selectorkey.fileobj)
+	if close:
+		selector.close()
 
 DEFAULT_TAB_SIZE = 8
 

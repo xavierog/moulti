@@ -25,7 +25,7 @@ from textual.widgets import Label, ProgressBar
 from textual.worker import get_current_worker, NoActiveWorker
 from . import __version__ as MOULTI_VERSION
 from .ansi import AnsiThemePolicy, dump_filters
-from .helpers import call_all
+from .helpers import call_all, clean_selector
 from .protocol import PRINTABLE_MOULTI_SOCKET, clean_socket, current_instance
 from .protocol import default_moulti_socket_path, from_printable
 from .protocol import moulti_listen, get_unix_credentials, send_json_message
@@ -382,7 +382,7 @@ class Moulti(App):
 			pass
 		def debug(line: str) -> None:
 			self.logconsole(f'exec: {line}')
-		helpers = {'file_descriptors': [filedesc.fileno()], 'debug': debug, 'reply': reply}
+		helpers = {'file_descriptors': [filedesc], 'debug': debug, 'reply': reply}
 		step.append_from_queue(queue, helpers)
 		queue.put_nowait(initial_data)
 		step.append_from_file_descriptor_to_queue(queue, {}, helpers)
@@ -394,6 +394,8 @@ class Moulti(App):
 		This method is the heart of `moulti run`.
 		"""
 		worker = get_current_worker()
+		harvest_output = self.output_policy() # Harvest stdout/stderr lines
+		output_delegated = False
 		try:
 			self.init_command_running = True
 			original_command = command.copy()
@@ -408,7 +410,7 @@ class Moulti(App):
 			self.logconsole(f'exec: {command} launched with PID {process.pid}')
 			returncode = None
 			output_selector = None
-			if self.output_policy(): # Harvest stdout/stderr lines
+			if harvest_output:
 				output_selector = selectors.DefaultSelector()
 				assert process.stdout is not None # for mypy
 				output_selector.register(process.stdout, selectors.EVENT_READ)
@@ -419,8 +421,11 @@ class Moulti(App):
 					assert process.stdout is not None and hasattr(process.stdout, 'raw') # for mypy
 					if initial_data := process.stdout.raw.read(1):
 						step = self.output_policy_step()
+						self.logconsole(f'exec: output detected on fd {process.stdout.fileno()}, harvesting')
 						self.output_policy_pass(step, process.stdout, initial_data)
+						output_delegated = True
 					# We no longer need to watch output in this loop:
+					clean_selector(output_selector, close_fds=False, close=True)
 					output_selector = None
 				returncode = process.poll() # non-blocking wait(), e.g. wait4(process.pid, result_addr, WNOHANG, NULL)
 				if returncode is not None:
@@ -436,6 +441,11 @@ class Moulti(App):
 		except Exception as exc:
 			self.logconsole(f'exec: error running {command}: {exc}')
 			self.init_command_running = False
+		finally:
+			clean_selector(output_selector, close_fds=False, close=True)
+			if harvest_output and not output_delegated and process.stdout is not None:
+				self.logconsole(f'exec: no output harvested, closing child process stdout fd {process.stdout.fileno()}')
+				process.stdout.close()
 
 	def all_steps(self) -> Iterator[AbstractStep]:
 		return self.steps_container.ordered_steps()
@@ -830,9 +840,10 @@ class Moulti(App):
 			self.logconsole(f'network loop: {exc}')
 		finally:
 			clean_socket(self.socket_path)
-			# Explicitly stop listening: this makes sense when and if the
+			# Explicitly stop listening and close all sockets: this makes sense when and if the
 			# Python process does not exit after this App has finished running.
 			server_socket.close()
+			clean_selector(server_selector, close_fds=True, close=True)
 
 	DEFAULT_CSS = """
 	/* Styles inherited by all widgets: */

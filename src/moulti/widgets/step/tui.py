@@ -1,3 +1,4 @@
+import errno
 import os
 import selectors
 from queue import Queue, Empty
@@ -10,7 +11,7 @@ from textual.worker import get_current_worker
 from rich.ansi import re_ansi
 from rich.text import Text
 from rich.cells import get_character_cell_size
-from moulti.helpers import ANSI_ESCAPE_SEQUENCE_BYTES, ANSI_RESET_SEQUENCES_BYTES, TAB_SPACES_BYTES
+from moulti.helpers import ANSI_ESCAPE_SEQUENCE_BYTES, ANSI_RESET_SEQUENCES_BYTES, TAB_SPACES_BYTES, clean_selector
 from moulti.search import TextSearch
 from . import MOULTI_PASS_DEFAULT_READ_SIZE
 from ..collapsiblestep.tui import CollapsibleStep, SEARCH_SUBWIDGETS
@@ -201,9 +202,14 @@ class Step(CollapsibleStep):
 	) -> None:
 		current_worker = get_current_worker()
 		error = None
+		original_file_descriptor = None
+		output_selector = None
 		try:
-			file_descriptor = helpers['file_descriptors'][0]
-			assert isinstance(file_descriptor, int)
+			original_file_descriptor = helpers['file_descriptors'][0]
+			if isinstance(original_file_descriptor, int):
+				file_descriptor = original_file_descriptor
+			else:
+				file_descriptor = original_file_descriptor.fileno()
 			# Although this thread is dedicated to reading from a single file descriptor, it should:
 			# - not block indefinitely on a read()
 			# - check is_cancelled at regular intervals
@@ -243,6 +249,28 @@ class Step(CollapsibleStep):
 		except Exception as exc:
 			error = str(exc)
 			helpers['debug'](f'pass: {error}')
+		finally:
+			try:
+				clean_selector(output_selector, close_fds=False, close=True)
+				if original_file_descriptor is not None and not isinstance(original_file_descriptor, int):
+					# The file descriptor passed to this method is an object, and its fileno() was extracted to
+					# instantiate a second fileobject (binary_stream), leading to TWO objects referencing the same
+					# underlying file descriptor, which was typically closed upon exiting the with statement above.
+					# Ideally, we should prevent the first fileobject from calling close() (or any equivalent private
+					# method) because that double-close could strike another file descriptor opened in the meantime,
+					# leading to one hell of a troubleshooting session.
+					# This is particularly relevant whenever the Python process keeps running after the Moulti App has
+					# finished running and garbage collection is not immediate.
+					# In practice, we can simply call close() right now and handle the errno=EBADF that typically
+					# ensues.
+					try:
+						original_file_descriptor.close()
+					except OSError as ose:
+						if ose.errno != errno.EBADF: # Bad file descriptor
+							raise
+			except Exception as exc:
+				error = str(exc)
+				helpers['debug'](f'pass: cleanup: unexpected error: {error}')
 		helpers['reply'](done=error is None, error=error)
 
 	@classmethod

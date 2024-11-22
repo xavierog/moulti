@@ -1,0 +1,14 @@
+{
+    "command": "step",
+    "action": "add",
+    "id": "title",
+    "classes": "standard",
+    "title": "This is a Moulti [italic]step[/]",
+    "scroll_on_activity": false,
+    "collapsed": false,
+    "top_text": "It was made using [yellow1 bold]moulti step add[/] and shall display MOULTI:",
+    "bottom_text": "Neat, eh? I made it with [yellow1 bold]toilet -f mono12 --metal[/]",
+    "auto_scroll": true,
+    "min_height": 1,
+    "max_height": 25
+}

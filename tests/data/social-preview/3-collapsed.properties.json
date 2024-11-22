@@ -1,0 +1,14 @@
+{
+    "command": "step",
+    "action": "add",
+    "id": "collapsed",
+    "classes": "warning",
+    "title": "This step probably shows things of the utmost importance, but right now it is collapsed.",
+    "scroll_on_activity": false,
+    "collapsed": true,
+    "top_text": "",
+    "bottom_text": "",
+    "auto_scroll": true,
+    "min_height": 1,
+    "max_height": 25
+}

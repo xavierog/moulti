@@ -4,6 +4,11 @@ build
 mypy
 pylint
 pyperclip
+pytest
+pytest-asyncio
+pytest-forked
+pytest-textual-snapshot
+pytest-xdist
 ruff
 textual-dev
 textual==0.83.0

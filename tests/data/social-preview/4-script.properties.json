@@ -1,0 +1,14 @@
+{
+    "command": "step",
+    "action": "add",
+    "id": "script",
+    "classes": "error",
+    "title": "Anyway, here is the script that generated all of this:",
+    "scroll_on_activity": false,
+    "collapsed": false,
+    "top_text": "",
+    "bottom_text": "",
+    "auto_scroll": true,
+    "min_height": 1,
+    "max_height": 25
+}

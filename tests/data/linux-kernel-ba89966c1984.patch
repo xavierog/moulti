@@ -1,0 +1,435 @@
+commit ba89966c1984513f4f2cc0a6c182266be44ddd03
+Author:     Eric Dumazet <dada1@cosmosbay.com>
+AuthorDate: 2005-08-26 12:05:31 -0700
+Commit:     David S. Miller <davem@sunset.davemloft.net>
+CommitDate: 2005-08-29 16:11:18 -0700
+
+    [NET]: use __read_mostly on kmem_cache_t , DEFINE_SNMP_STAT pointers
+    
+    This patch puts mostly read only data in the right section
+    (read_mostly), to help sharing of these data between CPUS without
+    memory ping pongs.
+    
+    On one of my production machine, tcp_statistics was sitting in a
+    heavily modified cache line, so *every* SNMP update had to force a
+    reload.
+    
+    Signed-off-by: Eric Dumazet <dada1@cosmosbay.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+diff --git a/net/bridge/br_fdb.c b/net/bridge/br_fdb.c
+index e6c2200b7ca3..24396b914d11 100644
+--- a/net/bridge/br_fdb.c
++++ b/net/bridge/br_fdb.c
+@@ -23,7 +23,7 @@
+ #include <asm/atomic.h>
+ #include "br_private.h"
+ 
+-static kmem_cache_t *br_fdb_cache;
++static kmem_cache_t *br_fdb_cache __read_mostly;
+ static int fdb_insert(struct net_bridge *br, struct net_bridge_port *source,
+ 		      const unsigned char *addr);
+ 
+diff --git a/net/core/flow.c b/net/core/flow.c
+index f289570b15a3..7e95b39de9fd 100644
+--- a/net/core/flow.c
++++ b/net/core/flow.c
+@@ -42,7 +42,7 @@ static DEFINE_PER_CPU(struct flow_cache_entry **, flow_tables) = { NULL };
+ 
+ #define flow_table(cpu) (per_cpu(flow_tables, cpu))
+ 
+-static kmem_cache_t *flow_cachep;
++static kmem_cache_t *flow_cachep __read_mostly;
+ 
+ static int flow_lwm, flow_hwm;
+ 
+diff --git a/net/core/skbuff.c b/net/core/skbuff.c
+index b853a9b29eb6..f80a28785610 100644
+--- a/net/core/skbuff.c
++++ b/net/core/skbuff.c
+@@ -68,8 +68,8 @@
+ #include <asm/uaccess.h>
+ #include <asm/system.h>
+ 
+-static kmem_cache_t *skbuff_head_cache;
+-static kmem_cache_t *skbuff_fclone_cache;
++static kmem_cache_t *skbuff_head_cache __read_mostly;
++static kmem_cache_t *skbuff_fclone_cache __read_mostly;
+ 
+ struct timeval __read_mostly skb_tv_base;
+ 
+diff --git a/net/dccp/ccids/ccid3.c b/net/dccp/ccids/ccid3.c
+index fe4cc85f5bcc..cf93b019ecbe 100644
+--- a/net/dccp/ccids/ccid3.c
++++ b/net/dccp/ccids/ccid3.c
+@@ -85,7 +85,7 @@ static int ccid3_debug;
+ static struct dccp_tx_hist *ccid3_tx_hist;
+ static struct dccp_rx_hist *ccid3_rx_hist;
+ 
+-static kmem_cache_t *ccid3_loss_interval_hist_slab;
++static kmem_cache_t *ccid3_loss_interval_hist_slab __read_mostly;
+ 
+ static inline struct ccid3_loss_interval_hist_entry *
+ 	ccid3_loss_interval_hist_entry_new(const unsigned int __nocast prio)
+diff --git a/net/dccp/proto.c b/net/dccp/proto.c
+index 600dda51d995..f97e92ea34f3 100644
+--- a/net/dccp/proto.c
++++ b/net/dccp/proto.c
+@@ -39,7 +39,7 @@
+ #include "ccid.h"
+ #include "dccp.h"
+ 
+-DEFINE_SNMP_STAT(struct dccp_mib, dccp_statistics);
++DEFINE_SNMP_STAT(struct dccp_mib, dccp_statistics) __read_mostly;
+ 
+ atomic_t dccp_orphan_count = ATOMIC_INIT(0);
+ 
+diff --git a/net/decnet/dn_table.c b/net/decnet/dn_table.c
+index 73a88489ff3e..eeba56f99323 100644
+--- a/net/decnet/dn_table.c
++++ b/net/decnet/dn_table.c
+@@ -79,7 +79,7 @@ for( ; ((f) = *(fp)) != NULL && dn_key_eq((f)->fn_key, (key)); (fp) = &(f)->fn_n
+ static DEFINE_RWLOCK(dn_fib_tables_lock);
+ struct dn_fib_table *dn_fib_tables[RT_TABLE_MAX + 1];
+ 
+-static kmem_cache_t *dn_hash_kmem;
++static kmem_cache_t *dn_hash_kmem __read_mostly;
+ static int dn_fib_hash_zombies;
+ 
+ static inline dn_fib_idx_t dn_hash(dn_fib_key_t key, struct dn_zone *dz)
+diff --git a/net/ipv4/af_inet.c b/net/ipv4/af_inet.c
+index 5810f9d14914..bf147f8db399 100644
+--- a/net/ipv4/af_inet.c
++++ b/net/ipv4/af_inet.c
+@@ -113,7 +113,7 @@
+ #include <linux/mroute.h>
+ #endif
+ 
+-DEFINE_SNMP_STAT(struct linux_mib, net_statistics);
++DEFINE_SNMP_STAT(struct linux_mib, net_statistics) __read_mostly;
+ 
+ extern void ip_mc_drop_socket(struct sock *sk);
+ 
+diff --git a/net/ipv4/fib_hash.c b/net/ipv4/fib_hash.c
+index b10d6bb5ef3d..2a8c9afc3695 100644
+--- a/net/ipv4/fib_hash.c
++++ b/net/ipv4/fib_hash.c
+@@ -45,8 +45,8 @@
+ 
+ #include "fib_lookup.h"
+ 
+-static kmem_cache_t *fn_hash_kmem;
+-static kmem_cache_t *fn_alias_kmem;
++static kmem_cache_t *fn_hash_kmem __read_mostly;
++static kmem_cache_t *fn_alias_kmem __read_mostly;
+ 
+ struct fib_node {
+ 	struct hlist_node	fn_hash;
+diff --git a/net/ipv4/fib_trie.c b/net/ipv4/fib_trie.c
+index ff21748248e4..b2dea4e5da77 100644
+--- a/net/ipv4/fib_trie.c
++++ b/net/ipv4/fib_trie.c
+@@ -166,7 +166,7 @@ static struct tnode *halve(struct trie *t, struct tnode *tn);
+ static void tnode_free(struct tnode *tn);
+ static void trie_dump_seq(struct seq_file *seq, struct trie *t);
+ 
+-static kmem_cache_t *fn_alias_kmem;
++static kmem_cache_t *fn_alias_kmem __read_mostly;
+ static struct trie *trie_local = NULL, *trie_main = NULL;
+ 
+ 
+diff --git a/net/ipv4/icmp.c b/net/ipv4/icmp.c
+index 25f66b750fd8..24eb56ae1b5a 100644
+--- a/net/ipv4/icmp.c
++++ b/net/ipv4/icmp.c
+@@ -114,7 +114,7 @@ struct icmp_bxm {
+ /*
+  *	Statistics
+  */
+-DEFINE_SNMP_STAT(struct icmp_mib, icmp_statistics);
++DEFINE_SNMP_STAT(struct icmp_mib, icmp_statistics) __read_mostly;
+ 
+ /* An array of errno for error messages from dest unreach. */
+ /* RFC 1122: 3.2.2.1 States that NET_UNREACH, HOST_UNREACH and SR_FAILED MUST be considered 'transient errs'. */
+diff --git a/net/ipv4/inetpeer.c b/net/ipv4/inetpeer.c
+index 4410b9dc03e9..f84ba9c96551 100644
+--- a/net/ipv4/inetpeer.c
++++ b/net/ipv4/inetpeer.c
+@@ -73,7 +73,7 @@
+ /* Exported for inet_getid inline function.  */
+ DEFINE_SPINLOCK(inet_peer_idlock);
+ 
+-static kmem_cache_t *peer_cachep;
++static kmem_cache_t *peer_cachep __read_mostly;
+ 
+ #define node_height(x) x->avl_height
+ static struct inet_peer peer_fake_node = {
+diff --git a/net/ipv4/ip_input.c b/net/ipv4/ip_input.c
+index 220a8b5920ea..473d0f2b2e0d 100644
+--- a/net/ipv4/ip_input.c
++++ b/net/ipv4/ip_input.c
+@@ -150,7 +150,7 @@
+  *	SNMP management statistics
+  */
+ 
+-DEFINE_SNMP_STAT(struct ipstats_mib, ip_statistics);
++DEFINE_SNMP_STAT(struct ipstats_mib, ip_statistics) __read_mostly;
+ 
+ /*
+  *	Process Router Attention IP option
+diff --git a/net/ipv4/ipmr.c b/net/ipv4/ipmr.c
+index dc806b578427..9dbf5909f3a6 100644
+--- a/net/ipv4/ipmr.c
++++ b/net/ipv4/ipmr.c
+@@ -103,7 +103,7 @@ static DEFINE_SPINLOCK(mfc_unres_lock);
+    In this case data path is free of exclusive locks at all.
+  */
+ 
+-static kmem_cache_t *mrt_cachep;
++static kmem_cache_t *mrt_cachep __read_mostly;
+ 
+ static int ip_mr_forward(struct sk_buff *skb, struct mfc_cache *cache, int local);
+ static int ipmr_cache_report(struct sk_buff *pkt, vifi_t vifi, int assert);
+diff --git a/net/ipv4/ipvs/ip_vs_conn.c b/net/ipv4/ipvs/ip_vs_conn.c
+index d0145a8b1551..e11952ea17af 100644
+--- a/net/ipv4/ipvs/ip_vs_conn.c
++++ b/net/ipv4/ipvs/ip_vs_conn.c
+@@ -40,7 +40,7 @@
+ static struct list_head *ip_vs_conn_tab;
+ 
+ /*  SLAB cache for IPVS connections */
+-static kmem_cache_t *ip_vs_conn_cachep;
++static kmem_cache_t *ip_vs_conn_cachep __read_mostly;
+ 
+ /*  counter for current IPVS connections */
+ static atomic_t ip_vs_conn_count = ATOMIC_INIT(0);
+diff --git a/net/ipv4/netfilter/ip_conntrack_core.c b/net/ipv4/netfilter/ip_conntrack_core.c
+index 285743bfbed3..a0648600190e 100644
+--- a/net/ipv4/netfilter/ip_conntrack_core.c
++++ b/net/ipv4/netfilter/ip_conntrack_core.c
+@@ -70,8 +70,8 @@ static LIST_HEAD(helpers);
+ unsigned int ip_conntrack_htable_size = 0;
+ int ip_conntrack_max;
+ struct list_head *ip_conntrack_hash;
+-static kmem_cache_t *ip_conntrack_cachep;
+-static kmem_cache_t *ip_conntrack_expect_cachep;
++static kmem_cache_t *ip_conntrack_cachep __read_mostly;
++static kmem_cache_t *ip_conntrack_expect_cachep __read_mostly;
+ struct ip_conntrack ip_conntrack_untracked;
+ unsigned int ip_ct_log_invalid;
+ static LIST_HEAD(unconfirmed);
+diff --git a/net/ipv4/netfilter/ipt_hashlimit.c b/net/ipv4/netfilter/ipt_hashlimit.c
+index 564b49bfebcf..2dd1cccbdab9 100644
+--- a/net/ipv4/netfilter/ipt_hashlimit.c
++++ b/net/ipv4/netfilter/ipt_hashlimit.c
+@@ -94,7 +94,7 @@ struct ipt_hashlimit_htable {
+ static DEFINE_SPINLOCK(hashlimit_lock);	/* protects htables list */
+ static DECLARE_MUTEX(hlimit_mutex);	/* additional checkentry protection */
+ static HLIST_HEAD(hashlimit_htables);
+-static kmem_cache_t *hashlimit_cachep;
++static kmem_cache_t *hashlimit_cachep __read_mostly;
+ 
+ static inline int dst_cmp(const struct dsthash_ent *ent, struct dsthash_dst *b)
+ {
+diff --git a/net/ipv4/tcp.c b/net/ipv4/tcp.c
+index 68626de6d69c..02fdda68718d 100644
+--- a/net/ipv4/tcp.c
++++ b/net/ipv4/tcp.c
+@@ -269,7 +269,7 @@
+ 
+ int sysctl_tcp_fin_timeout = TCP_FIN_TIMEOUT;
+ 
+-DEFINE_SNMP_STAT(struct tcp_mib, tcp_statistics);
++DEFINE_SNMP_STAT(struct tcp_mib, tcp_statistics) __read_mostly;
+ 
+ atomic_t tcp_orphan_count = ATOMIC_INIT(0);
+ 
+diff --git a/net/ipv4/udp.c b/net/ipv4/udp.c
+index 3a5bbbe7dd85..e5beca7de86c 100644
+--- a/net/ipv4/udp.c
++++ b/net/ipv4/udp.c
+@@ -113,7 +113,7 @@
+  *	Snmp MIB for the UDP layer
+  */
+ 
+-DEFINE_SNMP_STAT(struct udp_mib, udp_statistics);
++DEFINE_SNMP_STAT(struct udp_mib, udp_statistics) __read_mostly;
+ 
+ struct hlist_head udp_hash[UDP_HTABLE_SIZE];
+ DEFINE_RWLOCK(udp_hash_lock);
+diff --git a/net/ipv6/icmp.c b/net/ipv6/icmp.c
+index ff685f229b69..5176fc655ea9 100644
+--- a/net/ipv6/icmp.c
++++ b/net/ipv6/icmp.c
+@@ -67,7 +67,7 @@
+ #include <asm/uaccess.h>
+ #include <asm/system.h>
+ 
+-DEFINE_SNMP_STAT(struct icmpv6_mib, icmpv6_statistics);
++DEFINE_SNMP_STAT(struct icmpv6_mib, icmpv6_statistics) __read_mostly;
+ 
+ /*
+  *	The ICMP socket(s). This is the most convenient way to flow control
+diff --git a/net/ipv6/ip6_fib.c b/net/ipv6/ip6_fib.c
+index 1b354aa97934..16af874c9e8f 100644
+--- a/net/ipv6/ip6_fib.c
++++ b/net/ipv6/ip6_fib.c
+@@ -49,7 +49,7 @@
+ 
+ struct rt6_statistics	rt6_stats;
+ 
+-static kmem_cache_t * fib6_node_kmem;
++static kmem_cache_t * fib6_node_kmem __read_mostly;
+ 
+ enum fib_walk_state_t
+ {
+diff --git a/net/ipv6/ipv6_sockglue.c b/net/ipv6/ipv6_sockglue.c
+index 7516b8829a9d..76466af8331e 100644
+--- a/net/ipv6/ipv6_sockglue.c
++++ b/net/ipv6/ipv6_sockglue.c
+@@ -55,7 +55,7 @@
+ 
+ #include <asm/uaccess.h>
+ 
+-DEFINE_SNMP_STAT(struct ipstats_mib, ipv6_statistics);
++DEFINE_SNMP_STAT(struct ipstats_mib, ipv6_statistics) __read_mostly;
+ 
+ static struct packet_type ipv6_packet_type = {
+ 	.type = __constant_htons(ETH_P_IPV6), 
+diff --git a/net/ipv6/udp.c b/net/ipv6/udp.c
+index 67d9a04b6902..390d750449ce 100644
+--- a/net/ipv6/udp.c
++++ b/net/ipv6/udp.c
+@@ -59,7 +59,7 @@
+ #include <linux/proc_fs.h>
+ #include <linux/seq_file.h>
+ 
+-DEFINE_SNMP_STAT(struct udp_mib, udp_stats_in6);
++DEFINE_SNMP_STAT(struct udp_mib, udp_stats_in6) __read_mostly;
+ 
+ /* Grrr, addr_type already calculated by caller, but I don't want
+  * to add some silly "cookie" argument to this method just for that.
+diff --git a/net/ipv6/xfrm6_tunnel.c b/net/ipv6/xfrm6_tunnel.c
+index 60c26c87277e..fbef7826a74f 100644
+--- a/net/ipv6/xfrm6_tunnel.c
++++ b/net/ipv6/xfrm6_tunnel.c
+@@ -79,7 +79,7 @@ static u32 xfrm6_tunnel_spi;
+ #define XFRM6_TUNNEL_SPI_MIN	1
+ #define XFRM6_TUNNEL_SPI_MAX	0xffffffff
+ 
+-static kmem_cache_t *xfrm6_tunnel_spi_kmem;
++static kmem_cache_t *xfrm6_tunnel_spi_kmem __read_mostly;
+ 
+ #define XFRM6_TUNNEL_SPI_BYADDR_HSIZE 256
+ #define XFRM6_TUNNEL_SPI_BYSPI_HSIZE 256
+diff --git a/net/sctp/protocol.c b/net/sctp/protocol.c
+index 7d8ec6526347..e7025be77691 100644
+--- a/net/sctp/protocol.c
++++ b/net/sctp/protocol.c
+@@ -62,7 +62,7 @@
+ /* Global data structures. */
+ struct sctp_globals sctp_globals;
+ struct proc_dir_entry	*proc_net_sctp;
+-DEFINE_SNMP_STAT(struct sctp_mib, sctp_statistics);
++DEFINE_SNMP_STAT(struct sctp_mib, sctp_statistics) __read_mostly;
+ 
+ struct idr sctp_assocs_id;
+ DEFINE_SPINLOCK(sctp_assocs_id_lock);
+@@ -78,8 +78,8 @@ static struct sctp_pf *sctp_pf_inet_specific;
+ static struct sctp_af *sctp_af_v4_specific;
+ static struct sctp_af *sctp_af_v6_specific;
+ 
+-kmem_cache_t *sctp_chunk_cachep;
+-kmem_cache_t *sctp_bucket_cachep;
++kmem_cache_t *sctp_chunk_cachep __read_mostly;
++kmem_cache_t *sctp_bucket_cachep __read_mostly;
+ 
+ extern int sctp_snmp_proc_init(void);
+ extern int sctp_snmp_proc_exit(void);
+diff --git a/net/socket.c b/net/socket.c
+index ce69b7862f59..94fe638b4d72 100644
+--- a/net/socket.c
++++ b/net/socket.c
+@@ -274,7 +274,7 @@ int move_addr_to_user(void *kaddr, int klen, void __user *uaddr, int __user *ule
+ 
+ #define SOCKFS_MAGIC 0x534F434B
+ 
+-static kmem_cache_t * sock_inode_cachep;
++static kmem_cache_t * sock_inode_cachep __read_mostly;
+ 
+ static struct inode *sock_alloc_inode(struct super_block *sb)
+ {
+@@ -333,7 +333,7 @@ static struct super_block *sockfs_get_sb(struct file_system_type *fs_type,
+ 	return get_sb_pseudo(fs_type, "socket:", &sockfs_ops, SOCKFS_MAGIC);
+ }
+ 
+-static struct vfsmount *sock_mnt;
++static struct vfsmount *sock_mnt __read_mostly;
+ 
+ static struct file_system_type sock_fs_type = {
+ 	.name =		"sockfs",
+diff --git a/net/sunrpc/rpc_pipe.c b/net/sunrpc/rpc_pipe.c
+index 554f224c0445..fe1a73ce6cff 100644
+--- a/net/sunrpc/rpc_pipe.c
++++ b/net/sunrpc/rpc_pipe.c
+@@ -28,13 +28,13 @@
+ #include <linux/workqueue.h>
+ #include <linux/sunrpc/rpc_pipe_fs.h>
+ 
+-static struct vfsmount *rpc_mount;
++static struct vfsmount *rpc_mount __read_mostly;
+ static int rpc_mount_count;
+ 
+ static struct file_system_type rpc_pipe_fs_type;
+ 
+ 
+-static kmem_cache_t *rpc_inode_cachep;
++static kmem_cache_t *rpc_inode_cachep __read_mostly;
+ 
+ #define RPC_UPCALL_TIMEOUT (30*HZ)
+ 
+diff --git a/net/sunrpc/sched.c b/net/sunrpc/sched.c
+index 2d9eb7fbd521..f3104035e35d 100644
+--- a/net/sunrpc/sched.c
++++ b/net/sunrpc/sched.c
+@@ -34,10 +34,10 @@ static int			rpc_task_id;
+ #define RPC_BUFFER_MAXSIZE	(2048)
+ #define RPC_BUFFER_POOLSIZE	(8)
+ #define RPC_TASK_POOLSIZE	(8)
+-static kmem_cache_t	*rpc_task_slabp;
+-static kmem_cache_t	*rpc_buffer_slabp;
+-static mempool_t	*rpc_task_mempool;
+-static mempool_t	*rpc_buffer_mempool;
++static kmem_cache_t	*rpc_task_slabp __read_mostly;
++static kmem_cache_t	*rpc_buffer_slabp __read_mostly;
++static mempool_t	*rpc_task_mempool __read_mostly;
++static mempool_t	*rpc_buffer_mempool __read_mostly;
+ 
+ static void			__rpc_default_timer(struct rpc_task *task);
+ static void			rpciod_killall(void);
+diff --git a/net/xfrm/xfrm_input.c b/net/xfrm/xfrm_input.c
+index c58a6f05a0b6..2407a7072327 100644
+--- a/net/xfrm/xfrm_input.c
++++ b/net/xfrm/xfrm_input.c
+@@ -12,7 +12,7 @@
+ #include <net/ip.h>
+ #include <net/xfrm.h>
+ 
+-static kmem_cache_t *secpath_cachep;
++static kmem_cache_t *secpath_cachep __read_mostly;
+ 
+ void __secpath_destroy(struct sec_path *sp)
+ {
+diff --git a/net/xfrm/xfrm_policy.c b/net/xfrm/xfrm_policy.c
+index d65ed8684fc1..83c8135e1764 100644
+--- a/net/xfrm/xfrm_policy.c
++++ b/net/xfrm/xfrm_policy.c
+@@ -37,7 +37,7 @@ EXPORT_SYMBOL(xfrm_policy_list);
+ static DEFINE_RWLOCK(xfrm_policy_afinfo_lock);
+ static struct xfrm_policy_afinfo *xfrm_policy_afinfo[NPROTO];
+ 
+-static kmem_cache_t *xfrm_dst_cache;
++static kmem_cache_t *xfrm_dst_cache __read_mostly;
+ 
+ static struct work_struct xfrm_policy_gc_work;
+ static struct list_head xfrm_policy_gc_list =

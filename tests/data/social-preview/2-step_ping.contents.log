@@ -1,0 +1,6 @@
+PING example.org (2606:2800:21f:cb07:6820:80da:af6b:8b2c) 56 data bytes
+64 bytes from 2606:2800:21f:cb07:6820:80da:af6b:8b2c: icmp_seq=1 ttl=52 time=99.3 ms
+64 bytes from 2606:2800:21f:cb07:6820:80da:af6b:8b2c: icmp_seq=2 ttl=52 time=99.9 ms
+64 bytes from 2606:2800:21f:cb07:6820:80da:af6b:8b2c: icmp_seq=3 ttl=52 time=99.4 ms
+64 bytes from 2606:2800:21f:cb07:6820:80da:af6b:8b2c: icmp_seq=4 ttl=52 time=99.3 ms
+64 bytes from 2606:2800:21f:cb07:6820:80da:af6b:8b2c: icmp_seq=5 ttl=52 time=100 ms

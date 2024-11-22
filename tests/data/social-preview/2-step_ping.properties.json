@@ -1,0 +1,14 @@
+{
+    "command": "step",
+    "action": "add",
+    "id": "step_ping",
+    "classes": "success",
+    "title": "PING example.org (2606:2800:21f:cb07:6820:80da:af6b:8b2c) 56 data bytes",
+    "scroll_on_activity": false,
+    "collapsed": false,
+    "top_text": "",
+    "bottom_text": "This is a second step, made via [blue1 bold]ping example.org | moulti pass step_ping[/]",
+    "auto_scroll": true,
+    "min_height": 5,
+    "max_height": 5
+}

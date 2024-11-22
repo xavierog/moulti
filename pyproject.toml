@@ -30,3 +30,14 @@ disable = [
 	"too-many-public-methods",
 	"too-many-statements",
 ]
+
+[tool.pytest.ini_options]
+# Recommended in https://textual.textualize.io/guide/testing/#testing-frameworks-for-textual
+asyncio_mode = "auto"
+# Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope.
+asyncio_default_fixture_loop_scope = "function"
+addopts = ["-n", "auto", "--forked"]
+testpaths = ["tests"]
+filterwarnings = [
+	"ignore:.*may lead to deadlocks in the child.*:DeprecationWarning"
+]

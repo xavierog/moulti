@@ -1,0 +1,6 @@
+/* Define a step class named "customstate" rendered with red text on a yellow background: */
+Step.customstate {
+    color: red;
+    background: yellow;
+    & MoultiLog { scrollbar-corner-color: yellow; }
+}

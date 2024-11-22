@@ -11,7 +11,7 @@ Although Moulti's Python packages, modules and functions are obviously available
 ### Fixed
 
 - Fixed a double-close issue liable to affect any file descriptor inside a given Python process after a Moulti instance exited.
-- Introduced snapshot testing.
+- Introduced snapshot testing and continuous integration.
 
 ## [1.23.1] - 2024-11-17
 

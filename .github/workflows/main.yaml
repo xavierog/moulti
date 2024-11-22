@@ -1,0 +1,29 @@
+name: Moulti checks
+on:
+- push
+jobs:
+  checks:
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        python-version:
+        - '3.10'
+        - '3.11'
+        - '3.12'
+        - '3.13'
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python ${{matrix.python-version}}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{matrix.python-version}}
+        cache: pip
+    - run: pip install -r requirements.txt
+    - run: ruff check setup.py src/moulti
+    - run: mypy src/moulti
+    - run: pylint src/moulti
+    - run: ruff check tests
+    - run: pip install -e .
+    # This runs all tests except:
+    # - test_diff_with_delta (requires delta 0.18.x)
+    - run: pytest -v

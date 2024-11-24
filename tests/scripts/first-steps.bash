@@ -33,7 +33,7 @@ run moulti step update my_step --bottom-text='[blink]blink[/] [bold]bold[/] [con
 for class in warning error inactive standard; do
     run moulti step add "${class}_example" \
         --classes="${class}" \
-        --title="${class^} step" \
+        --title="$(tr '[:lower:]' '[:upper:]' <<< ${class:0:1})${class:1} step" \
         --text="This is a step with class '${class}'." \
         --bottom-text=' '
 done

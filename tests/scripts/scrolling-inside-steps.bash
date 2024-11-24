@@ -2,9 +2,10 @@
 
 function output {
 	local max="${1}"; shift
-	while sleep 0.1; do
+	for ((i=1; i <= max; ++i)); do
+		sleep 0.1
 		echo "$@"
-	done | stdbuf --output=0 head "-${max}"
+	done
 }
 
 moulti step add 1 --min-height=10 --max-height=10 --title='Step with auto-scroll enabled by default'

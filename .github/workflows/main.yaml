@@ -4,6 +4,7 @@ on:
 jobs:
   checks:
     strategy:
+      fail-fast: false
       matrix:
         system:
         - 'ubuntu-24.04'

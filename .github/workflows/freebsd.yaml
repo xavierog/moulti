@@ -1,0 +1,34 @@
+name: 'Moulti checks (FreeBSD)'
+on:
+- push
+jobs:
+  freebsdchecks:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: FreeBSD
+      uses: vmactions/freebsd-vm@v1
+      with:
+        usesh: true
+        prepare: |
+          pkg install -y python311 py311-pip bash git
+        run: |
+          set -e
+          python3.11 --version
+          pip --version
+          python3.11 -m venv .venv
+          . .venv/bin/activate
+          pip install --upgrade pip
+          # Remove problematic python packages:
+          # - bpython: unnecessary, depends on greenlet and thus on a recent C++ compiler
+          # - ruff: depends on a Rust compiler
+          # - twine: unnecessary, depends on a Rust compiler
+          sed -i '' '/bpython/d; /ruff/d; /twine/d' requirements.txt
+          pip install -r requirements.txt
+          # no ruff, no ruff check
+          mypy src/moulti
+          pylint src/moulti
+          pip install -e .
+          # This runs all tests except:
+          # - test_diff_with_delta (requires delta 0.18.x)
+          pytest -v

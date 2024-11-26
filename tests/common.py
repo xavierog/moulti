@@ -1,5 +1,8 @@
 import os
+from glob import glob
+from pathlib import Path
 from typing import Awaitable, Callable, Iterable
+from uuid import uuid4
 import pytest
 from _pytest.fixtures import FixtureRequest
 from textual.pilot import Pilot
@@ -76,3 +79,37 @@ def moulti_test_steps(moulti_test, script_path, max_step):
 	"""
 	for _, i, suffix in steps(max_step):
 		assert moulti_test(command=[script_path, i], suffix=suffix)
+
+
+class Beacon:
+	"""
+	A beacon is a file-based semaphore used to synchronize a Moulti-driving
+	shell script and a Moulti-driving Textual Pilot.
+	"""
+	def __init__(self, monkeypatch = None):
+		self._path = f'/tmp/{uuid4()}'
+		if monkeypatch is not None:
+			monkeypatch.setenv('MOULTI_TEST_BEACON', self._path)
+
+	def __exit__(self):
+		if not self._path:
+			return
+		for filepath in glob(f'{self._path}*'):
+			os.unlink(filepath)
+
+	def path(self, suffix=''):
+		return Path(f'{self._path}{suffix}')
+
+	def light(self, suffix=''):
+		self.path(suffix).touch()
+
+	def clear(self, suffix=''):
+		self.path(suffix).unlink()
+
+	def lit(self, suffix=''):
+		return self.path(suffix).exists()
+
+	async def wait(self, pilot, suffix='', pause_interval=0.1):
+		path = self.path(suffix)
+		while not path.exists():
+			await pilot.pause(pause_interval)

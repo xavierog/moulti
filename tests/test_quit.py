@@ -1,27 +1,19 @@
-from os.path import exists as path_exists
 from time import sleep
-from uuid import uuid4
-from .common import moulti_test, wait_script_start
+from .common import Beacon, moulti_test, wait_script_start
 assert moulti_test
 
-def moulti_test_child_beacon(moulti_test, expectation):
-	alive_path = f'/tmp/{uuid4()}'
-
-	async def wait_for_child_beacon(pilot):
-		await wait_script_start(pilot)
-		while not path_exists(alive_path):
-			await pilot.pause(0.1)
+def moulti_test_child_beacon(moulti_test, monkeypatch, expectation):
+	beacon = Beacon(monkeypatch)
 
 	def check_child_beacon(moulti_app):
 		# Moulti must have exited:
 		assert moulti_app.return_code == 0
 		sleep(1)
-		# The child process must have been terminated:
-		assert path_exists(alive_path) == expectation
+		assert beacon.lit() == expectation
 
 	assert moulti_test(
-		command=['sleep.bash', '10', alive_path],
-		run_before=wait_for_child_beacon,
+		command=['sleep.bash', '10'],
+		run_before=beacon.wait,
 		press='q',
 		run_after=check_child_beacon
 	)
@@ -42,8 +34,8 @@ def test_quit_running_ask(moulti_test, monkeypatch):
 
 def test_quit_running_terminate(moulti_test, monkeypatch):
 	monkeypatch.setenv('MOULTI_QUIT_POLICY', 'running=terminate')
-	moulti_test_child_beacon(moulti_test, False)
+	moulti_test_child_beacon(moulti_test, monkeypatch, False)
 
 def test_quit_running_leave(moulti_test, monkeypatch):
 	monkeypatch.setenv('MOULTI_QUIT_POLICY', 'running=leave')
-	moulti_test_child_beacon(moulti_test, True)
+	moulti_test_child_beacon(moulti_test, monkeypatch, True)

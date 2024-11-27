@@ -2,11 +2,10 @@
 
 # Optionally create/destroy a beacon file that reflects whether this process is
 # still running:
-BEACON_PATH="${2}"
-if [ "${BEACON_PATH}" ]; then
-	touch "${BEACON_PATH}"
+if [ "${MOULTI_TEST_BEACON}" ]; then
+	touch "${MOULTI_TEST_BEACON}"
 	function cleanup {
-		unlink "${BEACON_PATH}"
+		unlink "${MOULTI_TEST_BEACON}"
 	}
 	trap cleanup EXIT
 fi

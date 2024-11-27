@@ -1,0 +1,37 @@
+name: 'Moulti checks (NetBSD)'
+on:
+- push
+jobs:
+  netbsdchecks:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: NetBSD
+      uses: vmactions/netbsd-vm@v1
+      with:
+        usesh: true
+        prepare: |
+          PKG_PATH="http://cdn.NetBSD.org/pub/pkgsrc/packages/NetBSD/$(uname -p)/$(uname -r|cut -f '1 2' -d.|cut -f 1 -d_)/All"
+          export PKG_PATH
+          /usr/sbin/pkg_add py311-pip
+          /usr/sbin/pkg_add git-base
+        run: |
+          set -e
+          python3.11 --version
+          pip-3.11 --version || pip3.11 --version || pip --version
+          python3.11 -m venv .venv
+          . .venv/bin/activate
+          pip install --upgrade pip
+          # Remove problematic python packages:
+          # - bpython: unnecessary, depends on greenlet and thus on a recent C++ compiler
+          # - ruff: depends on a Rust compiler
+          # - twine: unnecessary, depends on a Rust compiler
+          sed -i '/bpython/d; /ruff/d; /twine/d' requirements.txt
+          pip install -r requirements.txt
+          # no ruff, no ruff check
+          mypy src/moulti
+          pylint src/moulti
+          pip install -e .
+          # This runs all tests except:
+          # - test_diff_with_delta (requires delta 0.18.x)
+          pytest -v

@@ -5,7 +5,7 @@
 if [ "${MOULTI_TEST_BEACON}" ]; then
 	touch "${MOULTI_TEST_BEACON}"
 	function cleanup {
-		unlink "${MOULTI_TEST_BEACON}"
+		rm -f "${MOULTI_TEST_BEACON}"
 	}
 	trap cleanup EXIT
 fi

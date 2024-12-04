@@ -62,7 +62,7 @@ class MoultiConsole(Static):
 		self.app.notify(message, title=title, severity='information' if res else 'error')
 
 	DEFAULT_CSS = """
-	$moulti_console_color: $accent;
+	$moulti_console_color: $primary;
 	MoultiConsole {
 		Label {
 			width: 100%;
@@ -128,9 +128,11 @@ class MoultiConsoleLog(Log, ToLinesMixin):
 	MoultiConsoleLog {
 		height: auto;
 		border-left: blank;
+		background: $background;
 	}
 	MoultiConsoleLog:focus {
-		border-left: thick $accent-lighten-3;
+		border-left: thick $primary-lighten-3;
+		background-tint: white 0%;
 	}
 	"""
 

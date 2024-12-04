@@ -78,9 +78,13 @@ class QuitDialog(ModalScreen):
 	DEFAULT_CSS = """
 		QuitDialog {
 			align: center middle;
+			background: $surface 60%;
 			& Button {
 				width: 100%;
 			}
+		}
+		#do_not_quit {
+			background: $secondary;
 		}
 
 		#quit_dialog_grid {
@@ -90,8 +94,8 @@ class QuitDialog(ModalScreen):
 			padding: 0 1;
 			width: 65;
 			height: 15;
-			border: thick $background 80%;
-			background: $surface;
+			border: thick $surface;
+			background: $background;
 			&.terminate { /* 1 extra button */
 				grid-size: 1 5;
 				grid-rows: 1fr 1fr 1fr 1fr 1;

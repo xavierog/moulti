@@ -18,32 +18,36 @@ class Footer(TextualFooter):
 			yield footer_key
 
 	FOOTER_KEY_CSS = """
-		background: $accent;
-		color: white;
+		background: $primary;
+		color: $footer-key-foreground;
+		.footer-key--description {
+			color: $footer-key-foreground;
+		}
 		.footer-key--key {
-			background: $accent-darken-2;
-			color: white;
+			background: $primary-darken-2;
+			color: $footer-key-foreground;
 		}
 		&:hover {
-			background: $accent-darken-1;
+			background: $primary-darken-1;
 			.footer-key--key {
-				background: $secondary;
-				color: white;
+				background: $accent;
+				color: $footer-key-foreground;
 			}
 		}
 		&.-disabled {
 			text-style: dim;
-			background: $accent;
+			background: $primary;
 			&:hover {
 				.footer-key--key {
-					background: $accent-darken-2;
+					background: $primary-darken-2;
 				}
 			}
 		}"""
 
 	DEFAULT_CSS = """
 Footer {
-    background: $accent;
+	color: $footer-key-foreground;
+    background: $primary;
 	/* FooterKey is specific to the new Footer and thus does not affect the previous one. */
 	FooterKey {%s
 	}

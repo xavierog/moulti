@@ -154,13 +154,18 @@ class CollapsibleStep(AbstractStep):
 		}
 		& CollapsibleTitle {
 			padding: 0;
+			color: $text;
 			width: 100%;
 		}
 		& CollapsibleTitle:focus {
 			background: initial;
+			color: $text;
+			text-style: none;
 		}
 		& CollapsibleTitle:hover {
 			background: $foreground 80%;
+			color: $text;
+			text-style: none;
 		}
 		/* Collapsible contents: */
 		& Contents {

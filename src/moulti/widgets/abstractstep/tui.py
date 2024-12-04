@@ -133,7 +133,7 @@ class AbstractStep(Static):
 		return True, search.highlight(text, *self.label_search_cursor)
 
 	DEFAULT_COLORS = """
-	$step_default: $primary;
+	$step_default: $secondary;
 	$step_success: #00ff00; /* bright green */
 	$step_warning: #ffa500; /* orange */
 	$step_error: #ff6347; /* tomato */
@@ -145,13 +145,13 @@ class AbstractStep(Static):
 		height: auto;
 		background: $step_default;
 		border-left: blank;
-		color: auto;
+		color: $text;
 		&.success { background: $step_success; }
 		&.warning { background: $step_warning; }
 		&.error { background: $step_error; }
 		&.inactive { background: $step_inactive; }
 	}
 	AbstractStep:focus, AbstractStep:focus-within {
-		border-left: thick $accent-lighten-3;
+		border-left: thick $primary-lighten-3;
 	}
 	"""

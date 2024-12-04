@@ -12,7 +12,7 @@ This document assumes:
 Moulti requires:
 - Linux, BSD or MacOS
 - Python ≥ 3.10
-- Textual ≥ 0.83
+- Textual 0.86.3
 
 ## Installation
 
@@ -1087,6 +1087,9 @@ The snippets below demonstrate how to leverage this mechanism to define one's st
 ```css
 /* Define a step class named "customstate" rendered with red text on a yellow background: */
 Step.customstate {
+    & CollapsibleTitle {
+        color: red;
+    }
     color: red;
     background: yellow;
     & MoultiLog { scrollbar-corner-color: yellow; }
@@ -1130,9 +1133,10 @@ Moulti requires Python ≥ 3.10 because:
 - Python 3.9 [isn't receiving regular bug fixes anymore](https://www.python.org/downloads/release/python-3918/).
 - Moulti type hints use PEP 604 (Allow writing union types as X | Y) syntax, which requires Python ≥ 3.10.
 
-The exact version of Textual required to run Moulti is 0.83.0.
+The exact version of Textual required to run Moulti is 0.86.3.
 Details:
-- version 0.84.0 introduce a rendering issue that affects focus indicators
+- version 0.86.0 replaces the dark vs light modes with themes; Moulti went through this breaking change on its way to Textual 1.0.0
+- version 0.84.0 introduces a rendering issue that affects focus indicators
 - version 0.83.0 removes the need to override `Screen.ALLOW_IN_MAXIMIZED_VIEW`
 - version 0.79.0 supports maximizing widgets
 - version 0.76.0 supports dynamic keybindings

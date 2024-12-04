@@ -21,6 +21,7 @@ from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.css.query import NoMatches
 from textual.dom import BadIdentifier
+from textual.reactive import reactive
 from textual.widgets import Label, ProgressBar
 from textual.worker import get_current_worker, NoActiveWorker
 from . import __version__ as MOULTI_VERSION
@@ -32,6 +33,7 @@ from .protocol import moulti_listen, get_unix_credentials, send_json_message
 from .protocol import MoultiConnectionClosedException, MoultiProtocolException, Message, FDs
 from .protocol import MoultiTLVReader, data_to_message, getraddr
 from .search import TextSearch, MatchSpan
+from .themes import MOULTI_THEMES
 from .widgets import MoultiWidgetException
 from .widgets.tui import MoultiWidgets
 from .widgets.footer import Footer
@@ -148,6 +150,9 @@ class Moulti(App):
 	ENABLE_COMMAND_PALETTE = False
 	# Do not minimize on 'escape' because widgets need to restore their max height:
 	ESCAPE_TO_MINIMIZE = False
+
+	dark = reactive(True)
+	"""True for dark mode, False for light mode."""
 
 	def __init__(self, command: list[str]|None = None, instance_name: str|None = None):
 		self.instance_name = instance_name
@@ -273,6 +278,11 @@ class Moulti(App):
 		yield self.progress_bar
 		yield self.footer
 		yield self.end_user_console
+
+	def on_mount(self) -> None:
+		for theme in MOULTI_THEMES.values():
+			self.register_theme(theme)
+		self.theme = 'moulti-dark' if self.dark else 'moulti-light'
 
 	def on_ready(self) -> None:
 		self.logconsole(f'Moulti v{MOULTI_VERSION}, Textual v{TEXTUAL_VERSION}, Python v{sys.version}')
@@ -473,10 +483,12 @@ class Moulti(App):
 				self.call_from_thread(self.end_user_console.write, line)
 
 	def action_light_mode(self) -> None:
+		self.theme = 'moulti-light'
 		self.dark = False
 		self.refresh_bindings()
 
 	def action_dark_mode(self) -> None:
+		self.theme = 'moulti-dark'
 		self.dark = True
 		self.refresh_bindings()
 
@@ -849,7 +861,7 @@ class Moulti(App):
 	/* Styles inherited by all widgets: */
 	$scrollbar_background: #b2b2b2;
 	$scrollbar_inactive_bar: #686868;
-	$scrollbar_active_bar: $accent-darken-1;
+	$scrollbar_active_bar: $primary-darken-1;
 	Widget {
 		/* By default, in dark mode, scrollbars are not rendered clearly; enforce their colours: */
 		scrollbar-background: $scrollbar_background;
@@ -859,26 +871,32 @@ class Moulti(App):
 		scrollbar-color-active: $scrollbar_active_bar;
 		scrollbar-color-hover: $scrollbar_active_bar;
 	}
+	#textual-tooltip { /* overrides "Tooltip" since it is more specific */
+		background: $surface;
+	}
 
 	/* One-line title at the top of the screen: */
 	#header {
 		text-align: center;
 		/* For the title to appear centered, the widget must occupy all available width: */
 		width: 100%;
-		background: $accent;
-		color: auto;
+		background: $primary;
+		color: $text;
 		dock: top; /* relevant in maximized mode */
 	}
 
 	/* Show the progress bar as a full-width extension of the footer: */
 	#progress_bar {
 		display: none; /* Do not display by default */
-		background: $accent;
+		background: $primary;
 		padding-left: 1;
 		padding-right: 1;
 		width: 100%;
 		&> Bar {
 			width: 1fr;
+			&> .bar--bar {
+				color: $warning;
+			}
 		}
 	}
 	"""

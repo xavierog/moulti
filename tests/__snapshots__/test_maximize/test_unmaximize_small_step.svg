@@ -36,7 +36,7 @@
 .terminal-r2 { fill: #c5c8c6 }
 .terminal-r3 { fill: #6db2ff }
 .terminal-r4 { fill: #dde6ed }
-.terminal-r5 { fill: #e1e1e1 }
+.terminal-r5 { fill: #e0e0e0 }
 .terminal-r6 { fill: #1e1e1e }
 .terminal-r7 { fill: #d9d9d9 }
 .terminal-r8 { fill: #00ff00 }

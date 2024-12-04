@@ -218,11 +218,11 @@ class SearchInputWidget(Static):
 
 	DEFAULT_CSS = """
 		#search_regex_label {
-			background: $primary-darken-2;
+			background: $secondary-darken-2;
 			color: $text-muted;
 		}
 		#search_regex_label.regex {
-			color: $secondary;
+			color: $accent;
 		}
 		SearchInputWidget {
 			display: none;

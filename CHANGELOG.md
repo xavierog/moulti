@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for its CLI (Command-Line Interface), i.e. for the `moulti` command.
 Although Moulti's Python packages, modules and functions are obviously available, they do not constitute a public API yet.
 
+## Unreleased
+
+## Changed
+
+- Moulti now requires Textual 0.86.3
+- Minor color changes: input fields, buttons, progress bar, some texts in light mode.
+- `MOULTI_CUSTOM_CSS` users: specify `& CollapsibleTitle { color: ...; }` to alter the default step title color; an example is available in the documentation.
+
 ## [1.23.2] - 2024-12-17
 
 ### Fixed

@@ -240,6 +240,6 @@ class MoultiLog(ScrollView, ToLinesMixin, can_focus=True):
 		border-left: blank;
 	}
 	MoultiLog:focus {
-		border-left: thick $accent-lighten-3;
+		border-left: thick $primary-lighten-3;
 	}
 	"""

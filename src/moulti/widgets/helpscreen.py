@@ -61,10 +61,12 @@ class HelpScreen(ModalScreen):
 	DEFAULT_CSS = """
 		HelpScreen {
 			align: center middle;
+			background: $surface 60%;
 		}
 		#main_text {
 			padding: 1;
-			border: panel $accent;
+			background: $surface;
+			border: panel $primary;
 			border-title-color: #ffffff;
 			border-title-align: center;
 			border-subtitle-color: $text-muted;

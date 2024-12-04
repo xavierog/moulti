@@ -1,6 +1,8 @@
 /* Define a step class named "customstate" rendered with red text on a yellow background: */
 Step.customstate {
-    color: red;
+	& CollapsibleTitle {
+		color: red;
+	}
     background: yellow;
     & MoultiLog { scrollbar-corner-color: yellow; }
 }

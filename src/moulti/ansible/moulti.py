@@ -2,10 +2,9 @@ from __future__ import annotations
 import os
 import sys
 import subprocess as sp
-import collections.abc as c
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, TYPE_CHECKING
 # pylint: disable=import-error
 from ansible.errors import AnsiblePromptInterrupt # type: ignore
 from ansible.utils.color import parsecolor # type: ignore
@@ -16,6 +15,9 @@ except ImportError: # for Ansible >= 2.17
 	proxy_display = Display._proxy # pylint: disable=protected-access
 from ansible.plugins.callback.default import CallbackModule as DefaultCallbackModule # type: ignore
 from ansible.utils.unsafe_proxy import wrap_var # type: ignore
+
+if TYPE_CHECKING:
+	import collections.abc as c
 
 DOCUMENTATION = '''
     name: moulti

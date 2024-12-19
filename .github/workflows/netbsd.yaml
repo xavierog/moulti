@@ -1,6 +1,8 @@
 name: 'Moulti checks (NetBSD)'
 on:
-- push
+  push:
+    branches:
+    - devel
 jobs:
   netbsdchecks:
     runs-on: ubuntu-latest

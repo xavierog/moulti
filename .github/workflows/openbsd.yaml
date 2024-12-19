@@ -1,6 +1,8 @@
 name: 'Moulti checks (OpenBSD)'
 on:
-- push
+  push:
+    branches:
+    - devel
 jobs:
   openbsdchecks:
     runs-on: ubuntu-latest

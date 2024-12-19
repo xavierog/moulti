@@ -1,6 +1,8 @@
 name: Moulti checks
 on:
-- push
+  push:
+    branches:
+    - devel
 jobs:
   checks:
     strategy:

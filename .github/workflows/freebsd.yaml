@@ -1,6 +1,8 @@
 name: 'Moulti checks (FreeBSD)'
 on:
-- push
+  push:
+    branches:
+    - devel
 jobs:
   freebsdchecks:
     runs-on: ubuntu-latest

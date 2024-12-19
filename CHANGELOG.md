@@ -8,7 +8,7 @@ Although Moulti's Python packages, modules and functions are obviously available
 
 ## [1.24.0] - 2024-12-19
 
-## Changed
+### Changed
 
 - Moulti now requires Textual 0.86.3
 - Minor color changes: input fields, buttons, progress bar, some texts in light mode.

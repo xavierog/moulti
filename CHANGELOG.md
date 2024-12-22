@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for its CLI (Command-Line Interface), i.e. for the `moulti` command.
 Although Moulti's Python packages, modules and functions are obviously available, they do not constitute a public API yet.
 
+## Unreleased
+
+### Added
+
+- `MOULTI_CUSTOM_CSS` users: combined with `offset`, `position: absolute` enables various interesting hacks (e.g. multiple steps per row)
+
+### Changed
+
+- Moulti now requires Textual 0.87.1
+
 ## [1.24.0] - 2024-12-19
 
 ### Changed

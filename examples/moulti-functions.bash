@@ -162,9 +162,13 @@ if [ "$(uname)" == 'NetBSD' ]; then
 elif [ "$(uname)" == 'OpenBSD' ]; then
 	if moulti_tool_is_available unbuffer; then
 		function stdbuf {
-			# Ignore arguments and call unbuffer:
-			while [[ "$1" =~ ^- ]]; do shift; done
-			unbuffer "$@"
+			# Ignore arguments and call unbuffer (unbuffer -p if stdbuf is invoked with -i or --input):
+			local deal_with_input=''
+			while [[ "$1" =~ ^- ]]; do
+				[[ "$1" =~ ^-i ]] || [[ "$1" =~ ^--input ]] && deal_with_input='-p'
+				shift
+			done
+			unbuffer $deal_with_input "$@"
 		}
 	fi
 fi

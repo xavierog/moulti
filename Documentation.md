@@ -1111,7 +1111,8 @@ Step.customstate {
 ```
 
 ```shell
-MOULTI_CUSTOM_CSS=/path/to/moulti-custom.tcss moulti init
+MOULTI_CUSTOM_CSS=/absolute/path/to/moulti-custom.tcss moulti init
+moulti step add test_step --classes=customstate
 ```
 
 Caution: if the `MOULTI_CUSTOM_CSS` environment variable is set, the path it indicates must exist and point to a syntactically valid TCSS file or the Moulti instance will crash.

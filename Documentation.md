@@ -1116,6 +1116,8 @@ MOULTI_CUSTOM_CSS=/path/to/moulti-custom.tcss moulti init
 
 Caution: if the `MOULTI_CUSTOM_CSS` environment variable is set, the path it indicates must exist and point to a syntactically valid TCSS file or the Moulti instance will crash.
 
+Refer to `examples/moulti-scoreboard.bash` for an advanced use of TCSS.
+
 ## Technical requirements (unabridged)
 
 Moulti requires a Unix-friendly operating system. Specifically, it requires an operating system that implements `AF_UNIX`+`SOCK_STREAM` local network sockets.

@@ -11,6 +11,7 @@ Although Moulti's Python packages, modules and functions are obviously available
 ### Added
 
 - `MOULTI_CUSTOM_CSS` users: combined with `offset`, `position: absolute` enables various interesting hacks (e.g. multiple steps per row)
+- New example script: `moulti-scoreboard.bash`
 
 ### Changed
 

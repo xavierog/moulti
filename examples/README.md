@@ -8,6 +8,7 @@ Descriptions:
 - pass-concurrency: display 8 (actually `$MOULTI_PASS_CONCURRENCY`) steps running `ping localhost` concurrently
 - progressbar: track the generation of 10 SSH keys using a progress bar
 - python-checks: run linters on Moulti code; to be executed from the parent directory
+- scoreboard: display the scores of two teams (home and guest) next to each other, along with a timer in the center of the screen; this unusual layout is achieved through `MOULTI_CUSTOM_CSS`
 - social-preview: display 4 steps using toilet, ping and bat -- used to generate Moulti's social preview picture
 
 ## Compatibility matrix
@@ -20,6 +21,7 @@ Descriptions:
 | pass-concurrency | ✅    |  ✅   |   ✅    |   ✅   |   ✅    |
 | progressbar      | ✅    |  ✅   |   ✅    |   ✅   |   ✅    |
 | python-checks    | ✅    |  ✅   |   ✅    |   ✅   |   ✅    |
+| scoreboard       | ✅    |  ✅   |   ✅    |   ✅   |   ✅    |
 | social-preview   | ✅    |  ✅   |   ✅    |   ✅   |   ✅    |
 
 [1] Debian-based distributions only

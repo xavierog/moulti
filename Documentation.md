@@ -12,7 +12,7 @@ This document assumes:
 Moulti requires:
 - Linux, BSD or MacOS
 - Python ≥ 3.10
-- Textual 0.87.1
+- Textual 0.88.1
 
 ## Installation
 
@@ -1136,8 +1136,9 @@ Moulti requires Python ≥ 3.10 because:
 - Python 3.9 [isn't receiving regular bug fixes anymore](https://www.python.org/downloads/release/python-3918/).
 - Moulti type hints use PEP 604 (Allow writing union types as X | Y) syntax, which requires Python ≥ 3.10.
 
-The exact version of Textual required to run Moulti is 0.87.1.
+The exact version of Textual required to run Moulti is 0.88.1.
 Details:
+- version 0.88.0 is a mere milestone on the way to Textual 1.0.0
 - version 0.87.0 introduces the `position: absolute` TCSS property
 - version 0.86.0 replaces the dark vs light modes with themes; Moulti went through this breaking change on its way to Textual 1.0.0
 - version 0.84.0 introduces a rendering issue that affects focus indicators

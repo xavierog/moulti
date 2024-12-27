@@ -45,7 +45,7 @@ setup(
 	keywords=['cli', 'tui', 'curses', 'terminal', 'multiplex', 'script', 'output', 'steps', 'textual', 'collapsible', 'ansible', 'diff'],
 	package_dir={'': 'src'},
 	python_requires='>=3.10',
-	install_requires=['textual==0.87.1', 'pyperclip', 'argcomplete', 'unidiff'],
+	install_requires=['textual==0.88.1', 'pyperclip', 'argcomplete', 'unidiff'],
 	entry_points={
 		'console_scripts': [
 			'moulti = moulti.precli:main',

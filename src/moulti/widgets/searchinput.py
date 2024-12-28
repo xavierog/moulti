@@ -146,14 +146,16 @@ class SearchInputWidget(Static):
 	def __init__(self, *args: Any, **kwargs: Any) -> None:
 		super().__init__(*args, **kwargs)
 		self.input = SearchInput(id='search_input')
-		self.input.valid_empty = True
-		self.input.validate_on = {'changed', 'submitted'}
 		self.next_label = Label('?', id='search_next_label')
 		self.regex_label = Label('?????', id='search_regex_label')
-		self.next_label.tooltip = '/: search forward\n?: search backward'
 		self.history: deque[TextSearch] = deque(maxlen=SEARCH_HISTORY_SIZE)
 		self.editable_history: deque[TextSearch] = deque(maxlen=SEARCH_HISTORY_SIZE + 1)
 		self.history_index = -1
+
+	def on_mount(self) -> None:
+		self.input.valid_empty = True
+		self.input.validate_on = {'changed', 'submitted'}
+		self.next_label.tooltip = '/: search forward\n?: search backward'
 
 	def compose(self) -> ComposeResult:
 		with Horizontal():

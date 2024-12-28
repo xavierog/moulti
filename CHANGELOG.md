@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for its CLI (Command-Line Interface), i.e. for the `moulti` command.
 Although Moulti's Python packages, modules and functions are obviously available, they do not constitute a public API yet.
 
+## Unreleased
+
+### Changed
+
+- Moulti now requires Textual 1.0.x
+- When searching text, the `[esc] Cancel` keybinding, which used to be shown in 1st position in the footer, is now shown in 3rd position
+
 ## [1.27.0] - 2024-12-28
 
 ### Changed

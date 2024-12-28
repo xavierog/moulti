@@ -11,6 +11,6 @@ git+https://github.com/Textualize/pytest-textual-snapshot@19b2607c93b898cc67c6f9
 pytest-xdist
 ruff
 textual-dev
-textual==0.89.1
+textual==1.0.*
 twine
 unidiff

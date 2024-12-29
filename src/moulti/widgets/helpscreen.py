@@ -30,7 +30,7 @@ class HelpScreen(ModalScreen):
   [key]w[/]: same + preserve colors/include metadata (e.g. the question)
   [key]/[/], [key]?[/]: forward/backward text search
   [key]n[/], [key]N[/]: next/previous text search
-  [key]q[/], [key]ctrl+c[/]: quit""".replace('[key]', '[bold #679cff on black]')
+  [key]q[/], [key]ctrl+q[/]: quit""".replace('[key]', '[bold #679cff on black]')
 
 	def compose(self) -> ComposeResult:
 		label = Label(self.TEXT, id='main_text')

@@ -63,14 +63,14 @@ class QuitDialog(ModalScreen):
 				self.query_one('#quit').focus()
 			elif self.quit_request_count == 3:
 				x = self.query_one('#extra_info', Label)
-				x.update('Hitting Ctrl+c again will terminate the process and quit.')
+				x.update('Hitting Ctrl+q again will terminate the process and quit.')
 				self.query_one('#terminate_and_quit').focus()
 			elif self.quit_request_count > 3:
 				self.exit('terminate')
 		else:
 			if self.quit_request_count == 2:
 				x = self.query_one('#extra_info', Label)
-				x.update('Hitting Ctrl+c again will quit.')
+				x.update('Hitting Ctrl+q again will quit.')
 				self.query_one('#quit').focus()
 			elif self.quit_request_count == 3:
 				self.exit('leave')

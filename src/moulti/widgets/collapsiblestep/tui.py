@@ -111,10 +111,12 @@ class CollapsibleStep(AbstractStep):
 		self.query_one('CollapsibleTitle').focus(scroll_visible)
 		return self
 
-	async def on_click(self, _: Click) -> None:
+	async def on_click(self, event: Click) -> None:
 		"""
 		Steps are meant to be focusable but it is actually the CollapsibleTitle that holds the focus.
 		"""
+		if event.control and event.control.can_focus:
+			return
 		self.focus()
 
 	def check_properties(self, kwargs: dict[str, str|int|bool]) -> None:

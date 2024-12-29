@@ -13,6 +13,9 @@ Although Moulti's Python packages, modules and functions are obviously available
 - Moulti now requires Textual 1.0.x
 - When searching text, the `[esc] Cancel` keybinding, which used to be shown in 1st position in the footer, is now shown in 3rd position
 - `Ctrl+c` no longer exits Moulti: use `Ctrl+q` instead; `q` still works
+- Input fields now support:
+  - text selection through mouse or Shift+left/right; Ctrl+Shift+left/right works too
+  - copy/paste through Ctrl+x/c/v
 
 ## [1.27.0] - 2024-12-28
 

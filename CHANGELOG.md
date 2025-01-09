@@ -8,6 +8,10 @@ Although Moulti's Python packages, modules and functions are obviously available
 
 ## Unreleased
 
+### Changed
+
+- console: abridge message strings longer than 100 characters
+
 ### Fixed
 
 - diff, load, manpage, step delete: improve pipelining so as to prevent deadlocks

@@ -24,6 +24,36 @@ def bool_or_int(value: str) -> bool|int:
 		return True
 	return int(value)
 
+def abridge_string(value: str, threshold: int = 100, sep: str = '...') -> str:
+	"""
+	Abridge a string longer than threshold; the result reflects the start middle and end, separated with the given
+	separator.
+	"""
+	if len(value) <= threshold:
+		return value
+	sep_len = 2 * len(sep) # the abridged string features 3 parts and thus 2 separators
+	chars_len = threshold - sep_len
+	part_len = chars_len // 3
+	delta = chars_len % 3
+	middle = int((len(value) / 2) - (part_len / 2))
+	return value[:part_len+delta] + sep + value[middle:middle+part_len] + sep + value[-part_len:]
+
+def abridge_dict(message: dict[str, Any], threshold: int = 100, sep: str = '...') -> dict[str, Any]:
+	"""
+	Abridge the string values of a given dict using abridge_string().
+	This function only processes first-level string values and does not work recursively.
+	"""
+	long_keys = []
+	for key, value in message.items():
+		if isinstance(value, str) and len(value) > threshold:
+			long_keys.append(key)
+	if not long_keys:
+		return message
+	abridged_message = {}
+	for key, value in message.items():
+		abridged_message[key] = abridge_string(value, threshold, sep) if key in long_keys else value
+	return abridged_message
+
 def handle_reply(reply: Message) -> None:
 	success = reply.get('done') is True
 	if not success:

@@ -1,7 +1,7 @@
 from selectors import DefaultSelector, EVENT_READ, EVENT_WRITE
 from socket import socket as Socket
 from typing import Callable
-from .helpers import clean_selector
+from .helpers import abridge_dict, clean_selector
 from .protocol import MoultiTLVReader, MoultiTLVWriter
 from .protocol import MoultiProtocolException, MoultiConnectionClosedException
 from .protocol import clean_socket, data_to_message, from_printable, getraddr, message_to_data, moulti_listen
@@ -144,7 +144,8 @@ class MoultiServer:
 	def got_tlv(self, socket: Socket, raddr: str, data_type: str, data: bytes, file_descriptors: FDs) -> None:
 		if data_type == 'JSON':
 			message = data_to_message(data)
-			self.log(f'{raddr}: => {message=} {file_descriptors=}')
+			log_message = abridge_dict(message)
+			self.log(f'{raddr}: => message={log_message} {file_descriptors=}')
 			self.message_callback(socket, raddr, message, file_descriptors)
 		else:
 			raise MoultiProtocolException(f'cannot handle {data_type} {len(data)}-byte message')

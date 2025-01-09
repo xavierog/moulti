@@ -27,12 +27,10 @@ from textual.worker import get_current_worker, NoActiveWorker
 from . import __version__ as MOULTI_VERSION
 from .ansi import AnsiThemePolicy, dump_filters
 from .helpers import call_all, clean_selector
-from .protocol import PRINTABLE_MOULTI_SOCKET, clean_socket, current_instance
-from .protocol import default_moulti_socket_path, from_printable
-from .protocol import moulti_listen, get_unix_credentials, send_json_message
-from .protocol import MoultiConnectionClosedException, MoultiProtocolException, Message, FDs
-from .protocol import MoultiTLVReader, data_to_message, getraddr
+from .protocol import PRINTABLE_MOULTI_SOCKET, current_instance, default_moulti_socket_path, get_unix_credentials
+from .protocol import Message, FDs
 from .search import TextSearch, MatchSpan
+from .server import MoultiServer
 from .themes import MOULTI_THEMES
 from .widgets import MoultiWidgetException
 from .widgets.tui import MoultiWidgets
@@ -157,6 +155,7 @@ class Moulti(App):
 	def __init__(self, command: list[str]|None = None, instance_name: str|None = None):
 		self.instance_name = instance_name
 		self.socket_path = default_moulti_socket_path(instance_name) if instance_name else PRINTABLE_MOULTI_SOCKET
+		self.server: MoultiServer|None = None
 		self.init_security()
 		self.init_quit_policy()
 		self.init_widgets()
@@ -644,6 +643,8 @@ class Moulti(App):
 		return step_index
 
 	def reply(self, connection: Socket, raddr: str, message: dict[str, Any], **kwargs: Any) -> None:
+		if self.server is None:
+			return
 		try:
 			# If the original message bears a message id, use it to send a
 			# smaller reply. Otherwise, send the original message back with
@@ -653,7 +654,7 @@ class Moulti(App):
 			else:
 				message = {**message, **kwargs}
 			self.logconsole(f'{raddr}: <= message={message}')
-			send_json_message(connection, message)
+			self.server.reply(connection, message)
 		except Exception as exc:
 			self.logconsole(f'{raddr}: reply: kwargs={kwargs}: {exc}')
 
@@ -774,88 +775,36 @@ class Moulti(App):
 			if finally_reply:
 				self.reply(connection, raddr, message, done=error is None, error=error)
 
-	def check_unix_credentials(self, socket: Socket) -> tuple[bool, int, int]:
-		_, uid, gid = get_unix_credentials(socket)
-		allowed = uid in self.allowed_uids or gid in self.allowed_gids
-		return allowed, uid, gid
+	def check_unix_credentials(self, socket: Socket) -> str:
+		# Check Unix credentials (uid/gid) if and only if Moulti listens on an abstract socket.
+		# Regular sockets are protected by file permissions.
+		if self.server is not None and self.server.server_socket_is_abstract:
+			_, uid, gid = get_unix_credentials(socket)
+			allowed = uid in self.allowed_uids or gid in self.allowed_gids
+			if not allowed:
+				return 'invalid Unix credentials {uid}:{gid}'
+		return ''
 
 	@work(thread=True, group='app-network', name='network-loop')
 	async def network_loop(self) -> None:
 		current_worker = get_current_worker()
-
-		def read(tlv_reader: MoultiTLVReader) -> None:
-			raddr = tlv_reader.raddr
-			try:
-				try:
-					# Read whatever there is to read; if a complete TLV message is received, calls got_tlv, which calls
-					# handle_message, which calls reply().
-					tlv_reader.read()
-				except (MoultiProtocolException, MoultiConnectionClosedException, ConnectionResetError) as exc:
-					server_selector.unregister(tlv_reader.socket)
-					tlv_reader.socket.close()
-					self.logconsole(f'{raddr}: read: closed connection; cause: {exc}')
-					return
-			except Exception as exc:
-				self.logconsole(f'{raddr}: read: {exc}')
-
-		def got_tlv(socket: Socket, raddr: str, data_type: str, data: bytes, file_descriptors: FDs) -> None:
-			if data_type == 'JSON':
-				message = data_to_message(data)
-				self.logconsole(f'{raddr}: => {message=} {file_descriptors=}')
-				self.handle_message(socket, raddr, message, file_descriptors)
-			else:
-				raise MoultiProtocolException(f'cannot handle {data_type} {len(data)}-byte message')
-
-		def accept(socket: Socket) -> None:
-			raddr = None
-			try:
-				connection, _ = socket.accept()
-				raddr = getraddr(connection)
-				self.logconsole(f'{raddr}: accept: accepted new connection')
-				# Check Unix credentials (uid/gid) if and only if Moulti listens on an abstract socket.
-				# Regular sockets are protected by file permissions.
-				if server_socket_is_abstract:
-					allowed, uid, gid = self.check_unix_credentials(connection)
-					if not allowed:
-						connection.close()
-						self.logconsole(f'{raddr}: accept: closed connection: invalid Unix credentials {uid}:{gid}')
-						return
-				connection.setblocking(False)
-				tlv_reader = MoultiTLVReader(connection, raddr, got_tlv, self.logconsole)
-				server_selector.register(connection, selectors.EVENT_READ, tlv_reader)
-			except Exception as exc:
-				self.logconsole(f'{raddr}: accept: {exc}')
-
+		self.server = MoultiServer(
+			socket_path=self.socket_path,
+			loop_callback=lambda: not current_worker.is_cancelled,
+			log_callback=self.logconsole,
+			ready_callback=self.network_loop_is_ready,
+			security_callback=self.check_unix_credentials,
+			message_callback=self.handle_message,
+		)
 		try:
-			server_socket, server_socket_is_abstract = moulti_listen(bind=from_printable(self.socket_path))
+			self.server.listen()
 		except Exception as exc:
 			# A Moulti instance is useless if it cannot listen:
 			tip = 'Tip: try setting the MOULTI_INSTANCE environment variable, e.g. MOULTI_INSTANCE=$$ moulti init'
 			self.exit(return_code=100, message=f'Fatal: {exc}\n{tip}')
 			return
-		socket_type = "abstract socket" if server_socket_is_abstract else "socket"
-		self.logconsole(f'listening on {socket_type} {self.socket_path}')
+		self.server.network_loop()
 
-		try:
-			server_selector = selectors.DefaultSelector()
-			server_selector.register(server_socket, selectors.EVENT_READ, accept)
-
-			self.network_loop_is_ready()
-			while not current_worker.is_cancelled:
-				events = server_selector.select(1)
-				for key, _ in events:
-					if isinstance(key.data, MoultiTLVReader):
-						read(key.data)
-					elif callable(key.data):
-						key.data(key.fileobj)
-		except Exception as exc:
-			self.logconsole(f'network loop: {exc}')
-		finally:
-			clean_socket(self.socket_path)
-			# Explicitly stop listening and close all sockets: this makes sense when and if the
-			# Python process does not exit after this App has finished running.
-			server_socket.close()
-			clean_selector(server_selector, close_fds=True, close=True)
 
 	DEFAULT_CSS = """
 	/* Styles inherited by all widgets: */

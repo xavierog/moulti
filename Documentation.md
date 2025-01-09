@@ -1169,11 +1169,12 @@ In the end, Moulti is architected around 5 components:
 - the server part
 - the TUI part
 
-Implementation-wise, these 5 components are spread across only 3 Python modules:
+Implementation-wise, these 5 components are spread across only 4 Python modules:
 
 - moulti.cli (CLI + client)
 - moulti.protocol
-- moulti.app (server + TUI)
+- moulti.server (server)
+- moulti.app (TUI)
 
 The protocol does not neeed to work across network hosts, it simply needs to work across processes on a single host.
 At this stage, all IPC techniques remain available.

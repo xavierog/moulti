@@ -3,6 +3,7 @@ import re
 import sys
 import pwd
 import uuid
+from collections import deque
 from struct import calcsize, unpack
 from socket import socket as Socket, AF_UNIX, SOCK_STREAM, SOL_SOCKET
 from socket import recv_fds as socket_recv_fds, send_fds
@@ -329,3 +330,65 @@ class MoultiTLVReader:
 		except BlockingIOError:
 			# It turns out there is nothing (left) to read; better luck next read().
 			pass
+
+class MoultiTLVWriter:
+	"""
+	Helper that writes TLV data to a given socket each time write() is called.
+	Each time a complete TLV dataset has been written, call a given callback.
+	"""
+	# pylint: disable=attribute-defined-outside-init
+	def __init__(
+		self,
+		socket: Socket,
+		raddr: str,
+		callback: TLVCallback|None,
+		log_callback: LogCallback|None = None,
+	):
+		self.socket = socket
+		self.raddr = raddr
+		self.callback = callback
+		self.log_callback = log_callback
+		self.buffers: deque = deque()
+		self.reset()
+
+	def reset(self) -> None:
+		self.message_type: str|None = None
+		self.message_data: bytes|None = None
+		self.data: bytes|None = None
+		self.written = 0
+
+	def log(self, line: str) -> None:
+		if self.log_callback:
+			self.log_callback(line)
+
+	def finished_writing(self) -> None:
+		if self.callback is not None:
+			assert self.message_type is not None # for mypy
+			assert self.message_data is not None # for mypy
+			self.callback(self.socket, self.raddr, self.message_type, self.message_data, [])
+		self.reset()
+
+	def write_message(self, data: bytes, data_type: str = 'JSON') -> bool:
+		self.buffers.appendleft((data, data_type))
+		return self.write()
+
+	def next(self) -> bool:
+		if self.buffers:
+			self.message = self.buffers.pop()
+			self.data = assemble_tlv(*self.message)
+			self.written = 0
+			return True
+		return False
+
+	def write(self) -> bool:
+		try:
+			while self.data is not None or self.next():
+				assert self.data is not None # for mypy
+				self.written += self.socket.send(self.data[self.written:])
+				if self.written == len(self.data):
+					self.finished_writing()
+			# Everything was written:
+			return True
+		except BlockingIOError:
+			# Cannot write without blocking; better luck next write().
+			return False

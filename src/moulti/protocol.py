@@ -207,11 +207,14 @@ def read_tlv_data_from_socket(socket: Socket, max_fds: int = 1) -> tuple[str, by
 	data_type, data_length = parse_preamble(preamble)
 	return data_type, read_fixed_amount_from_socket(socket, data_length), file_descriptors
 
-def write_tlv_data_to_socket(socket: Socket, data: bytes, data_type: str = 'JSON', fds: FDs|None = None) -> None:
+def assemble_tlv(data: bytes, data_type: str = 'JSON') -> bytes:
 	data_type = data_type + '____'
 	data_length = len(data)
 	preamble = f':{data_type[0:4]}:{data_length:013}:'.encode('ascii')
-	to_send = preamble + data
+	return preamble + data
+
+def write_tlv_data_to_socket(socket: Socket, data: bytes, data_type: str = 'JSON', fds: FDs|None = None) -> None:
+	to_send = assemble_tlv(data, data_type)
 	if fds:
 		send_fds(socket, [to_send], fds)
 	else:

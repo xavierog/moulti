@@ -4,8 +4,8 @@ from typing import Callable
 from .helpers import abridge_dict, clean_selector
 from .protocol import MoultiTLVReader, MoultiTLVWriter
 from .protocol import MoultiProtocolException, MoultiConnectionClosedException
-from .protocol import clean_socket, data_to_message, from_printable, getraddr, message_to_data, moulti_listen
-from .protocol import Message, FDs, LogCallback
+from .protocol import clean_socket, current_instance, data_to_message, default_moulti_socket_path, FDs, from_printable
+from .protocol import getraddr, LogCallback, Message, message_to_data, moulti_listen
 
 LoopCallback = Callable[[], bool]
 MessageCallback = Callable[[Socket, str, Message, FDs], None]
@@ -22,7 +22,8 @@ class MoultiServer:
 	"""
 	def __init__(
 		self,
-		socket_path: str,
+		instance_name: str|None,
+		socket_path: str|None,
 		loop_callback: LoopCallback,
 		message_callback: MessageCallback,
 		log_callback: LogCallback|None = None,
@@ -39,7 +40,8 @@ class MoultiServer:
 		error message to deny the connection or an empty string to accept it
 		"""
 		self.server_selector = DefaultSelector()
-		self.socket_path = socket_path
+		self.instance_name = instance_name or current_instance()
+		self.socket_path = socket_path if socket_path else default_moulti_socket_path(self.instance_name)
 		self.server_socket: Socket|None = None
 		self.server_socket_is_abstract = False
 		self.loop_callback = loop_callback

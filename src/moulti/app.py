@@ -27,10 +27,9 @@ from textual.worker import get_current_worker, NoActiveWorker
 from . import __version__ as MOULTI_VERSION
 from .ansi import AnsiThemePolicy, dump_filters
 from .helpers import call_all, clean_selector
-from .protocol import PRINTABLE_MOULTI_SOCKET, current_instance, default_moulti_socket_path, get_unix_credentials
-from .protocol import Message, FDs
+from .protocol import get_unix_credentials
 from .search import TextSearch, MatchSpan
-from .server import MoultiServer
+from .server import Message, FDs, MoultiServer, current_instance
 from .themes import MOULTI_THEMES
 from .widgets import MoultiWidgetException
 from .widgets.tui import MoultiWidgets
@@ -66,14 +65,14 @@ def add_abs_path_to_environment(env: dict[str, str], env_var: str, command: str)
 		return True
 	return False
 
-def run_environment(command: list[str], socket_path: str|None, copy: bool = True) -> dict[str, str]:
+def run_environment(command: list[str], socket_path: str, copy: bool = True) -> dict[str, str]:
 	"""
 	Return environment variables set by "Moulti run <command>".
 	"""
 	environment = os.environ.copy() if copy else {}
 
 	environment['MOULTI_RUN'] = 'moulti'
-	environment['MOULTI_SOCKET_PATH'] = socket_path or PRINTABLE_MOULTI_SOCKET
+	environment['MOULTI_SOCKET_PATH'] = socket_path
 	environment['MOULTI_INSTANCE_PID'] = str(os.getpid())
 
 	if 'SSH_ASKPASS' not in os.environ:
@@ -153,8 +152,7 @@ class Moulti(App):
 	"""True for dark mode, False for light mode."""
 
 	def __init__(self, command: list[str]|None = None, instance_name: str|None = None):
-		self.instance_name = instance_name
-		self.socket_path = default_moulti_socket_path(instance_name) if instance_name else PRINTABLE_MOULTI_SOCKET
+		self.instance_name = instance_name or current_instance()
 		self.server: MoultiServer|None = None
 		self.init_security()
 		self.init_quit_policy()
@@ -224,7 +222,7 @@ class Moulti(App):
 
 	def init_widgets(self) -> None:
 		self.title_label = Label('Title', id='header')
-		self.title_label.tooltip = f'Instance name: {current_instance()}'
+		self.title_label.tooltip = f'Instance name: {self.instance_name}'
 		self.steps_container = StepContainer()
 		self.search_input = SearchInputWidget(id='search_bar')
 		self.progress_bar = ProgressBar(id='progress_bar', show_eta=False)
@@ -285,7 +283,7 @@ class Moulti(App):
 
 	def on_ready(self) -> None:
 		self.logconsole(f'Moulti v{MOULTI_VERSION}, Textual v{TEXTUAL_VERSION}, Python v{sys.version}')
-		self.logconsole(f'instance "{current_instance()}", PID {os.getpid()}')
+		self.logconsole(f'instance "{self.instance_name}", PID {os.getpid()}')
 		self.logconsole('quit policy: ' + ', '.join(f"{k}='{v}'" for k,v in self.quit_policy.items()))
 		self.setup_ansi_behavior()
 		self.init_threads()
@@ -409,7 +407,8 @@ class Moulti(App):
 			self.init_command_running = True
 			original_command = command.copy()
 			self.logconsole(f'exec: about to run {original_command}')
-			environment = run_environment(command, self.socket_path)
+			assert self.server is not None
+			environment = run_environment(command, self.server.socket_path)
 			popen_args: dict[str, Any] = {'env': environment, 'stdin': subprocess.DEVNULL}
 			# Important: run_environment() may have modified command:
 			if command != original_command:
@@ -789,7 +788,8 @@ class Moulti(App):
 	async def network_loop(self) -> None:
 		current_worker = get_current_worker()
 		self.server = MoultiServer(
-			socket_path=self.socket_path,
+			instance_name=self.instance_name,
+			socket_path=None,
 			loop_callback=lambda: not current_worker.is_cancelled,
 			log_callback=self.logconsole,
 			ready_callback=self.network_loop_is_ready,

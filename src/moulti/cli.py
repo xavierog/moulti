@@ -19,7 +19,7 @@ def init(args: dict) -> None:
 	# Handle --print-env:
 	if args.pop('print_env', False):
 		from .app import run_environment # pylint: disable=import-outside-toplevel
-		environment_variables = run_environment(args['command'], None, False)
+		environment_variables = run_environment(args['command'], PRINTABLE_MOULTI_SOCKET, False)
 		for name, value in environment_variables.items():
 			print(f'{name}={value}')
 		sys.exit(0)

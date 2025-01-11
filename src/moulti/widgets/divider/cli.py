@@ -1,5 +1,5 @@
 from argparse import _SubParsersAction
-from moulti.helpers import send_delete, send_to_moulti_and_handle_reply, send_no_none_to_moulti_and_handle_reply
+from moulti.client import send_delete, send_to_moulti_and_handle_reply, send_no_none_to_moulti_and_handle_reply
 from ..abstractstep.cli import add_abstractstep_options
 
 COMMAND = 'divider'

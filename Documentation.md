@@ -1163,18 +1163,11 @@ To this end, CLI processes need a protocol to communicate with the TUI instance.
 
 In the end, Moulti is architected around 5 components:
 
-- the CLI part, used to drive the instance but also used to initialize it.
-- the client part
-- the protocol
-- the server part
-- the TUI part
-
-Implementation-wise, these 5 components are spread across only 4 Python modules:
-
-- moulti.cli (CLI + client)
-- moulti.protocol
-- moulti.server (server)
-- moulti.app (TUI)
+- the CLI part (moulti.cli), used to drive the instance but also used to initialize it (`moulti init`, `moulti run`)
+- the client part (moulti.client)
+- the protocol (moulti.protocol)
+- the server part (moulti.server)
+- the TUI part (moulti.app)
 
 The protocol does not neeed to work across network hosts, it simply needs to work across processes on a single host.
 At this stage, all IPC techniques remain available.

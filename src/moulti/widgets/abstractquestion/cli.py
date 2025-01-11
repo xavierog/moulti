@@ -1,6 +1,5 @@
 from argparse import ArgumentParser
-from moulti.helpers import Args, handle_reply
-from moulti.protocol import send_to_moulti
+from moulti.client import Args, handle_reply, send_to_moulti
 from ..collapsiblestep.cli import add_collapsiblestep_options
 
 def add_abstractquestion_options(parser: ArgumentParser, none: bool = False) -> None:

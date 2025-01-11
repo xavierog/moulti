@@ -1,5 +1,6 @@
 from argparse import ArgumentParser, BooleanOptionalAction, _SubParsersAction
-from moulti.helpers import pint, send_delete, send_to_moulti_and_handle_reply, send_no_none_to_moulti_and_handle_reply
+from moulti.client import send_delete, send_to_moulti_and_handle_reply, send_no_none_to_moulti_and_handle_reply
+from moulti.helpers import pint
 from ..abstractquestion.cli import add_abstractquestion_options, question_get_answer
 
 COMMAND = 'inputquestion' # abridged 'iq' below

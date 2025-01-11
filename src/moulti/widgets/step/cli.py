@@ -1,7 +1,8 @@
 import sys
 from argparse import ArgumentParser, BooleanOptionalAction, _SubParsersAction
-from moulti.helpers import Args, pint, handle_reply
-from moulti.helpers import send_delete, send_to_moulti_and_handle_reply, send_no_none_to_moulti_and_handle_reply
+from moulti.helpers import pint
+from moulti.client import Args, handle_reply, send_delete
+from moulti.client import send_to_moulti_and_handle_reply, send_no_none_to_moulti_and_handle_reply
 from moulti.protocol import moulti_connect, send_json_message, recv_json_message
 from . import MOULTI_PASS_DEFAULT_READ_SIZE
 from ..collapsiblestep.cli import add_collapsiblestep_options

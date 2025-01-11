@@ -7,9 +7,8 @@ from pathlib import Path
 from typing import Generator
 import argcomplete
 from . import __version__ as moulti_version
-from .helpers import pint, float_str, send_to_moulti_and_handle_reply
-from .pipeline import pipeline
-from .protocol import send_to_moulti, PRINTABLE_MOULTI_SOCKET
+from .client import PRINTABLE_MOULTI_SOCKET, send_to_moulti, send_to_moulti_and_handle_reply, pipeline
+from .helpers import pint, float_str
 from .widgets.cli import add_cli_arguments
 from .manpage import manpage_parse, manpage_run
 

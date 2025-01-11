@@ -403,6 +403,8 @@ class Moulti(App):
 		worker = get_current_worker()
 		harvest_output = self.output_policy() # Harvest stdout/stderr lines
 		output_delegated = False
+		output_selector = None
+		process = None
 		try:
 			self.init_command_running = True
 			original_command = command.copy()
@@ -417,7 +419,6 @@ class Moulti(App):
 			process = subprocess.Popen(command, **popen_args, **self.output_policy_popen_args())
 			self.logconsole(f'exec: {command} launched with PID {process.pid}')
 			returncode = None
-			output_selector = None
 			if harvest_output:
 				output_selector = selectors.DefaultSelector()
 				assert process.stdout is not None # for mypy
@@ -451,7 +452,7 @@ class Moulti(App):
 			self.init_command_running = False
 		finally:
 			clean_selector(output_selector, close_fds=False, close=True)
-			if harvest_output and not output_delegated and process.stdout is not None:
+			if harvest_output and not output_delegated and process is not None and process.stdout is not None:
 				self.logconsole(f'exec: no output harvested, closing child process stdout fd {process.stdout.fileno()}')
 				process.stdout.close()
 

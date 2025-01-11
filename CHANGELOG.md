@@ -16,6 +16,7 @@ Although Moulti's Python packages, modules and functions are obviously available
 
 - diff, load, manpage, step delete: improve pipelining so as to prevent deadlocks
 - server-side networking: use non-blocking methods to deal with non-blocking sockets
+- `moulti run path/to/non_executable_script` used to crash
 
 ## [1.28.0] - 2024-12-29
 

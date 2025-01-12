@@ -4,8 +4,7 @@ import sys
 import pwd
 import uuid
 from collections import deque
-from struct import calcsize, unpack
-from socket import socket as Socket, AF_UNIX, SOCK_STREAM, SOL_SOCKET
+from socket import socket as Socket, AF_UNIX, SOCK_STREAM
 from socket import recv_fds as socket_recv_fds, send_fds
 import json
 from json.decoder import JSONDecodeError
@@ -118,16 +117,6 @@ def clean_socket(socket_path: str = PRINTABLE_MOULTI_SOCKET) -> None:
 			os.unlink(socket_path)
 		except FileNotFoundError:
 			pass
-
-def get_unix_credentials(socket: Socket) -> tuple[int, int, int]:
-	if sys.platform == 'linux':
-		# struct ucred is { pid_t, uid_t, gid_t }
-		struct_ucred = '3i'
-		from socket import SO_PEERCRED # pylint: disable=import-outside-toplevel,no-name-in-module
-		unix_credentials = socket.getsockopt(SOL_SOCKET, SO_PEERCRED, calcsize(struct_ucred))
-		pid, uid, gid = unpack(struct_ucred, unix_credentials)
-		return pid, uid, gid
-	return -1, -1, -1
 
 def moulti_connect(address: str = MOULTI_SOCKET, bind: str | None = None) -> Socket:
 	client_socket = moulti_unix_socket()

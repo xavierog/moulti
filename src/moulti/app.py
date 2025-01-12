@@ -27,8 +27,8 @@ from textual.worker import get_current_worker, NoActiveWorker
 from . import __version__ as MOULTI_VERSION
 from .ansi import AnsiThemePolicy, dump_filters
 from .helpers import call_all, clean_selector
-from .protocol import get_unix_credentials
 from .search import TextSearch, MatchSpan
+from .security import MoultiSecurityPolicy
 from .server import Message, FDs, MoultiServer, current_instance
 from .themes import MOULTI_THEMES
 from .widgets import MoultiWidgetException
@@ -154,7 +154,7 @@ class Moulti(App):
 	def __init__(self, command: list[str]|None = None, instance_name: str|None = None):
 		self.instance_name = instance_name or current_instance()
 		self.server: MoultiServer|None = None
-		self.init_security()
+		self.security = MoultiSecurityPolicy(self)
 		self.init_quit_policy()
 		self.init_widgets()
 		self.end_user_console = MoultiConsole('moulti_console', classes='hidden')
@@ -187,21 +187,6 @@ class Moulti(App):
 		super().__init__()
 		self.dark = os.environ.get('MOULTI_MODE', 'dark') != 'light'
 		self.set_title('Moulti')
-
-	def init_security(self) -> None:
-		def ids_from_env(env_var_name: str) -> list[int]:
-			try:
-				return [int(xid) for xid in os.environ.get(env_var_name, '').split(',')]
-			except Exception:
-				return []
-
-		# By default, allow only the current uid to connect to Moulti:
-		self.allowed_uids = [os.getuid()]
-		self.allowed_gids = []
-
-		# Make this behaviour configurable through environment variables:
-		self.allowed_uids.extend(ids_from_env('MOULTI_ALLOWED_UID'))
-		self.allowed_gids.extend(ids_from_env('MOULTI_ALLOWED_GID'))
 
 	def init_quit_policy(self) -> None:
 		"""
@@ -775,16 +760,6 @@ class Moulti(App):
 			if finally_reply:
 				self.reply(connection, raddr, message, done=error is None, error=error)
 
-	def check_unix_credentials(self, socket: Socket) -> str:
-		# Check Unix credentials (uid/gid) if and only if Moulti listens on an abstract socket.
-		# Regular sockets are protected by file permissions.
-		if self.server is not None and self.server.server_socket_is_abstract:
-			_, uid, gid = get_unix_credentials(socket)
-			allowed = uid in self.allowed_uids or gid in self.allowed_gids
-			if not allowed:
-				return 'invalid Unix credentials {uid}:{gid}'
-		return ''
-
 	@work(thread=True, group='app-network', name='network-loop')
 	async def network_loop(self) -> None:
 		current_worker = get_current_worker()
@@ -794,7 +769,7 @@ class Moulti(App):
 			loop_callback=lambda: not current_worker.is_cancelled,
 			log_callback=self.logconsole,
 			ready_callback=self.network_loop_is_ready,
-			security_callback=self.check_unix_credentials,
+			security_callback=self.security.check,
 			message_callback=self.handle_message,
 		)
 		try:

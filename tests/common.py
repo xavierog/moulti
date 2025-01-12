@@ -52,7 +52,7 @@ def moulti_test(request: FixtureRequest, snap_compare):
 		if suffix is not None:
 			name += suffix
 		if command:
-			if command[0] != 'moulti' and not command[0].startswith(COMMAND_PREFIX):
+			if not command[0].startswith('moulti') and not command[0].startswith(COMMAND_PREFIX):
 				command[0] = COMMAND_PREFIX + command[0]
 			if not run_before:
 				run_before = wait_script

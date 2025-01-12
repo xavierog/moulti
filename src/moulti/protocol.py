@@ -60,6 +60,9 @@ def default_moulti_socket_path(instance: str|None = None) -> str:
 	socket_filename = f'moulti-{username}-{instance}.socket'
 	return make_socket_path(socket_filename, abstract_unix_sockets_supported())
 
+def moulti_socket_path(instance: str|None = None) -> str:
+	return os.environ.get('MOULTI_SOCKET_PATH') or default_moulti_socket_path(instance)
+
 def moulti_bind_path(abstract: bool) -> str:
 	username = current_username()
 	pid = os.getpid()
@@ -79,7 +82,7 @@ def to_printable(socket_path: str) -> str:
 		socket_path = '@' + socket_path[1:]
 	return socket_path
 
-PRINTABLE_MOULTI_SOCKET = os.environ.get('MOULTI_SOCKET_PATH') or default_moulti_socket_path()
+PRINTABLE_MOULTI_SOCKET = moulti_socket_path()
 MOULTI_SOCKET = from_printable(PRINTABLE_MOULTI_SOCKET)
 
 class MoultiProtocolException(Exception):

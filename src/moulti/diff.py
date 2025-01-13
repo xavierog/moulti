@@ -1,17 +1,18 @@
-import os
 import re
 import sys
 import subprocess
+from os import getpid
 from io import StringIO
 from typing import Any, Generator
 from unidiff import PatchSet # type: ignore
 from .pipeline import pipeline
+from .environ import env
 
 ANSI_GREEN = '\x1b[0;32m' # ANSI green bold is hard to read on light backgrounds
 ANSI_RED_BOLD = '\x1b[1;31m'
 ANSI_RESET = '\x1b[0m'
 DIFF_FIRST_LINE_RE = r'^(?:diff|index|\-\-\-|\+\+\+|Binary files)\s'
-ENCODING = os.environ.get('MOULTI_DIFF_ENCODING', 'utf-8')
+ENCODING = env('MOULTI_DIFF_ENCODING') or 'utf-8'
 
 def separate_header_and_data(filedesc: Any) -> tuple[str, str]:
 	"""
@@ -45,11 +46,11 @@ def commands(title: str, header: str, diff: PatchSet) -> Generator:
 	"""
 	Yield pipeline()-compatible triplets.
 	"""
-	if 'MOULTI_DIFF_NO_TITLE' not in os.environ:
+	if env('MOULTI_DIFF_NO_TITLE') is None:
 		yield None, {'command': 'set', 'title': title}, None
 
 	delta_lines: list[str] = []
-	if 'MOULTI_DIFF_NO_DELTA' not in os.environ:
+	if env('MOULTI_DIFF_NO_DELTA') is None:
 		try:
 			delta = ['delta', '--color-only']
 			diff_s = str(diff)
@@ -58,8 +59,8 @@ def commands(title: str, header: str, diff: PatchSet) -> Generator:
 		except Exception:
 			pass
 
-	print_steps = bool(os.environ.get('MOULTI_DIFF_VERBOSE'))
-	pid = os.getpid()
+	print_steps = bool(env('MOULTI_DIFF_VERBOSE'))
+	pid = getpid()
 	counter = {'step': 1}
 	def step(cmd: str, title: str, **kwargs: Any) -> tuple[str, dict, None]:
 		step_id = f'diff_{pid}_{counter["step"]}'

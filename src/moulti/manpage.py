@@ -1,13 +1,14 @@
-import os
 import re
 import sys
 import subprocess
 from io import StringIO
+from os import environ, getpid
 from typing import Any, Generator
 from rich.text import Text
 from .pipeline import pipeline
+from .environ import env
 
-ENCODING = os.environ.get('MOULTI_MANPAGE_ENCODING', 'utf-8')
+ENCODING = env('MOULTI_MANPAGE_ENCODING') or 'utf-8'
 
 def overtype_to_ansi(content: str) -> str:
 	"""
@@ -91,11 +92,11 @@ def commands(title: str, manpage: dict) -> Generator:
 	"""
 	Yield pipeline()-compatible triplets.
 	"""
-	if 'MOULTI_MANPAGE_NO_TITLE' not in os.environ:
+	if env('MOULTI_MANPAGE_NO_TITLE') is None:
 		yield None, {'command': 'set', 'title': title}, None
 
-	print_steps = bool(os.environ.get('MOULTI_MANPAGE_VERBOSE'))
-	pid = os.getpid()
+	print_steps = bool(env('MOULTI_MANPAGE_VERBOSE'))
+	pid = getpid()
 	counter = {'step': 1}
 	def step(cmd: str, title: str, **kwargs: Any) -> tuple[str, dict, None]:
 		step_id = f'manpage_{pid}_{counter["step"]}'
@@ -126,7 +127,7 @@ def manpage_parse(args: dict) -> None:
 
 def manpage_run(args: dict) -> None:
 	command = args['command']
-	os.environ['MAN_KEEP_FORMATTING'] = 'y'
+	environ['MAN_KEEP_FORMATTING'] = 'y'
 	res = subprocess.run(command, check=False, stdout=subprocess.PIPE, encoding=ENCODING, errors='surrogateescape')
 	if res.stdout:
 		title = ' '.join(command)

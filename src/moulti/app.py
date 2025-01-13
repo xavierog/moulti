@@ -26,6 +26,7 @@ from textual.widgets import Label, ProgressBar
 from textual.worker import get_current_worker, NoActiveWorker
 from . import __version__ as MOULTI_VERSION
 from .ansi import AnsiThemePolicy, dump_filters
+from .environ import env, envd, spint, existing_filepath
 from .helpers import call_all, clean_selector
 from .search import TextSearch, MatchSpan
 from .security import MoultiSecurityPolicy
@@ -59,9 +60,9 @@ def timestamp() -> str:
 def is_ansible(command: list[str]) -> bool:
 	return bool(len(command)) and 'ansible' in command[0]
 
-def add_abs_path_to_environment(env: dict[str, str], env_var: str, command: str) -> bool:
+def add_abs_path_to_environment(environment: dict[str, str], env_var: str, command: str) -> bool:
 	if abs_path := which(command):
-		env[env_var] = abs_path
+		environment[env_var] = abs_path
 		return True
 	return False
 
@@ -75,18 +76,18 @@ def run_environment(command: list[str], socket_path: str, copy: bool = True) -> 
 	environment['MOULTI_SOCKET_PATH'] = socket_path
 	environment['MOULTI_INSTANCE_PID'] = str(os.getpid())
 
-	if 'SSH_ASKPASS' not in os.environ:
+	if env('SSH_ASKPASS') is None:
 		environment['SSH_ASKPASS'] = 'moulti-askpass'
 		environment['SSH_ASKPASS_REQUIRE'] = 'force'
 
-	if 'SUDO_ASKPASS' not in os.environ:
+	if env('SUDO_ASKPASS') is None:
 		# sudo requires an absolute path:
 		add_abs_path_to_environment(environment, 'SUDO_ASKPASS', 'moulti-askpass')
 
-	if (ansible_policy := os.environ.get('MOULTI_ANSIBLE', 'default')) != 'no':
-		if ansible_policy == 'force' or (is_ansible(command) and 'ANSIBLE_STDOUT_CALLBACK' not in os.environ):
+	if (ansible_policy := env('MOULTI_ANSIBLE', 'default')) != 'no':
+		if ansible_policy == 'force' or (is_ansible(command) and env('ANSIBLE_STDOUT_CALLBACK') is None):
 			from . import ansible # pylint: disable=import-outside-toplevel
-			if ansible_callback_paths := os.environ.get('ANSIBLE_CALLBACK_PLUGINS', ''):
+			if ansible_callback_paths := env('ANSIBLE_CALLBACK_PLUGINS', ''):
 				ansible_callback_paths += ':'
 			ansible_callback_paths += ansible.__path__[0]
 			environment['ANSIBLE_CALLBACK_PLUGINS'] = ansible_callback_paths
@@ -185,7 +186,7 @@ class Moulti(App):
 		False: search the title; True: search steps; None: decide based on search.next_result.
 		"""
 		super().__init__()
-		self.dark = os.environ.get('MOULTI_MODE', 'dark') != 'light'
+		self.dark = env('MOULTI_MODE', 'dark') != 'light'
 		self.set_title('Moulti')
 
 	def init_quit_policy(self) -> None:
@@ -195,15 +196,11 @@ class Moulti(App):
 		# Default quit policy: ask if the driving process is still running, otherwise quit directly:
 		self.quit_policy = {'running': 'ask', 'default': 'quit'}
 		# The default policy can be overridden through the environment variable MOULTI_QUIT_POLICY:
-		for override in os.environ.get('MOULTI_QUIT_POLICY', '').split(';'):
-			if override.startswith('running='):
-				override = override[8:]
-				if override in ('ask', 'leave', 'terminate'):
-					self.quit_policy['running'] = override
-			elif override.startswith('default='):
-				override = override[8:]
-				if override in ('ask', 'quit'):
-					self.quit_policy['default'] = override
+		env_overrides = envd('MOULTI_QUIT_POLICY', {}, sepa=';')
+		if (override := env_overrides.get('running')) in ('ask', 'leave', 'terminate'):
+			self.quit_policy['running'] = override
+		if (override := env_overrides.get('default')) in ('ask', 'quit'):
+			self.quit_policy['default'] = override
 
 	def init_widgets(self) -> None:
 		self.title_label = Label('Title', id='header')
@@ -214,7 +211,7 @@ class Moulti(App):
 		self.footer = Footer()
 
 	def init_enforce_collapsible(self) -> bool|None:
-		mec_env_var = os.environ.get('MOULTI_ENFORCE_COLLAPSIBLE')
+		mec_env_var = env('MOULTI_ENFORCE_COLLAPSIBLE')
 		if mec_env_var == 'collapse':
 			return True
 		if mec_env_var == 'expand':
@@ -231,7 +228,7 @@ class Moulti(App):
 		official value). This makes perfect sense for most applications. Moulti is special because its users expect
 		steps to display the exact same thing as their terminal with no or little care for portability.
 		"""
-		if os.environ.get('MOULTI_ANSI') == 'textual_default':
+		if env('MOULTI_ANSI') == 'textual_default':
 			# MOULTI_ANSI=textual_default means Moulti neither loads, applies nor alters any theme.
 			# However, Textual default themes will apply, unaltered.
 			return
@@ -241,10 +238,7 @@ class Moulti(App):
 		self.logconsole(f'Textual filters: {dump_filters(self) or "none"}')
 
 	def init_threads(self) -> None:
-		try:
-			max_pass = max(1, int(os.environ['MOULTI_PASS_CONCURRENCY']))
-		except (KeyError, ValueError):
-			max_pass = 20
+		max_pass = env('MOULTI_PASS_CONCURRENCY', default=20, types=(spint,))
 		default_threads = 2 # network_loop() + exec()
 		threads_per_pass = 2 # Each "moulti pass" command spawns 2 threads -- cf Step.cli_action_pass()
 		thread_count = default_threads + threads_per_pass * max_pass
@@ -327,7 +321,7 @@ class Moulti(App):
 		- True if Moulti should harvest stdout/stderr and append it to the "moulti_run_output" step
 		"""
 		policy = None
-		if value := os.environ.get('MOULTI_RUN_OUTPUT'):
+		if value := env('MOULTI_RUN_OUTPUT'):
 			if value == 'discard':
 				policy = False
 			elif value == 'harvest':
@@ -579,7 +573,7 @@ class Moulti(App):
 		export_dir_fd = None
 		try:
 			# Determine where to create the export directory:
-			basepath = os.environ.get('MOULTI_SAVE_PATH') or '.'
+			basepath = env('MOULTI_SAVE_PATH') or '.'
 			# Determine what to name the export directory:
 			iso_8601_date = datetime.datetime.now().isoformat().replace(":", "-")
 			export_dirname = f'{current_instance()}-{iso_8601_date}'
@@ -828,7 +822,7 @@ class Moulti(App):
 
 	# Allow end users to redefine Moulti's look and feel through an optional
 	# custom CSS set through an environment variable:
-	CSS_PATH = os.environ.get('MOULTI_CUSTOM_CSS') or None
+	CSS_PATH = env('MOULTI_CUSTOM_CSS', types=(existing_filepath,))
 
 def main(command: list[str]|None = None) -> None:
 	moulti_app = Moulti(command=command)

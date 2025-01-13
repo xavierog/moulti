@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-from moulti.helpers import bool_or_int
+from moulti.environ import bool_or_int
 
 def add_abstractstep_options(parser: ArgumentParser, none: bool = False) -> None:
 	"""Options common to step add (with actual default values) and step update (with None default values)."""

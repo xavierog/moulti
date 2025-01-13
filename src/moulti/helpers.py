@@ -1,24 +1,7 @@
 import os
 from selectors import BaseSelector
 from typing import Any
-from argparse import ArgumentTypeError
-
-def pint(value: str) -> int:
-	integer_value = int(value)
-	if integer_value < 0:
-		raise ArgumentTypeError('expected a positive integer')
-	return integer_value
-
-def float_str(value: str) -> str:
-	_ = float(value)
-	return value
-
-def bool_or_int(value: str) -> bool|int:
-	if value.lower() == 'false':
-		return False
-	if value.lower() == 'true':
-		return True
-	return int(value)
+from .environ import env, pint
 
 def abridge_string(value: str, threshold: int = 100, sep: str = '...') -> str:
 	"""
@@ -74,10 +57,7 @@ def clean_selector(selector: BaseSelector|None, close_fds: bool = False, close: 
 DEFAULT_TAB_SIZE = 8
 
 def get_tab_size() -> int:
-	try:
-		return pint(os.environ.get('MOULTI_TAB_SIZE', ''))
-	except Exception:
-		return DEFAULT_TAB_SIZE
+	return env('MOULTI_TAB_SIZE', DEFAULT_TAB_SIZE, types=(pint,))
 
 TAB_SIZE = get_tab_size()
 TAB_SPACES_STR = ' '*TAB_SIZE

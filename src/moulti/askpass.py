@@ -1,11 +1,11 @@
 """
 A simple "askpass" program for Moulti, compatible with ssh, Ansible and sudo.
 """
-import os
 import re
 import sys
 import random
 from .client import Socket, moulti_connect, send
+from .environ import env
 
 class NoAnswerException(Exception):
 	pass
@@ -18,7 +18,7 @@ def get_default_prompt() -> str:
 	if sys.argv and (rem := re.search(r'moulti-askpass-(?P<suffix>[^/]+)$', sys.argv[0])):
 		return rem.group('suffix').replace('-', ' ').capitalize() + '?'
 	# Otherwise, check environment variables; use a dummy prompt as a last resort:
-	return os.environ.get('MOULTI_ASKPASS_DEFAULT_PROMPT', 'askpass')
+	return env('MOULTI_ASKPASS_DEFAULT_PROMPT', 'askpass')
 
 def get_prompt() -> tuple[str, str, bool]:
 	# Assume the user is prompted for a secret value:
@@ -70,7 +70,7 @@ def main() -> None:
 			'action': 'add', 'id': main_input_id, 'classes': 'askpass', 'title': title, 'top_text': top_text,
 			'bottom_text': ' ', 'collapsed': False,
 		}
-		ssh_askpass_prompt = os.environ.get('SSH_ASKPASS_PROMPT')
+		ssh_askpass_prompt = env('SSH_ASKPASS_PROMPT')
 		ok_button = ['ok', 'success', 'OK']
 		cancel_button = ['cancel', 'error', 'Cancel']
 

@@ -7,6 +7,7 @@ from types import ModuleType
 from rich import terminal_theme
 from textual.app import App as TextualApp
 from textual.filter import ANSIToTruecolor, LineFilter
+from .environ import env
 
 TerminalTheme = terminal_theme.TerminalTheme
 NamedTerminalTheme = tuple[str, TerminalTheme]
@@ -191,6 +192,6 @@ class AnsiThemePolicy:
 		Return an AnsiThemePolicy object based on (optionally prefixed) environment variables ANSI and ANSI_THEME_*.
 		"""
 		env_var_name = environment_prefix + 'ANSI'
-		env_var_value = environ.get(env_var_name, '')
+		env_var_value = env(env_var_name, '')
 		themes = all_ansi_themes(environment_prefix) if env_var_value.startswith('theme:') else {}
 		return cls.from_string(themes, env_var_value)

@@ -1,9 +1,9 @@
-import os
 from textual.app import App
 from pyperclip import copy as pyperclip_copy # type: ignore
 from pyperclip import PyperclipException
+from .environ import env
 
-COPY_POLICY = os.environ.get('MOULTI_CLIPBOARD_COPY')
+COPY_POLICY = env('MOULTI_CLIPBOARD_COPY')
 
 class ClipboardException(Exception):
 	pass

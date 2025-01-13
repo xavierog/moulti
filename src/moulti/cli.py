@@ -8,7 +8,7 @@ from typing import Generator
 import argcomplete
 from . import __version__ as moulti_version
 from .client import PRINTABLE_MOULTI_SOCKET, send_to_moulti, send_to_moulti_and_handle_reply, pipeline
-from .helpers import pint, float_str
+from .environ import pint, float_str
 from .widgets.cli import add_cli_arguments
 from .manpage import manpage_parse, manpage_run
 

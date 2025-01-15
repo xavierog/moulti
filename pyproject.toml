@@ -2,6 +2,88 @@
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
+[project]
+name = "moulti"
+version = "1.29.0"
+dependencies = [
+	'argcomplete',
+	'pyperclip',
+	'textual==1.0.*',
+	'unidiff',
+]
+requires-python = ">= 3.10"
+authors = [
+	{ name = "Xavier G.", email = "xavier.moulti@kindwolf.org" },
+]
+description = """\
+	Moulti is a CLI-driven Terminal User Interface (TUI) displaying \
+	arbitrary outputs inside visual, collapsible blocks called steps.\
+"""
+readme = "README.md"
+license = { "file" = "LICENSE" }
+keywords = [
+	"ansible",
+	"cli",
+	"collapsible",
+	"curses",
+	"diff",
+	"multiplex",
+	"output",
+	"script",
+	"steps",
+	"terminal",
+	"textual",
+	"tui",
+]
+classifiers = [
+	"Environment :: Console :: Curses",
+	"Intended Audience :: Developers",
+	"Intended Audience :: System Administrators",
+	"License :: OSI Approved :: MIT License",
+	"Operating System :: MacOS :: MacOS X",
+	"Operating System :: POSIX :: BSD :: FreeBSD",
+	"Operating System :: POSIX :: BSD :: NetBSD",
+	"Operating System :: POSIX :: BSD :: OpenBSD",
+	"Operating System :: POSIX :: Linux",
+	"Programming Language :: Python :: 3 :: Only",
+	"Topic :: System :: Logging",
+	"Topic :: Utilities",
+]
+
+[project.urls]
+Homepage = "https://github.com/xavierog/moulti/?tab=readme-ov-file#moulti"
+Documentation = "https://github.com/xavierog/moulti/blob/master/Documentation.md"
+Repository = "https://github.com/xavierog/moulti.git"
+Issues = "https://github.com/xavierog/moulti/issues"
+Changelog = "https://github.com/xavierog/moulti/blob/master/CHANGELOG.md"
+
+[project.scripts]
+moulti = "moulti.precli:main"
+moulti-askpass = "moulti.askpass:main"
+moulti-askpass-become-password = "moulti.askpass:main"
+moulti-askpass-connection-password = "moulti.askpass:main"
+moulti-askpass-vault-client = "moulti.askpass:main"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+packages = [
+	"moulti",
+	"moulti.ansible",
+	"moulti.widgets",
+	"moulti.widgets.abstractquestion",
+	"moulti.widgets.abstractstep",
+	"moulti.widgets.buttonquestion",
+	"moulti.widgets.collapsiblestep",
+	"moulti.widgets.divider",
+	"moulti.widgets.inputquestion",
+	"moulti.widgets.question",
+	"moulti.widgets.step",
+]
+script-files = [
+	"examples/moulti-functions.bash",
+	"examples/moulti-man",
+]
+
 [tool.ruff]
 line-length = 120
 

@@ -1,9 +1,9 @@
 FROM debian:stable-20240211-slim
 
 # Install Moulti:
-COPY README.md pyproject.toml setup.py /tmp/moulti
+COPY LICENSE pyproject.toml /tmp/moulti
 COPY examples /tmp/moulti/examples
-COPY src/moulti /tmp/moulti/src/moulti
+COPY src /tmp/moulti/src
 ENV PIPX_HOME=/opt/pipx PIPX_BIN_DIR=/usr/local/bin PIPX_MAN_DIR=/usr/local/share/man
 RUN unlink /etc/apt/apt.conf.d/docker-clean && \
     apt update && \

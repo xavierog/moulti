@@ -16,7 +16,7 @@ moulti step add versions --title='Versions' --bottom-text=' '
 	pytest --version
 } 2>&1 | moulti pass versions
 
-moulti_exec ruff check setup.py src
+moulti_exec ruff check src
 moulti_exec mypy src
 moulti_exec pylint src
 moulti_exec pytest

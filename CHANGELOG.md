@@ -15,6 +15,10 @@ Although Moulti's Python packages, modules and functions are obviously available
   This behaviour can be prevented by setting the `MOULTI_RUN_NO_SUFFIX` environment variable or using the `-n` / `--no-suffix` command-line option.
   The behaviour of `moulti init` remains unchanged.
 
+### Fixed
+
+- `moulti-scoreboard.bash` example script: make scoreboard control path instance-specific.
+
 ## [1.29.0] - 2025-01-12
 
 ### Changed

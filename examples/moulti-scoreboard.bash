@@ -21,8 +21,9 @@
 
 # Part 1: variables and functions users should source to control the scoreboard:
 
-export MOULTI_INSTANCE="scoreboard-${SCOREBOARD_INSTANCE:-default}"
-export SCOREBOARD_CONTROL_PATH="${SCOREBOARD_CONTROL_PATH:-/tmp/scoreboard-control}"
+scoreboard_instance="${SCOREBOARD_INSTANCE:-default}"
+export MOULTI_INSTANCE="scoreboard-${scoreboard_instance}"
+export SCOREBOARD_CONTROL_PATH="${SCOREBOARD_CONTROL_PATH:-/tmp/scoreboard-${scoreboard_instance}-control}"
 declare -a SCOREBOARD_SCORES=('' 0 0)
 
 function scoreboard_score_inc {

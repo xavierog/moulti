@@ -114,22 +114,23 @@ Limitation: shell completion will help typing subcommands and options but is tec
 ## Shell scripting
 
 The key takeaway from the previous section is that Moulti starts as an empty shell that is meant to be controlled and filled through the `moulti` CLI tool.
-A simple Moulti-based bash script makes use of two new commands:
+Controlling a Moulti instance by typing individual commands is occasionally useful but, most of the time, Moulti is driven by a shell script.
+To this end, a new subcommand proves helpful: `moulti run`.
+`moulti run` is essentially the same as `moulti init` but it runs a command right after the startup phase.
 
-- `moulti run`: same as `moulti init` but runs a command right after the startup phase
-- `moulti wait`: tries connecting to the Moulti instance; think "ping for moulti"
+That command inherits various environment variables; among them:
+- `MOULTI_RUN`: if this variable is set to a non-empty value, the Moulti instance is already running and there is no need to launch it;
+- `MOULTI_SOCKET_PATH`: this variable ensures all subsequent `moulti` commands connect to the right Moulti instance.
 
-... and looks like this:
+In practice, a simple Moulti-based bash script looks like this:
 
 ```bash
 #!/usr/bin/env bash
 
-# Name the Moulti instance to prevent conflicts:
+# Good practice: name the Moulti instance:
 export MOULTI_INSTANCE='my-first-script-with-moulti'
 # If not done already, start a Moulti instance and have it re-execute this script:
 [ "${MOULTI_RUN}" ] || exec moulti run -- "$0" "$@"
-# Ensure the Moulti instance is reachable:
-moulti wait
 moulti step add step_1 --title='First step'
 {
    echo "$(date --iso-8601=ns) Starting combobulating things and stuff..."
@@ -142,7 +143,7 @@ moulti step add step_2 --title='Second step'
 } 2>&1 | moulti pass step_2
 ```
 
-In practice, it makes sense to heavily leverage shell functions, such as those available in [moulti-functions.bash](examples/moulti-functions.bash).
+In real life, it makes sense to heavily leverage shell functions, such as those available in [moulti-functions.bash](examples/moulti-functions.bash).
 
 ### Dealing with existing scripts
 
@@ -930,7 +931,8 @@ Hit `n` to go to the next occurrence or `N` to go to the previous one.
 
 #### Connectivity
 
-- `MOULTI_INSTANCE`: name of your Moulti instance; defaults to `default`; taken into account by the instance to compute the default value of `MOULTI_SOCKET_PATH`.
+- `MOULTI_INSTANCE`: name of your Moulti instance; defaults to `default`; `moulti init` keeps this value untouched; since v1.30.0, `moulti run` appends its process id (e.g. `default-1234`) to prevent conflicts; taken into account by the instance to compute the default value of `MOULTI_SOCKET_PATH`.
+- `MOULTI_RUN_NO_SUFFIX`: if non-empty, instruct `moulti run` not to append its process id to the instance name; setting this environment variable is equivalent to running `moulti run --no-suffix`.
 - `MOULTI_SOCKET_PATH`: path to the network socket that Moulti should listen/connect to; taken into account by both the instance and the CLI; if not specified, Moulti defaults to a platform-specific value that reflects your username and `MOULTI_INSTANCE`; examples: `@moulti-bob-test-instance.socket`, `/run/user/1000/moulti-bob-test-instance.socket`.
 - `MOULTI_ALLOWED_UID`: abstract sockets (i.e. Linux) only! By default, Moulti only accepts commands from the user (uid) that launched the Moulti instance; setting this environment variable beforehand makes it accept arbitrary uids; example:
   ```shell

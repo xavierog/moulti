@@ -73,7 +73,7 @@ if [ -z "${MOULTI_RUN}" ]; then
 	[ "${SCOREBOARD_COLUMNS}" ] && export COLUMNS="${SCOREBOARD_COLUMNS}"
 	[ "${SCOREBOARD_LINES}" ] && export LINES="${SCOREBOARD_LINES}"
 
-	exec moulti run -- "$0" "$@"
+	exec moulti run --no-suffix -- "$0" "$@"
 fi
 
 # Part 3: driver script:

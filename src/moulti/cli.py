@@ -7,8 +7,8 @@ from pathlib import Path
 from typing import Generator
 import argcomplete
 from . import __version__ as moulti_version
-from .client import moulti_socket_path, send_to_moulti, send_to_moulti_and_handle_reply, pipeline
-from .environ import pint, float_str
+from .client import current_instance, moulti_socket_path, send_to_moulti, send_to_moulti_and_handle_reply, pipeline
+from .environ import env, pint, float_str
 from .widgets.cli import add_cli_arguments
 from .manpage import manpage_parse, manpage_run
 
@@ -18,8 +18,26 @@ def init(args: dict) -> None:
 	from .app import main as init_moulti # pylint: disable=import-outside-toplevel
 	init_moulti(**args)
 
+def moulti_run_should_suffix_instance_name(args: dict) -> bool:
+	"""
+	By default, `moulti run` suffixes the instance name with the process id.
+	Since the socket path is derived from the instance name, this helps prevent clashes and thus
+	"cannot listen" errors.
+	"""
+	if env('MOULTI_SOCKET_PATH'):
+		# If a socket path was explicitly set, then the instance name cannot affect
+		# its computation. Therefore, there is no need to suffix the instance name.
+		return False
+	if args['no_suffix']:
+		return False
+	if env('MOULTI_RUN_NO_SUFFIX') is not None:
+		return False
+	return True
+
 def run(args: dict) -> None:
 	"""Start a new Moulti instance and run the given command."""
+	if moulti_run_should_suffix_instance_name(args):
+		os.environ['MOULTI_INSTANCE'] = f'{current_instance()}-{os.getpid()}'
 
 	# Handle --print-env:
 	if args['print_env']:
@@ -96,6 +114,7 @@ def add_main_commands(subparsers: _SubParsersAction) -> None:
 	run_parser = subparsers.add_parser('run', help='start a new Moulti instance and run a command')
 	run_parser.set_defaults(func=run)
 	run_parser.add_argument('--print-env', action='store_true', default=False, help='print environment variables set by Moulti and exit')
+	run_parser.add_argument('--no-suffix', '-n', action='store_true', default=False, help='do not suffix the instance name with the process id')
 	run_parser.add_argument('command', type=str, nargs='+', help='command to run along with its arguments')
 
 	# moulti wait

@@ -15,4 +15,4 @@ max_unindent=3
 export MANWIDTH=$(((COLUMNS-moulti_columns+max_unindent)))
 
 export MOULTI_INSTANCE="man-$$"
-exec moulti run -- moulti manpage run -- man "$@"
+exec moulti run --no-suffix -- moulti manpage run -- man "$@"

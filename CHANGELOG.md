@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for its CLI (Command-Line Interface), i.e. for the `moulti` command.
 Although Moulti's Python packages, modules and functions are obviously available, they do not constitute a public API yet.
 
+## Unreleased
+
+### Changed
+
+- `moulti run` now suffixes the instance name with its process id (e.g. `default-1234` instead of `default`).
+  This helps prevent clashes and makes it possible to run various tools concurrently without having to worry about such details.
+  This behaviour can be prevented by setting the `MOULTI_RUN_NO_SUFFIX` environment variable or using the `-n` / `--no-suffix` command-line option.
+  The behaviour of `moulti init` remains unchanged.
+
 ## [1.29.0] - 2025-01-12
 
 ### Changed

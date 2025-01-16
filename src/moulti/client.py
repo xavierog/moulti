@@ -9,7 +9,7 @@ from typing import Any, cast
 from .pipeline import pipeline
 from .protocol import Message, Socket
 from .protocol import moulti_connect, recv_json_message, send_json_message, send_to_moulti
-from .protocol import MOULTI_SOCKET, PRINTABLE_MOULTI_SOCKET
+from .protocol import moulti_socket_path, current_instance
 
 Args = dict[str, Any]
 

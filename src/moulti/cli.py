@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Generator
 import argcomplete
 from . import __version__ as moulti_version
-from .client import PRINTABLE_MOULTI_SOCKET, send_to_moulti, send_to_moulti_and_handle_reply, pipeline
+from .client import moulti_socket_path, send_to_moulti, send_to_moulti_and_handle_reply, pipeline
 from .environ import pint, float_str
 from .widgets.cli import add_cli_arguments
 from .manpage import manpage_parse, manpage_run
@@ -18,7 +18,7 @@ def init(args: dict) -> None:
 	# Handle --print-env:
 	if args.pop('print_env', False):
 		from .app import run_environment # pylint: disable=import-outside-toplevel
-		environment_variables = run_environment(args['command'], PRINTABLE_MOULTI_SOCKET, False)
+		environment_variables = run_environment(args['command'], moulti_socket_path(), False)
 		for name, value in environment_variables.items():
 			print(f'{name}={value}')
 		sys.exit(0)
@@ -44,7 +44,7 @@ def wait(verbose: bool = False, delay: int = 500, max_attempts: int = 0) -> None
 			break
 		except Exception as exc:
 			if verbose:
-				print(f'Connection #{attempts} to {PRINTABLE_MOULTI_SOCKET}: {exc}')
+				print(f'Connection #{attempts} to {moulti_socket_path()}: {exc}')
 			if max_attempts > 0 and attempts == max_attempts:
 				print('Giving up.')
 				break

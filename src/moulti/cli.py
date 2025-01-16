@@ -15,8 +15,14 @@ from .manpage import manpage_parse, manpage_run
 def init(args: dict) -> None:
 	"""Start a new Moulti instance."""
 
+	from .app import main as init_moulti # pylint: disable=import-outside-toplevel
+	init_moulti(**args)
+
+def run(args: dict) -> None:
+	"""Start a new Moulti instance and run the given command."""
+
 	# Handle --print-env:
-	if args.pop('print_env', False):
+	if args['print_env']:
 		from .app import run_environment # pylint: disable=import-outside-toplevel
 		environment_variables = run_environment(args['command'], moulti_socket_path(), False)
 		for name, value in environment_variables.items():
@@ -24,7 +30,7 @@ def init(args: dict) -> None:
 		sys.exit(0)
 
 	from .app import main as init_moulti # pylint: disable=import-outside-toplevel
-	init_moulti(**args)
+	init_moulti(args['command'])
 
 def wait(verbose: bool = False, delay: int = 500, max_attempts: int = 0) -> None:
 	"""Wait until the Moulti instance is available.
@@ -88,7 +94,7 @@ def add_main_commands(subparsers: _SubParsersAction) -> None:
 
 	# moulti run
 	run_parser = subparsers.add_parser('run', help='start a new Moulti instance and run a command')
-	run_parser.set_defaults(func=init)
+	run_parser.set_defaults(func=run)
 	run_parser.add_argument('--print-env', action='store_true', default=False, help='print environment variables set by Moulti and exit')
 	run_parser.add_argument('command', type=str, nargs='+', help='command to run along with its arguments')
 

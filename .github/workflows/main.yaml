@@ -26,12 +26,11 @@ jobs:
       with:
         python-version: ${{matrix.python-version}}
         cache: pip
-    - run: pip install -r requirements.txt
+    - run: pip install -e .[ci]
     - run: ruff check src/moulti
     - run: mypy src/moulti
     - run: pylint src/moulti
     - run: ruff check tests
-    - run: pip install -e .
     # This runs all tests except:
     # - test_diff_with_delta (requires delta 0.18.x)
     - run: pytest -v

@@ -50,6 +50,43 @@ classifiers = [
 	"Topic :: Utilities",
 ]
 
+[project.optional-dependencies]
+tinker = [
+	"bpython",
+	"textual-dev",
+]
+check-py = [
+	"mypy",
+	"pylint",
+]
+check-rust = [
+	"ruff",
+]
+check = [
+	"moulti[check-py,check-rust]",
+]
+test = [
+	"pytest",
+	"pytest-asyncio",
+	"pytest-forked",
+	"pytest-textual-snapshot @ git+https://github.com/textualize/pytest-textual-snapshot@19b2607c93b898cc67c6f9299f6236af5e994375",
+	"pytest-xdist",
+]
+release = [
+	"build",
+	"twine",
+]
+dev = [
+	"moulti[tinker,check,test,release]",
+]
+ci = [
+	"moulti[check,test]",
+]
+# Installing ruff on *BSD systems requires a Rust compiler + time + energy:
+bsd-ci = [
+	"moulti[check-py,test]",
+]
+
 [project.urls]
 Homepage = "https://github.com/xavierog/moulti/?tab=readme-ov-file#moulti"
 Documentation = "https://github.com/xavierog/moulti/blob/master/Documentation.md"

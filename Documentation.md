@@ -43,9 +43,14 @@ Limitation: shell completion will help typing subcommands and options but is tec
 ## First steps with Moulti
 
 1. Open two terminals on the same machine/host/VM/container.
+   For better visual results, these terminals should ideally support 24-bit colors and advertise it to applications.
+   This typically does the trick:
+   ```shell
+   export TERM=xterm-256color COLORTERM=truecolor
+   ```
 2. In the first terminal, launch the Moulti instance, i.e. the Terminal User Interface (TUI) itself:
    ```shell
-   TERM=xterm-256color moulti init
+   moulti init
    ```
    Upon startup, Moulti is empty: it shows nothing beyond a title bar and a footer: ![step 2](https://xavier.kindwolf.org/p/moulti/doc/img/quickstart-step02.png)
 3. From now on, we will use the second terminal to issue commands to the Moulti instance through the Command-Line Interface (CLI) client.

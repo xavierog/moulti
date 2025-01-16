@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "moulti"
-version = "1.29.0"
+dynamic = ["version"]
 dependencies = [
 	'argcomplete',
 	'pyperclip',
@@ -120,6 +120,9 @@ script-files = [
 	"examples/moulti-functions.bash",
 	"examples/moulti-man",
 ]
+
+[tool.setuptools.dynamic]
+version = { attr = "moulti.__version__" }
 
 [tool.ruff]
 line-length = 120

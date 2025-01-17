@@ -178,10 +178,40 @@ def build_arg_parser() -> ArgumentParser:
 	add_cli_arguments(subparsers)
 	return arg_parser
 
+def first_non_option_argument(args: list[str], start: int = 0) -> int|None:
+	"""
+	Return the index of the first non-option argument, i.e. the first argument that does not start with a "-" (dash)
+	character.
+	"""
+	for index, arg in enumerate(args[start:], start):
+		if not arg.startswith('-'):
+			return index
+	return None
+
+def inject_double_dash_before_command(args: list[str], start: int = 0) -> None:
+	"""
+	Inject "--" right before the first non-option argument.
+	"""
+	index = first_non_option_argument(args, start)
+	if index is not None and index > 0 and args[index - 1] != '--':
+		args.insert(index, '--')
+
+def adjust_cli_args(args: list[str]) -> None:
+	"""
+	Command-line arguments are parsed using argparse. Consequently, "run" subcommands often require users to add "--" to
+	their command line, e.g. "moulti run -- ls -al" instead of "moulti run ls -al".
+	Detect such cases and inject "--" if it is missing.
+	"""
+	if args[1] == 'run':
+		inject_double_dash_before_command(args, 2)
+	elif args[1] in ('manpage', 'diff') and args[2] == 'run':
+		inject_double_dash_before_command(args, 3)
+
 def main() -> None:
 	try:
 		arg_parser = build_arg_parser()
 		argcomplete.autocomplete(arg_parser, always_complete_options='long')
+		adjust_cli_args(sys.argv)
 		args = vars(arg_parser.parse_args())
 		func = args.pop('func')
 		# Subtlety: func and args are not always used the same way:

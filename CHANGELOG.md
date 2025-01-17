@@ -14,6 +14,7 @@ Although Moulti's Python packages, modules and functions are obviously available
   This helps prevent clashes and makes it possible to run various tools concurrently without having to worry about such details.
   This behaviour can be prevented by setting the `MOULTI_RUN_NO_SUFFIX` environment variable or using the `-n` / `--no-suffix` command-line option.
   The behaviour of `moulti init` remains unchanged.
+- `moulti run`, `moulti diff run`, `moulti manpage run`: it is no longer mandatory to use `--` to separate Moulti arguments and the command to be run.
 
 ### Fixed
 

@@ -69,7 +69,7 @@ test = [
 	"pytest",
 	"pytest-asyncio",
 	"pytest-forked",
-	"pytest-textual-snapshot @ git+https://github.com/textualize/pytest-textual-snapshot@19b2607c93b898cc67c6f9299f6236af5e994375",
+	"pytest-textual-snapshot",
 	"pytest-xdist",
 ]
 release = [

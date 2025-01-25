@@ -361,6 +361,10 @@ class MoultiTLVWriter:
 		self.reset()
 
 	def write_message(self, data: bytes, data_type: str = 'JSON') -> bool:
+		"""
+		Append the given message to the list of messages to be sent then call the write() method.
+		Return True if all buffered messages were written, False if some messages or data remain to be written.
+		"""
 		self.buffers.appendleft((data, data_type))
 		return self.write()
 
@@ -373,6 +377,10 @@ class MoultiTLVWriter:
 		return False
 
 	def write(self) -> bool:
+		"""
+		Write data and buffered messages until the network socket would block.
+		Return True if all buffered messages were written, False if some messages or data remain to be written.
+		"""
 		try:
 			while self.data is not None or self.next():
 				assert self.data is not None # for mypy

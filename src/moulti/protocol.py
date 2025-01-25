@@ -360,13 +360,14 @@ class MoultiTLVWriter:
 			self.callback(self.socket, self.raddr, self.message_type, self.message_data, [])
 		self.reset()
 
-	def write_message(self, data: bytes, data_type: str = 'JSON') -> bool:
+	def write_message(self, data: bytes, data_type: str = 'JSON', immediate: bool = True) -> bool:
 		"""
-		Append the given message to the list of messages to be sent then call the write() method.
+		Append the given message to the list of messages to be sent.
+		If immediate is True (the default), call the write() method.
 		Return True if all buffered messages were written, False if some messages or data remain to be written.
 		"""
 		self.buffers.appendleft((data, data_type))
-		return self.write()
+		return self.write() if immediate else False
 
 	def next(self) -> bool:
 		if self.buffers:

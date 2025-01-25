@@ -155,8 +155,11 @@ class MoultiServer:
 	def reply(self, socket: Socket, message: Message) -> None:
 		# Get the TLV writer for the given socket:
 		tlv_writer = self.server_selector.get_key(socket).data['writer']
-		all_written = tlv_writer.write_message(message_to_data(message), 'JSON')
-		self.watch_write_events(socket, not all_written)
+		# Provide the TLV writer with the reply message so it stores it but does not try to send it:
+		tlv_writer.write_message(message_to_data(message), 'JSON', immediate=False)
+		# Watch write events for the given socket: that should trigger the network loop, which will send the reply message.
+		self.watch_write_events(socket, True)
+		# This approach makes this function thread-safe.
 
 	def watch_write_events(self, socket: Socket, watch: bool) -> None:
 		"""

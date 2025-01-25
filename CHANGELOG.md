@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for its CLI (Command-Line Interface), i.e. for the `moulti` command.
 Although Moulti's Python packages, modules and functions are obviously available, they do not constitute a public API yet.
 
+## Unreleased
+
+### Fixed
+
+- Fix a race condition that was liable to generate (innocuous) error messages in the Moulti console after running `moulti pass`:
+  - `Invalid file descriptor: -1`
+  - '<socket.socket fd=xx, family=1, type=1, proto=0, laddr=xxx.socket> is not registered'
+
 ## [1.30.0] - 2025-01-23
 
 ### Changed

@@ -1,5 +1,6 @@
 from selectors import DefaultSelector, EVENT_READ, EVENT_WRITE
 from socket import socket as Socket
+from queue import Queue, Empty
 from typing import Callable
 from .helpers import abridge_dict, clean_selector
 from .protocol import MoultiTLVReader, MoultiTLVWriter
@@ -49,6 +50,7 @@ class MoultiServer:
 		self.log_callback = log_callback
 		self.ready_callback = ready_callback
 		self.security_callback = security_callback
+		self.replies: Queue = Queue()
 
 	def log(self, data: str) -> None:
 		if self.log_callback is not None:
@@ -73,7 +75,10 @@ class MoultiServer:
 				self.ready_callback()
 
 			while self.loop_callback():
-				events = self.server_selector.select(1)
+				events = self.server_selector.select(0.01)
+				# This loop is not entirely event-based: it also dequeues replies, hence the relatively short duration
+				# in select().
+				self.handle_replies()
 				for key, mask in events:
 					assert isinstance(key.data, dict)
 					if key.data['type'] == TYPE_ACCEPT:
@@ -153,13 +158,28 @@ class MoultiServer:
 			raise MoultiProtocolException(f'cannot handle {data_type} {len(data)}-byte message')
 
 	def reply(self, socket: Socket, message: Message) -> None:
-		# Get the TLV writer for the given socket:
-		tlv_writer = self.server_selector.get_key(socket).data['writer']
-		# Provide the TLV writer with the reply message so it stores it but does not try to send it:
-		tlv_writer.write_message(message_to_data(message), 'JSON', immediate=False)
-		# Watch write events for the given socket: that should trigger the network loop, which will send the reply message.
-		self.watch_write_events(socket, True)
+		# Delegate to the network loop through a queue:
+		self.replies.put_nowait((socket, message))
 		# This approach makes this function thread-safe.
+
+	def handle_replies(self) -> None:
+		try:
+			while True:
+				socket, message = self.replies.get_nowait()
+				self.handle_reply(socket, message)
+		except Empty:
+			pass
+
+	def handle_reply(self, socket: Socket, message: Message) -> None:
+		try:
+			# Get the TLV writer for the given socket:
+			tlv_writer = self.server_selector.get_key(socket).data['writer']
+			# Provide the TLV writer with the reply message so it stores it but does not try to send it:
+			tlv_writer.write_message(message_to_data(message), 'JSON', immediate=False)
+			# Let write() handle the rest:
+			self.write(tlv_writer)
+		except Exception as exc:
+			self.log(f'handle_reply: {exc}')
 
 	def watch_write_events(self, socket: Socket, watch: bool) -> None:
 		"""

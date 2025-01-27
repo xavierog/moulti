@@ -1,3 +1,4 @@
+import errno
 import os
 import re
 import sys
@@ -209,7 +210,26 @@ def assemble_tlv(data: bytes, data_type: str = 'JSON') -> bytes:
 def write_tlv_data_to_socket(socket: Socket, data: bytes, data_type: str = 'JSON', fds: FDs|None = None) -> None:
 	to_send = assemble_tlv(data, data_type)
 	if fds:
-		send_fds(socket, [to_send], fds)
+		# File descriptors are sent as ancillary data along with a regular non-empty message; operating systems may
+		# require such messages be sent atomically; if buffers do not allow that, the system returns EMSGSIZE.
+		# First, try to send the whole message:
+		try:
+			send_fds(socket, [to_send], fds)
+		except OSError as outer_ose:
+			if outer_ose.errno != errno.EMSGSIZE:
+				raise
+			# Got EMSGSIZE: try to send only the first byte, in a loop:
+			first_byte = [to_send[0:1]]
+			fds_sent = False
+			while not fds_sent:
+				try:
+					send_fds(socket, first_byte, fds)
+					fds_sent = True
+				except OSError as inner_ose:
+					if inner_ose.errno != errno.EMSGSIZE:
+						raise
+			# Send the rest of the message:
+			write_fixed_amount_to_socket(socket, to_send[1:])
 	else:
 		write_fixed_amount_to_socket(socket, to_send)
 

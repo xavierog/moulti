@@ -2,6 +2,7 @@ import errno
 import os
 import selectors
 from queue import Queue, Empty
+from stat import S_ISREG
 from time import monotonic_ns
 from typing import Any, Callable, Iterable, Sequence
 from textual import work
@@ -193,6 +194,20 @@ class Step(CollapsibleStep):
 		self.append_from_file_descriptor_to_queue(queue, kwargs, helpers)
 		return ()
 
+
+	def watch_read_events(self, selector: selectors.BaseSelector, file_descriptor: int) -> Callable[[], bool]:
+		try:
+			# On Linux, epoll() does not support regular files and returns EPERM (register() raises an exception).
+			# On macOS, it is possible to watch read events for a regular file... but that induces problems when the
+			# file is (and remains) empty, because no events are generated.
+			# In the end, it is simpler to NOT watch regular files:
+			if S_ISREG(os.fstat(file_descriptor).st_mode):
+				raise OSError('attempt to watch read events for a regular file')
+			selector.register(file_descriptor, selectors.EVENT_READ)
+			return lambda: bool(selector.select(0.5))
+		except Exception:
+			return lambda: True
+
 	@work(thread=True, group='step-ingestion', name='fd-to-queue')
 	async def append_from_file_descriptor_to_queue(
 		self,
@@ -217,14 +232,7 @@ class Step(CollapsibleStep):
 			# To this end, use non-blocking mode along with a select()-like interface:
 			os.set_blocking(file_descriptor, False)
 			output_selector = selectors.DefaultSelector()
-			try:
-				output_selector.register(file_descriptor, selectors.EVENT_READ)
-				def can_read() -> bool:
-					return bool(output_selector.select(0.5))
-			except Exception:
-				# register() may fail: for instance, on Linux, epoll() does not support regular files and returns EPERM.
-				def can_read() -> bool:
-					return True
+			can_read = self.watch_read_events(output_selector, file_descriptor)
 			# Read binary data from the given file descriptor using a FileIO (raw binary stream whose methods only make
 			# one system call):
 			with os.fdopen(file_descriptor, mode='rb', buffering=0) as binary_stream:

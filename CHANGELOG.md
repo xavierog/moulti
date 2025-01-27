@@ -13,6 +13,7 @@ Although Moulti's Python packages, modules and functions are obviously available
 - Fix a race condition that was liable to generate (innocuous) error messages in the Moulti console after running `moulti pass`:
   - `Invalid file descriptor: -1`
   - '<socket.socket fd=xx, family=1, type=1, proto=0, laddr=xxx.socket> is not registered'
+- `moulti pass step_id < empty_regular_file` used to block on macOS; `moulti load` was also affected.
 
 ## [1.30.0] - 2025-01-23
 

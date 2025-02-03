@@ -11,6 +11,10 @@ Although Moulti's Python packages, modules and functions are obviously available
 This release finally fixes a bug initially reported in August 2024. It took significant efforts to diagnose the root cause.
 Special thanks go to [huyz](https://github.com/huyz), whose thorough cooperation made it possible to tackle this issue.
 
+### Added
+
+- Ansible callback plugin: the `MOULTI_ANSIBLE_WRITE_MODE` environment variable defines whether to use `moulti pass` or `moulti step append`
+
 ### Fixed
 
 - Ansible callback plugin: fix a major bug that used to block the display at arbitrary points in a playbook

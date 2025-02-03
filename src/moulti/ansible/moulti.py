@@ -60,6 +60,7 @@ class MoultiDisplay(Display):
 		self.current_type: str|None = None
 		self.start_time = datetime.now()
 		self.pipes: dict[str, sp.Popen|None] = {}
+		self.use_append: bool = os.environ.get('MOULTI_ANSIBLE_WRITE_MODE', 'pass') == 'append'
 		if 'MOULTI_ANSIBLE_NO_TITLE' not in os.environ:
 			self.set_title_from_command_line()
 		self.is_task: bool = False
@@ -192,6 +193,9 @@ class MoultiDisplay(Display):
 			self.close_pipe(self.current_step)
 
 	def do_write(self, step_id: str, msg: str) -> None:
+		if self.use_append:
+			self.moulti(['step', 'append', step_id, '--', *msg.split('\n')])
+			return
 		pipe = self.get_pipe(step_id)
 		data = msg
 		if not data.endswith('\n'):

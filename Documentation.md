@@ -945,6 +945,9 @@ Hit `n` to go to the next occurrence or `N` to go to the previous one.
   moulti init
   ```
 - `MOULTI_PASS_CONCURRENCY`: define how many concurrent "moulti pass" commands is acceptable; defaults to 20.
+- `MOULTI_ANSIBLE_WRITE_MODE`: define how the Ansible plugin should pass data to Moulti:
+  - `pass` uses `moulti pass` (default behaviour)
+  - `append` uses `moulti step append`
 
 #### Appearance, look and feel
 

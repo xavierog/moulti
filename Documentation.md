@@ -377,7 +377,7 @@ This table reflects the main environment variables that you can set to control M
 
 #### Under the hood
 
-Ansible uses a [plugin architecture](https://docs.ansible.com/ansible/latest/plugins/plugins.html) to enable a rich, flexible and expandable feature set. Moulti integrates with Ansible by providing a [stdout callback plugin](https://docs.ansible.com/ansible/latest/plugins/callback.html#types-of-callback-plugins) (known to work with ansible-core 2.16 and 2.17).
+Ansible uses a [plugin architecture](https://docs.ansible.com/ansible/latest/plugins/plugins.html) to enable a rich, flexible and expandable feature set. Moulti integrates with Ansible by providing a [stdout callback plugin](https://docs.ansible.com/ansible/latest/plugins/callback.html#types-of-callback-plugins) (known to work with ansible-core 2.16, 2.17 and 2.18).
 When loaded and executed by `ansible-playbook`, this plugin runs `moulti` commands that display the results of each Ansible task in a separate Moulti step.
 
 `moulti run` lets Ansible know about this plugin by internally setting some environment variables:

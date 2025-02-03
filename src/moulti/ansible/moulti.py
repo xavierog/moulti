@@ -67,10 +67,32 @@ class MoultiDisplay(Display):
 		self.task_class_priority: int = -1
 		# Hijack sys.stdout and sys.stderr to harvest as much output as possible:
 		sys.stdout = sys.stderr = self
+		os.register_at_fork(after_in_child=self.reset)
 
 	def __del__(self) -> None:
 		# Close the last remaining pipe, if any:
 		self.close_current_pipe()
+
+	def reset(self) -> None:
+		"""
+		ansible-playbook is liable to fork child processes that will inherit a copy of this object along with "moulti
+		pass" file descriptors stored in self.pipes.
+		Typically executed in a freshly forked child process, this method takes care to:
+		- close inherited file descriptors so they can be properly closed in the parent process; not doing so could
+		  BLOCK the entire plugin as `moulti pass` does not exit until its standard input gets EOF;
+		- reset other attributes: this way, child processes do not try to interfere with steps created by the parent
+		  process.
+		"""
+		for pipe in self.pipes.values():
+			if pipe is not None:
+				pipe.stdin.close() # type: ignore
+		self.pipes = {}
+		self.current_step = None
+		self.current_type = None
+		self.start_time = datetime.now()
+		self.is_task = False
+		self.task_class = None
+		self.task_class_priority = -1
 
 	def moulti(self, args: list[str], **sp_args: Any) -> sp.CompletedProcess:
 		return sp.run(['moulti'] + args, shell=False, check=True, **sp_args)

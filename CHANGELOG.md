@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for its CLI (Command-Line Interface), i.e. for the `moulti` command.
 Although Moulti's Python packages, modules and functions are obviously available, they do not constitute a public API yet.
 
+## Unreleased
+
+This release finally fixes a bug initially reported in August 2024. It took significant efforts to diagnose the root cause.
+Special thanks go to [huyz](https://github.com/huyz), whose thorough cooperation made it possible to tackle this issue.
+
+### Fixed
+
+- Ansible callback plugin: fix a major bug that used to block the display at arbitrary points in a playbook
+
 ## [1.30.1] - 2025-01-28
 
 ### Fixed

@@ -347,68 +347,93 @@ Note that `sudo` does not perform `$PATH` lookup, so `SUDO_ASKPASS` must be a pa
 `moulti run` automatically sets `SUDO_ASKPASS` **IF** it is not set already **AND** `moulti-askpass` exists in `$PATH`.
 Consequently, sudo should work out of the box with `moulti run`.
 
-### moulti run: dealing with Ansible
+### Transforming Ansible's output with `moulti run`
 
-According to their homepage, [Ansible](https://www.ansible.com/) is "an IT automation engine that automates provisioning, configuration management, application deployment, orchestration, and many other IT processes".
-In practice, Ansible users run `ansible-playbook` commands that output a succession of results grouped by task.
+[Ansible](https://www.ansible.com/) is a popular Infrastructure-as-Code tool that generates a lot of output that is often hard to follow. You can wrap your invocation of Ansible with `moulti run` to make the output more digestible.
 
-[Ansible uses a plugin architecture to enable a rich, flexible and expandable feature set](https://docs.ansible.com/ansible/latest/plugins/plugins.html) so Moulti provides an [stdout callback plugin](https://docs.ansible.com/ansible/latest/plugins/callback.html#types-of-callback-plugins).
+Basic usage: `moulti run ansible-playbook your-playbook.yaml`
+
+For concise output that lets you lightly monitor progress: `MOULTI_RUN_OUTPUT=harvest MOULTI_ANSIBLE_COLLAPSE=task moulti run ansible-playbook your-playbook.yaml`
+
+#### When not calling `ansible-playbook` directly
+
+For Moulti to behave properly, it needs to know when it is working with Ansible output.
+`moulti run` tries to be smart by checking for the string `ansible` in the command name; i.e. `ansible-playbook`, which is typical.
+
+If you have your own script that wraps and invokes `ansible-playbook`, either name it with the string `ansible` in it or set the environment variable `MOULTI_ANSIBLE=force`.
+
+#### Configuring behavior
+
+This table reflects the main environment variables that you can set to control Moulti's integration with Ansible:
+
+| Environment variable      | Value     | Description                                                     |
+| ------------------------- | --------- | --------------------------------------------------------------- |
+| `MOULTI_RUN_OUTPUT`       | `harvest` | Collects Ansible's initial output just as for any Ansible task  |
+| `MOULTI_ANSIBLE_COLLAPSE` | `task`    | Collapses tasks by default, for concise output                  |
+| `MOULTI_ANSIBLE_NO_TITLE` | 1         | Disables the setting of the window title to the invoked command |
+| `MOULTI_ANSIBLE`          | `force`   | Forces Moulti to expect Ansible output                          |
+| `MOULTI_ANSIBLE`          | `no`      | Prevents Moulti from processing Ansible output                  |
+
+
+#### Under the hood
+
+Ansible uses a [plugin architecture](https://docs.ansible.com/ansible/latest/plugins/plugins.html) to enable a rich, flexible and expandable feature set. Moulti integrates with Ansible by providing a [stdout callback plugin](https://docs.ansible.com/ansible/latest/plugins/callback.html#types-of-callback-plugins) (known to work with ansible-core 2.16 and 2.17).
 When loaded and executed by `ansible-playbook`, this plugin runs `moulti` commands that display the results of each Ansible task in a separate Moulti step.
-This plugin is known to work with ansible-core 2.16 and 2.17.
 
-In practice, combining Ansible with Moulti is as simple as:
-```bash
-moulti run -- ansible-playbook your-playbook.yaml
-```
+`moulti run` lets Ansible know about this plugin by internally setting some environment variables:
 
-Under the hood, `moulti run` performs some magic. It sets three environment variables:
 - `ANSIBLE_STDOUT_CALLBACK`: id of the stdout callback plugin to use: `moulti`
 - `ANSIBLE_CALLBACK_PLUGINS`: colon-separated list of paths that Ansible searches for callback plugins.
   If this environment variable is set already, moulti simply appends its own plugin path to it.
 - `ANSIBLE_FORCE_COLOR=yes`: generate colors in "PLAY RECAP" and diff (`-D` command-line option)
 
-However, unlike SSH and sudo, this integration is not always desirable so `moulti run` relies on the following heuristics:
-- If the environment variable `MOULTI_ANSIBLE` is set to `force`, it systematically sets both environment variables.
-- If the environment variable `MOULTI_ANSIBLE` is set to `no`, it sets neither.
-- Otherwise, it sets both environment variables if the name of the executed program contains `ansible` **AND** `ANSIBLE_STDOUT_CALLBACK` is not set already.
+This integration is automatically enabled when one of the following conditions is met:
 
+- The name of the executed program (e.g. `ansible-playbook`) contains `ansible`, unless:
+    - `ANSIBLE_STDOUT_CALLBACK` is already set, or
+    - the environment variable `MOULTI_ANSIBLE` is set to `no` (This is useful to override moulti's heuristics
+      and disable integration.)
+- The environment variable `MOULTI_ANSIBLE` is set to `force` (This is useful if invoking a script that wraps Ansible
+  but doesn't contain the string `ansible` in its name.)
 
-If you feel confused, experiment with `moulti run --print-env`:
+To illustrate, here are different scenarios where we use the `--print-env` flag to check whether Ansible integration would be enabled or disabled:
 
-1. Forbid Ansible-Moulti integration:
-```console
-$ MOULTI_ANSIBLE=no moulti run --print-env -- ansible-playbook your-playbook.yaml | grep ^ANSIBLE
-$
-```
+1. Moulti auto-enables Ansible integration ✅
+    ```console
+    $ moulti run --print-env ansible-playbook your-playbook.yaml | grep ^ANSIBLE
+    ANSIBLE_CALLBACK_PLUGINS=/path/to/python/package/moulti/ansible
+    ANSIBLE_STDOUT_CALLBACK=moulti
+    ANSIBLE_FORCE_COLOR=yes
+    ```
 
-2. Enforce Ansible-Moulti integration:
-```console
-$ MOULTI_ANSIBLE=force moulti run --print-env -- your-script.sh | grep ^ANSIBLE
-ANSIBLE_CALLBACK_PLUGINS=/path/to/python/package/moulti/ansible
-ANSIBLE_STDOUT_CALLBACK=moulti
-ANSIBLE_FORCE_COLOR=yes
-$
-```
+    or
+    ```console
+    $ moulti run --print-env your-ansible-wrapper.sh | grep ^ANSIBLE
+    ANSIBLE_CALLBACK_PLUGINS=/path/to/python/package/moulti/ansible
+    ANSIBLE_STDOUT_CALLBACK=moulti
+    ANSIBLE_FORCE_COLOR=yes
+    ```
 
-3. Leverage the heuristics:
-```console
-$ moulti run --print-env -- ansible-playbook your-playbook.yaml | grep ^ANSIBLE
-ANSIBLE_CALLBACK_PLUGINS=/path/to/python/package/moulti/ansible
-ANSIBLE_STDOUT_CALLBACK=moulti
-ANSIBLE_FORCE_COLOR=yes
-$ moulti run --print-env -- your-ansible-wrapper.sh | grep ^ANSIBLE
-ANSIBLE_CALLBACK_PLUGINS=/path/to/python/package/moulti/ansible
-ANSIBLE_STDOUT_CALLBACK=moulti
-ANSIBLE_FORCE_COLOR=yes
-$ moulti run --print-env -- your-script.sh | grep ^ANSIBLE
-$
-```
+2. Moulti does not auto-enable Ansible integration ❌
+    ```console
+    $ moulti run --print-env your-script.sh | grep ^ANSIBLE
+    $
+    ```
 
-Tips:
-- Depending on its verbosity level (from `-v` to `-vvvvv`), Ansible is liable to output lines before Moulti's stdout callback plugin is invoked.
-  Therefore, it is recommended to set `MOULTI_RUN_OUTPUT=harvest`.
-- By default, the callback plugin changes the title of the Moulti instance; set the environment variable `MOULTI_ANSIBLE_NO_TITLE` to any value to prevent that.
-- By default, all widgets appear expanded; set the environment variable `MOULTI_ANSIBLE_COLLAPSE=task` to collapse tasks from the start.
+3. You override Moulti's auto-enabling of Ansible integration ❌
+    ```console
+    $ MOULTI_ANSIBLE=no moulti run --print-env ansible-playbook your-playbook.yaml | grep ^ANSIBLE
+    $
+    ```
+
+4. You force Moulti to enable Ansible integration ✅
+    ```console
+    $ MOULTI_ANSIBLE=force moulti run --print-env your-script.sh | grep ^ANSIBLE
+    ANSIBLE_CALLBACK_PLUGINS=/path/to/python/package/moulti/ansible
+    ANSIBLE_STDOUT_CALLBACK=moulti
+    ANSIBLE_FORCE_COLOR=yes
+    $
+    ```
 
 ## Python scripting
 

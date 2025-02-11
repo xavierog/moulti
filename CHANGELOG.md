@@ -8,6 +8,10 @@ Although Moulti's Python packages, modules and functions are obviously available
 
 ## Unreleased
 
+### Changed
+
+- `moulti run`: `MOULTI_RUN_OUTPUT=harvest` is now the default behaviour instead of `ignore`.
+
 ### Fixed
 
 - `moulti run`: make output harvesting more reactive.

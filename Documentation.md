@@ -196,10 +196,6 @@ To interface `first-lines` with Moulti, one can write `moulti-first-lines`:
 ```bash
 #!/usr/bin/env bash
 
-# Optional precaution: instruct the Moulti instance to harvest any output not
-# explicitly assigned to a step:
-export MOULTI_RUN_OUTPUT=harvest
-
 # If not done already, start a Moulti instance and have it re-execute this script:
 export MOULTI_INSTANCE="moulti-first-lines"
 [ "${MOULTI_RUN}" ] || exec moulti run -- "$0" "$@"
@@ -256,15 +252,12 @@ But hopefully, `moulti_process_lines()` should help with most use cases.
 
 ### moulti run: dealing with stdin, stdout, stderr
 
-By default, scripts launched through "moulti run":
-
-- have their standard input (stdin, file descriptor #0) redirected to `/dev/null`;
-- inherit the standard and error outputs (stdout and stderr, file descriptors #1 and #2) from Moulti (e.g. `/dev/pts/42`);
+In principle, scripts that leverage Moulti:
 - should not try to `read` from stdin;
 - should either refrain from writing to stdout/stderr or...
 - should redirect stdout/stderr to a suitable destination.
 
-Possible approaches in bash:
+Possible implementations in bash:
 
 ```bash
 # Discard stdout and stderr entirely:
@@ -282,13 +275,19 @@ moulti step add main_script_output
 exec > >(tee --append custom.log | moulti pass main_script_output) 2>&1
 ```
 
-If, for some reason, the recommendations above cannot be applied, the environment variable `MOULTI_RUN_OUTPUT` should help:
-- `MOULTI_RUN_OUTPUT=discard` redirects stdout and stderr to /dev/null, thus discarding any unexpected output;
-- `MOULTI_RUN_OUTPUT=harvest` harvests stdout and stderr lines and passes them to the `moulti_run_output` step;
-- any other value leads to the default behaviour: stdout and stderr are left untouched and their output is liable to degrade Moulti's visual display.
+... but writing this boilerplate is not exactly pleasant.
+This is why in practice, by default, scripts launched through `moulti run`:
+
+- have their standard input (stdin, file descriptor #0) redirected to `/dev/null`;
+- have their standard and error outputs (stdout and stderr, file descriptors #1 and #2) piped to the `moulti_run_output` step.
 
 The `moulti_run_output` step is special in that it is created upon reception of the first byte of output if it does not exist already.
 It can be created beforehand, can be updated or cleared at any time and cannot be deleted while the script is running.
+
+This behaviour can be configured through the environment variable `MOULTI_RUN_OUTPUT`:
+- `MOULTI_RUN_OUTPUT=harvest` or any other value: as described above;
+- `MOULTI_RUN_OUTPUT=discard`: redirect stdout and stderr to /dev/null, thus discarding any unexpected output;
+- `MOULTI_RUN_OUTPUT=ignore`: stdout and stderr are left untouched and their output is liable to degrade Moulti's visual display.
 
 ### moulti run: dealing with ssh
 
@@ -353,7 +352,7 @@ Consequently, sudo should work out of the box with `moulti run`.
 
 Basic usage: `moulti run ansible-playbook your-playbook.yaml`
 
-For concise output that lets you lightly monitor progress: `MOULTI_RUN_OUTPUT=harvest MOULTI_ANSIBLE_COLLAPSE=task moulti run ansible-playbook your-playbook.yaml`
+For concise output that lets you lightly monitor progress: `MOULTI_ANSIBLE_COLLAPSE=task moulti run ansible-playbook your-playbook.yaml`
 
 #### When not calling `ansible-playbook` directly
 
@@ -368,7 +367,6 @@ This table reflects the main environment variables that you can set to control M
 
 | Environment variable      | Value     | Description                                                     |
 | ------------------------- | --------- | --------------------------------------------------------------- |
-| `MOULTI_RUN_OUTPUT`       | `harvest` | Collects Ansible's initial output just as for any Ansible task  |
 | `MOULTI_ANSIBLE_COLLAPSE` | `task`    | Collapses tasks by default, for concise output                  |
 | `MOULTI_ANSIBLE_NO_TITLE` | 1         | Disables the setting of the window title to the invoked command |
 | `MOULTI_ANSIBLE`          | `force`   | Forces Moulti to expect Ansible output                          |

@@ -316,16 +316,16 @@ class Moulti(App):
 		"""
 		`moulti run` launches an arbitrary command. In an ideal world, this command should not output anything on
 		stdout/stderr. In practice, this method returns:
-		- None if Moulti should ignore stdout/stderr (default)
+		- None if Moulti should ignore stdout/stderr
 		- False if Moulti should discard stdout/stderr
-		- True if Moulti should harvest stdout/stderr and append it to the "moulti_run_output" step
+		- True if Moulti should harvest stdout/stderr and append it to the "moulti_run_output" step (default)
 		"""
-		policy = None
+		policy: bool|None = True
 		if value := env('MOULTI_RUN_OUTPUT'):
 			if value == 'discard':
 				policy = False
-			elif value == 'harvest':
-				policy = True
+			elif value == 'ignore':
+				policy = None
 		return policy
 
 	def output_policy_popen_args(self) -> dict[str, Any]:

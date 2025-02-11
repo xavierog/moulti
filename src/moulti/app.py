@@ -404,7 +404,7 @@ class Moulti(App):
 				output_selector.register(process.stdout, selectors.EVENT_READ)
 
 			while not worker.is_cancelled:
-				if output_selector is not None and output_selector.select(0):
+				if output_selector is not None and output_selector.select(0.5):
 					# If the child process outputs anything other than end-of-file, pass it to a special step:
 					assert process.stdout is not None and hasattr(process.stdout, 'raw') # for mypy
 					if initial_data := process.stdout.raw.read(1):
@@ -420,7 +420,8 @@ class Moulti(App):
 					self.init_command_running = False
 					self.logconsole(f'exec: {command} exited with return code {returncode}')
 					break
-				time.sleep(0.5)
+				if output_selector is None:
+					time.sleep(0.5)
 			if returncode is None:
 				self.logconsole(f'exec: {command} is still running (PID {process.pid}) but Moulti is about to exit')
 				if self.exit_first_policy == 'terminate':

@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for its CLI (Command-Line Interface), i.e. for the `moulti` command.
 Although Moulti's Python packages, modules and functions are obviously available, they do not constitute a public API yet.
 
+## Unreleased
+
+### Fixed
+
+- `moulti run`: make output harvesting more reactive.
+
 ## [1.31.0] - 2025-02-03
 
 This release finally fixes a bug initially reported in August 2024. It took significant efforts to diagnose the root cause.

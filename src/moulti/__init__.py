@@ -3,4 +3,4 @@ __copyright__ = 'Copyright (c) 2024-2025 Xavier G.'
 __email__ = 'xavier.moulti@kindwolf.org'
 __licence__ = 'MIT'
 __maintainer__ = __author__
-__version__ = '1.31.0'
+__version__ = '1.32.0'

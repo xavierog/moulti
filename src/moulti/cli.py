@@ -202,6 +202,8 @@ def adjust_cli_args(args: list[str]) -> None:
 	their command line, e.g. "moulti run -- ls -al" instead of "moulti run ls -al".
 	Detect such cases and inject "--" if it is missing.
 	"""
+	if len(args) < 2:
+		return
 	if args[1] == 'run':
 		inject_double_dash_before_command(args, 2)
 	elif args[1] in ('manpage', 'diff') and args[2] == 'run':

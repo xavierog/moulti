@@ -1,0 +1,14 @@
+{
+    "command": "step",
+    "action": "add",
+    "id": "ansible_4095737_1",
+    "classes": "ansible_task ansible success",
+    "title": "TASK: reseda : install required tools",
+    "scroll_on_activity": -1,
+    "collapsed": true,
+    "top_text": "Started 2025-02-20 23:13:11.328",
+    "bottom_text": "Finished 2025-02-20 23:13:17.309 - duration: 0:00:05.981",
+    "auto_scroll": true,
+    "min_height": 1,
+    "max_height": 25
+}

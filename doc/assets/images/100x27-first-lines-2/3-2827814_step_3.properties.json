@@ -1,0 +1,14 @@
+{
+    "command": "step",
+    "action": "add",
+    "id": "2827814_step_3",
+    "classes": "standard",
+    "title": "David Copperfield",
+    "scroll_on_activity": false,
+    "collapsed": false,
+    "top_text": "",
+    "bottom_text": " ",
+    "auto_scroll": true,
+    "min_height": 1,
+    "max_height": 25
+}

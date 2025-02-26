@@ -1,0 +1,17 @@
+{
+    "command": "inputquestion",
+    "action": "add",
+    "id": "askpass_31396968",
+    "classes": "askpass",
+    "title": "bandit0@bandit.labs.overthewire.org's password: ",
+    "scroll_on_activity": false,
+    "collapsed": false,
+    "top_text": "",
+    "bottom_text": " ",
+    "text": "",
+    "placeholder": "",
+    "value": "*******",
+    "password": true,
+    "max_length": 0,
+    "restrict": ""
+}

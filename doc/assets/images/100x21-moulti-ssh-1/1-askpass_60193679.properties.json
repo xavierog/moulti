@@ -1,0 +1,17 @@
+{
+    "command": "inputquestion",
+    "action": "add",
+    "id": "askpass_60193679",
+    "classes": "askpass",
+    "title": "The authenticity of host '\\[bandit.labs.overthewire.org]:2220 (\\[16.16.163.126]:2220)' can't be established.",
+    "scroll_on_activity": false,
+    "collapsed": false,
+    "top_text": "ED25519 key fingerprint is SHA256:C2ihUBV7ihnV1wUXRb4RrEcLfXC5CXlhmAAM/urerLY.\nAre you sure you want to continue connecting (yes/no/\\[fingerprint])? ",
+    "bottom_text": " ",
+    "text": "",
+    "placeholder": "",
+    "value": "yes",
+    "password": false,
+    "max_length": 0,
+    "restrict": ""
+}

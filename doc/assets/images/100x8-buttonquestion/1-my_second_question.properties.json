@@ -1,0 +1,39 @@
+{
+    "command": "buttonquestion",
+    "action": "add",
+    "id": "my_second_question",
+    "classes": "standard",
+    "title": "My second question with Moulti",
+    "scroll_on_activity": false,
+    "collapsed": false,
+    "top_text": "",
+    "bottom_text": "What a mess: https://en.wikipedia.org/wiki/Alice_and_Bob",
+    "text": "What is your name?",
+    "button": [
+        [
+            "alice",
+            "success",
+            "Alice"
+        ],
+        [
+            "bob",
+            "primary",
+            "Bob"
+        ],
+        [
+            "craig",
+            "default",
+            "Craig"
+        ],
+        [
+            "mallory",
+            "error",
+            "Mallory"
+        ],
+        [
+            "oscar",
+            "warning",
+            "Oscar"
+        ]
+    ]
+}

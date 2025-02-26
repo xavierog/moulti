@@ -1,0 +1,8 @@
+{
+    "command": "divider",
+    "action": "add",
+    "id": "manpage_4104952_1",
+    "classes": "manpage title",
+    "title": "[underline]BASH[not underline][/underline](1)                            General Commands Manual                           [underline][/not underline]BASH[not underline][/underline](1)[/not underline]",
+    "scroll_on_activity": false
+}

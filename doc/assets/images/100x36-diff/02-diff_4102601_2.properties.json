@@ -1,0 +1,8 @@
+{
+    "command": "divider",
+    "action": "add",
+    "id": "diff_4102601_2",
+    "classes": "diff",
+    "title": "include/linux/audit.h",
+    "scroll_on_activity": false
+}

@@ -1,0 +1,13 @@
+{
+    "command": "step",
+    "action": "add",
+    "id": "ansible_835697_7",
+    "classes": "ansible_task ansible success",
+    "title": "TASK: apt : configure apt",
+    "scroll_on_activity": -1,
+    "collapsed": true,
+    "top_text": "Started 2024-05-05 16:13:08.870",
+    "bottom_text": "Finished 2024-05-05 16:13:11.128 - duration: 0:00:02.258",
+    "min_height": 1,
+    "max_height": 25
+}

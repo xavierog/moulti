@@ -1,0 +1,14 @@
+{
+    "command": "step",
+    "action": "add",
+    "id": "manpage_4104952_6",
+    "classes": "manpage",
+    "title": "[bold]OPTIONS[/bold]",
+    "scroll_on_activity": false,
+    "collapsed": true,
+    "top_text": "",
+    "bottom_text": "",
+    "auto_scroll": true,
+    "min_height": 1,
+    "max_height": 0
+}

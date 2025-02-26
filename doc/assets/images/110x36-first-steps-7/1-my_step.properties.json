@@ -1,0 +1,14 @@
+{
+    "command": "step",
+    "action": "add",
+    "id": "my_step",
+    "classes": "success",
+    "title": "My first step",
+    "scroll_on_activity": false,
+    "collapsed": false,
+    "top_text": "Here is the output of [red bold]ip -color address[/]:",
+    "bottom_text": "[blink]blink[/] [bold]bold[/] [conceal]conceal[/] [italic]italic[/] [overline]overline[/] [reverse]reverse[/] [strike]strike[/] [underline]underline[/] [underline2]underline2[/] [blue]blue[/] [on yellow1]on yellow1[/] [blue on yellow1]blue on yellow1[/]",
+    "auto_scroll": true,
+    "min_height": 1,
+    "max_height": 25
+}

@@ -76,8 +76,12 @@ release = [
 	"build",
 	"twine",
 ]
+doc = [
+	"mkdocs-material[imaging]",
+	"mkdocs-inline-select-svg-plugin",
+]
 dev = [
-	"moulti[tinker,check,test,release]",
+	"moulti[tinker,check,test,release,doc]",
 ]
 ci = [
 	"moulti[check,test]",

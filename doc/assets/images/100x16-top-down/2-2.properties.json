@@ -1,0 +1,14 @@
+{
+    "command": "step",
+    "action": "add",
+    "id": "2",
+    "classes": "standard",
+    "title": "2",
+    "scroll_on_activity": false,
+    "collapsed": false,
+    "top_text": "",
+    "bottom_text": "",
+    "auto_scroll": true,
+    "min_height": 1,
+    "max_height": 25
+}

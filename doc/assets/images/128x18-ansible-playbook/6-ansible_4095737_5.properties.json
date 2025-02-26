@@ -1,0 +1,14 @@
+{
+    "command": "step",
+    "action": "add",
+    "id": "ansible_4095737_5",
+    "classes": "ansible_task ansible warning",
+    "title": "TASK: reseda : create reseda crontab entry",
+    "scroll_on_activity": -1,
+    "collapsed": false,
+    "top_text": "Started 2025-02-20 23:13:24.062",
+    "bottom_text": "Finished 2025-02-20 23:13:25.655 - duration: 0:00:01.593",
+    "auto_scroll": true,
+    "min_height": 1,
+    "max_height": 25
+}

@@ -1,0 +1,8 @@
+{
+    "command": "divider",
+    "action": "add",
+    "id": "my_first_divider",
+    "classes": "warning",
+    "title": "This text is simply displayed.\nMulti-line is possible. So is [i]rich formatting[/]",
+    "scroll_on_activity": false
+}

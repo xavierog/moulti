@@ -1,0 +1,14 @@
+{
+    "command": "step",
+    "action": "add",
+    "id": "diff_4102601_4",
+    "classes": "diff",
+    "title": " [yellow1]@@ 235,6 236,8 @@[/] [#00FF66]+2[/][#FFD0EB]-0[/] [gray]extern int audit_get_stamp(struct audit_context *ctx,[/]",
+    "scroll_on_activity": false,
+    "collapsed": false,
+    "top_text": "",
+    "bottom_text": " ",
+    "auto_scroll": true,
+    "min_height": 1,
+    "max_height": 0
+}

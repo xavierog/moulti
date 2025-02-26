@@ -1,0 +1,23 @@
+/* Define a step class named "customstate" rendered with red text on a yellow background: */
+Step.customstate {
+    & CollapsibleTitle {
+        color: red;
+    }
+    color: red;
+    background: yellow;
+    & MoultiLog { scrollbar-corner-color: yellow; }
+}
+
+/* Customise steps shown by moulti-askpass: */
+.askpass {
+    color: gray;
+    background: black;
+    padding: 2;
+    border: panel blue;
+}
+
+/* Change the colors of the Moulti header: */
+#header {
+    background: red;
+    color: yellow;
+}

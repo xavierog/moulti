@@ -1,0 +1,14 @@
+{
+    "command": "step",
+    "action": "add",
+    "id": "ansible_4095737_4",
+    "classes": "ansible_task ansible success",
+    "title": "TASK: reseda : push reseda script",
+    "scroll_on_activity": -1,
+    "collapsed": true,
+    "top_text": "Started 2025-02-20 23:13:21.081",
+    "bottom_text": "Finished 2025-02-20 23:13:23.926 - duration: 0:00:02.845",
+    "auto_scroll": true,
+    "min_height": 1,
+    "max_height": 25
+}

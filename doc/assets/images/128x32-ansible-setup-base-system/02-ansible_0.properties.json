@@ -1,0 +1,8 @@
+{
+    "command": "divider",
+    "action": "add",
+    "id": "ansible_835697_0",
+    "classes": "ansible ansible_play",
+    "title": "PLAY: Set up base system",
+    "scroll_on_activity": -1
+}

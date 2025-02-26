@@ -1,0 +1,14 @@
+{
+    "command": "step",
+    "action": "add",
+    "id": "ansible_4095737_3",
+    "classes": "ansible_task ansible success",
+    "title": "TASK: reseda : create Unix user \"reseda\"",
+    "scroll_on_activity": -1,
+    "collapsed": true,
+    "top_text": "Started 2025-02-20 23:13:19.126",
+    "bottom_text": "Finished 2025-02-20 23:13:20.944 - duration: 0:00:01.817",
+    "auto_scroll": true,
+    "min_height": 1,
+    "max_height": 25
+}

@@ -1,0 +1,71 @@
+extra_css:
+- assets/asciinema/asciinema-player.css
+extra_javascript:
+- assets/asciinema/asciinema-player.min.js
+markdown_extensions:
+- admonition
+- pymdownx.superfences # support nesting code blocks in lists
+nav:
+- Home: index.md
+- Installation: install.md
+- First steps: first-steps.md
+- Widgets:
+  - Steps: steps.md
+  - Questions: questions.md
+  - Dividers: dividers.md
+  - Progress bar: progressbar.md
+- Tools:
+  - Introduction: tools.md
+  - Ansible: ansible.md
+  - diff: diff.md
+  - manpage: manpage.md
+- Documentation:
+  - Introduction: documentation.md
+  - Shell scripting: shell-scripting.md
+  - Migrating existing scripts: existing-scripts.md
+  - Python scripting: python-scripting.md
+  - Saving and loading: saving-and-loading.md
+  - Direction and position: direction-and-position.md
+  - Scrolling: scrolling.md
+  - Text search: text-search.md
+  - Classes: classes.md
+  - Design: design.md
+  - Technical requirements: technical-requirements.md
+- Reference:
+  - Commands: commands.md
+  - Subcommands: subcommands.md
+  - Environment variables: environment-variables.md
+plugins:
+- inline-select-svg
+- search
+- social
+repo_name: Moulti Git repository
+repo_url: https://github.com/xavierog/moulti
+site_name: Moulti
+site_url: https://moulti.run/
+theme:
+  features:
+  - navigation.footer
+  - navigation.instant
+  - navigation.sections
+  - search.highlight
+  icon:
+    logo: material/console
+    admonition:
+      example: material/console
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: dark)"
+      primary: blue
+      accent: orange
+      scheme: slate
+      toggle:
+        icon: material/weather-night
+        name: Dark mode; click to switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      primary: blue
+      accent: orange
+      scheme: default
+      toggle:
+        icon: material/weather-sunny
+        name: Light mode; click to switch to dark mode

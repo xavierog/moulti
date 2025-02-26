@@ -1,0 +1,13 @@
+{
+    "command": "step",
+    "action": "add",
+    "id": "ansible_835697_20",
+    "classes": "ansible_task ansible warning",
+    "title": "TASK: hostname : set FQDN",
+    "scroll_on_activity": -1,
+    "collapsed": true,
+    "top_text": "Started 2024-05-05 16:13:56.724",
+    "bottom_text": "Finished 2024-05-05 16:13:57.956 - duration: 0:00:01.232",
+    "min_height": 1,
+    "max_height": 25
+}

@@ -1,0 +1,34 @@
+{
+    "command": "question",
+    "action": "add",
+    "id": "my_third_question",
+    "classes": "standard",
+    "title": "My third question with Moulti",
+    "scroll_on_activity": false,
+    "collapsed": false,
+    "top_text": "",
+    "bottom_text": "I live on the second floor",
+    "text": "What is your name?",
+    "placeholder": "Enter your name in this input field, or click a button",
+    "value": "Luka",
+    "password": false,
+    "max_length": 0,
+    "restrict": "",
+    "button": [
+        [
+            "My name is Alice",
+            "default",
+            "Alice"
+        ],
+        [
+            "My name is Bob",
+            "default",
+            "Bob"
+        ],
+        [
+            "My name is {input}",
+            "success",
+            "Neither, use input"
+        ]
+    ]
+}

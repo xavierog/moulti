@@ -1,0 +1,9 @@
+{
+    "command": "set",
+    "title": "Moulti",
+    "progress_bar": true,
+    "progress_target": -1,
+    "progress": 0,
+    "step_position": "top",
+    "step_direction": "down"
+}

@@ -1,0 +1,13 @@
+{
+    "command": "step",
+    "action": "add",
+    "id": "ansible_835697_2",
+    "classes": "ansible_task ansible warning",
+    "title": "TASK: timezone : set desired timezone",
+    "scroll_on_activity": -1,
+    "collapsed": true,
+    "top_text": "Started 2024-05-05 16:13:05.164",
+    "bottom_text": "Finished 2024-05-05 16:13:06.739 - duration: 0:00:01.575",
+    "min_height": 1,
+    "max_height": 25
+}

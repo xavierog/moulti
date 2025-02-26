@@ -1,0 +1,14 @@
+{
+    "command": "step",
+    "action": "add",
+    "id": "demo_step",
+    "classes": "standard",
+    "title": "Title (set with --title)",
+    "scroll_on_activity": false,
+    "collapsed": false,
+    "top_text": "Top text (set with --top-text)",
+    "bottom_text": "Bottom text (set with --bottom-text)",
+    "auto_scroll": true,
+    "min_height": 1,
+    "max_height": 25
+}

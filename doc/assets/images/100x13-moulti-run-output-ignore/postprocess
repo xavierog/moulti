@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+perl -i -ple '
+	$background = q[<rect fill="#000000" x="12.2" y="1.5" width="810" height="24.65" shape-rendering="crispEdges"/>];
+	$text = q[ 22:20:10 This output is not passed to any step; where will it end?];
+    $text = sprintf(q[%-100s], $text);
+	$text =~ s/ /\&\#160\;/g;
+	if ( m/(&#160;)+Moulti(&#160;)+/ ) {
+		print qq[\t]x3 . $background;
+		s/(\&\#160\;)+Moulti(\&\#160\;)+/$text/xe;
+	}
+' "${1?}"

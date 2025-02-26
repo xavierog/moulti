@@ -1,0 +1,13 @@
+{
+    "command": "step",
+    "action": "add",
+    "id": "ansible_835697_9",
+    "classes": "ansible_task ansible warning",
+    "title": "TASK: apt : remove sources.list",
+    "scroll_on_activity": -1,
+    "collapsed": true,
+    "top_text": "Started 2024-05-05 16:13:30.541",
+    "bottom_text": "Finished 2024-05-05 16:13:31.776 - duration: 0:00:01.235",
+    "min_height": 1,
+    "max_height": 25
+}

@@ -1,0 +1,14 @@
+{
+    "command": "step",
+    "action": "add",
+    "id": "8",
+    "classes": "standard",
+    "title": "22:20:08: step #8",
+    "scroll_on_activity": false,
+    "collapsed": true,
+    "top_text": "",
+    "bottom_text": "",
+    "auto_scroll": true,
+    "min_height": 1,
+    "max_height": 25
+}

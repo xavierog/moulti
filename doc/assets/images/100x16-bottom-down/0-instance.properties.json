@@ -1,0 +1,9 @@
+{
+    "command": "set",
+    "title": "position: bottom | direction: down",
+    "progress_bar": false,
+    "progress_target": null,
+    "progress": 0.0,
+    "step_position": "bottom",
+    "step_direction": "down"
+}

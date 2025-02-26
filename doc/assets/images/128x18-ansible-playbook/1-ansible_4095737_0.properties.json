@@ -1,0 +1,8 @@
+{
+    "command": "divider",
+    "action": "add",
+    "id": "ansible_4095737_0",
+    "classes": "ansible_play ansible",
+    "title": "PLAY: Set up Reseda on clarke",
+    "scroll_on_activity": -1
+}

@@ -8,6 +8,10 @@ Although Moulti's Python packages, modules and functions are obviously available
 
 ## Unreleased
 
+### Changed
+
+- [moulti.run](https://moulti.run/) is the new official documentation. It replaces `Documentation.md`.
+
 ### Fixed
 
 - Running `moulti` without any argument used to crash since v1.30.0.

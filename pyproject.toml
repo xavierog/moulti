@@ -92,8 +92,8 @@ bsd-ci = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/xavierog/moulti/?tab=readme-ov-file#moulti"
-Documentation = "https://github.com/xavierog/moulti/blob/master/Documentation.md"
+Homepage = "https://moulti.run/"
+Documentation = "https://moulti.run/"
 Repository = "https://github.com/xavierog/moulti.git"
 Issues = "https://github.com/xavierog/moulti/issues"
 Changelog = "https://github.com/xavierog/moulti/blob/master/CHANGELOG.md"

@@ -8,8 +8,7 @@ class HelpScreen(ModalScreen):
 	Modal screen presenting the various keybindings available in Moulti.
 	"""
 
-	TEXT = """[u]Documentation[/]:
-  https://github.com/xavierog/moulti/blob/master/Documentation.md
+	TEXT = """[u]Documentation[/]: https://moulti.run/
 
 [u]Keybindings[/]:
   [key]tab[/], [key]shift+tab[/]: next/previous step/component

@@ -26,7 +26,7 @@ By the way, Moulti can also display man pages and unified diff files (with color
 
 TL;DR: `pipx install moulti; pipx ensurepath`
 
-More details in the [Documentation](Documentation.md#installation)
+More details in the [Documentation](https://moulti.run/install/)
 
 ## How?
 
@@ -37,7 +37,7 @@ Synopsis:
 3. Fill it: `whatever_your_script_does | moulti pass step_name`
 4. Repeat #2 and #3 until your script is done.
 
-Learn how to leverage Moulti by jumping to its [Documentation](Documentation.md).
+Learn how to leverage Moulti by jumping to its [Documentation](https://moulti.run/)
 
 ## Features
 
@@ -48,18 +48,18 @@ As shown in the demo, Moulti enables user interactions through **questions**:
 ![Moulti button question](https://xavier.kindwolf.org/p/moulti/doc/img/moulti-button-question.png?20240218)
 
 Moulti also features:
-- text **search**, similar to `less`: [documentation](Documentation.md#text-search)
+- text **search**, similar to `less`: [documentation](https://moulti.run/text-search/)
 - ability to maximize a single step log, similar to tmux's zoom feature
-- a **progress bar**: [documentation](Documentation.md#progress-bar)
-- programmatic scrolling: [documentation](Documentation.md#programmatically-scrolling-through-steps)
-- an askpass helper named `moulti-askpass`: [documentation](Documentation.md#moulti-run-dealing-with-ssh)
-- support for [Ansible playbooks](Documentation.md#moulti-run-dealing-with-ansible), [man pages](Documentation.md#moulti-manpage) and [unified diff](Documentation.md#moulti-diff)
+- a **progress bar**: [documentation](https://moulti.run/progressbar/)
+- programmatic scrolling: [documentation](https://moulti.run/scrolling/#programmatically-scrolling-through-steps)
+- an askpass helper named `moulti-askpass`: [documentation](https://moulti.run/shell-scripting/#ssh)
+- support for [Ansible playbooks](https://moulti.run/ansible/), [man pages](https://moulti.run/manpage/) and [unified diff](https://moulti.run/diff/)
 
 When it comes to look and feel, Moulti can be customised:
 
-- through `moulti set`: define whether Moulti steps flow up or down: [documentation](Documentation.md#multiple-ways-to-display-steps)
-- through [Textual CSS (TCSS)](https://textual.textualize.io/guide/CSS/): [documentation](Documentation.md#how-to-define-my-own-step-classes-)
-- through ANSI themes: [documentation](Documentation.md#appearance-look-and-feel)
+- through `moulti set`: define whether Moulti steps flow up or down: [documentation](https://moulti.run/direction-and-position/)
+- through [Textual CSS (TCSS)](https://textual.textualize.io/guide/CSS/): [documentation](https://moulti.run/classes/#custom-classes)
+- through ANSI themes: [documentation](https://moulti.run/environment-variables/#moulti_ansi)
 
 ## Implementation
 

@@ -1,7 +1,7 @@
 # Steps
 
 Steps are collapsible blocks meant to display arbitrary outputs.
-These widgets are the bread and butter of Moulti and are best introduced by [first steps](first-steps.md), which showcases how to create, update, fill, clear and delete them.
+These widgets are the bread and butter of Moulti and are best introduced by [first steps](first-steps.md), which showcases how to add, update, fill, clear and delete them.
 This section expands on the matter by covering intermediate topics.
 
 ![A step](assets/images/step.svg)

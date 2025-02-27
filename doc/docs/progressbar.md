@@ -50,7 +50,7 @@ moulti set --progress +20
 moulti set --progress -5
 ```
 
-!!! info "Refer to [moulti-progressbar.bash](https://github.com/xavierog/moulti/examples/moulti-progressbar.bash) for a demonstration of the typical use case."
+!!! info "Refer to [moulti-progressbar.bash](https://github.com/xavierog/moulti/blob/master/examples/moulti-progressbar.bash) for a demonstration of the typical use case."
 
 ## Is it a widget?
 

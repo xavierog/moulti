@@ -5,7 +5,7 @@ But what about pre-existing scripts? Theoretically, it is always possible to rew
 But in practice, rewriting can be time-consuming, error-prone and, overall, expensive.
 In that case, another approach is to write a wrapper that runs the existing script, creates Moulti steps on the fly and dispatches its output.
 
-To this end, [moulti-functions.bash](https://github.com/xavierog/moulti/examples/moulti-functions.bash) provides a bash function named `moulti_process_lines` that:
+To this end, [moulti-functions.bash](https://github.com/xavierog/moulti/blob/master/examples/moulti-functions.bash) provides a bash function named `moulti_process_lines` that:
 
 1. reads lines from the standard input
 2. matches these lines against the pattern found in variable `$MOULTI_NEW_STEP_PATTERN`

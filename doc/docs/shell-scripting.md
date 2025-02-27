@@ -38,7 +38,7 @@ moulti step add step_2 --title='Second step'
 } 2>&1 | moulti pass step_2
 ```
 
-In real life, it makes sense to heavily leverage shell functions, such as those available in [moulti-functions.bash](https://github.com/xavierog/moulti/examples/moulti-functions.bash).
+In real life, it makes sense to heavily leverage shell functions, such as those available in [moulti-functions.bash](https://github.com/xavierog/moulti/blob/master/examples/moulti-functions.bash).
 
 ## Standard streams
 

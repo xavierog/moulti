@@ -46,7 +46,7 @@ In particular, Moulti does not:
 - strip colors from input:
     1. look for command-line options and environment variables that explicitly address the issue, e.g. `--color=never` or `NO_COLOR=1`
     2. use tools to strip ANSI escape codes, e.g. `ansi2txt` from [colorized-logs](https://github.com/kilobyte/colorized-logs)
-- keep track of when your processes started, how long they ran and/or what return code they exited with... but see `moulti_exec` in [moulti-functions.bash](https://github.com/xavierog/moulti/examples/moulti-functions.bash) for an example of it.
+- keep track of when your processes started, how long they ran and/or what return code they exited with... but see `moulti_exec` in [moulti-functions.bash](https://github.com/xavierog/moulti/blob/master/examples/moulti-functions.bash) for an example of it.
 
 !!! warning "There is, however, one notable exception:"
     Moulti expands horizontal tab characters (HT, `\t`) into a fixed number of spaces, which defaults to 8. 

@@ -27,7 +27,7 @@ try {
 	setup_demo();
 } catch (ReferenceError) {
 	/* The Asciinema JS file has not loaded yet: defer setup until after the page has loaded: */
-	window.onload = setup_demo;
+	addEventListener('load', (event) => { setup_demo(); });
 }
 </script>
 

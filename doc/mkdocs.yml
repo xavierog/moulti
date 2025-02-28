@@ -35,6 +35,7 @@ nav:
   - Commands: commands.md
   - Subcommands: subcommands.md
   - Environment variables: environment-variables.md
+  - Shell functions: moulti-functions.md
 plugins:
 - inline-select-svg
 - search

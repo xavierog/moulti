@@ -1,0 +1,14 @@
+{
+    "command": "step",
+    "action": "add",
+    "id": "1885115540",
+    "classes": "error",
+    "title": "false",
+    "scroll_on_activity": false,
+    "collapsed": false,
+    "top_text": "Started 2025-02-28T19:18:26.590+01:00",
+    "bottom_text": "Exited  2025-02-28T19:18:26.729+01:00 with RC 1 after 0:00:00.139",
+    "auto_scroll": true,
+    "min_height": 1,
+    "max_height": 25
+}

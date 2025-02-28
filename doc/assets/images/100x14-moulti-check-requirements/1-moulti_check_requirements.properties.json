@@ -1,0 +1,24 @@
+{
+    "command": "buttonquestion",
+    "action": "add",
+    "id": "moulti_check_requirements",
+    "classes": "error",
+    "title": "[b]Unmet requirements[/]",
+    "scroll_on_activity": false,
+    "collapsed": false,
+    "top_text": "The following tools are required but appear to be missing:\n- kubectl\n- ack or rg\n- lsb_release -is | grep Fedora (expected rc 0, got 1)",
+    "bottom_text": "",
+    "text": "Do you want to continue anyway?",
+    "button": [
+        [
+            "yes",
+            "error",
+            "Yes, continue"
+        ],
+        [
+            "no",
+            "success",
+            "No, abort"
+        ]
+    ]
+}

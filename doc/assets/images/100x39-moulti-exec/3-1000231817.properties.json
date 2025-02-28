@@ -1,0 +1,14 @@
+{
+    "command": "step",
+    "action": "add",
+    "id": "1000231817",
+    "classes": "success",
+    "title": "rsync -av moulti/doc/ remote:moulti-doc/",
+    "scroll_on_activity": false,
+    "collapsed": false,
+    "top_text": "Started 2025-02-28T19:18:26.805+01:00",
+    "bottom_text": "Exited  2025-02-28T19:18:29.400+01:00 with RC 0 after 0:00:02.595",
+    "auto_scroll": true,
+    "min_height": 1,
+    "max_height": 25
+}

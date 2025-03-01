@@ -78,3 +78,8 @@ while read src; do
 		fi
 	fi
 done < <(find "${in_dir}/" -mindepth 1 -maxdepth 2 -type d -printf '%P\n')
+
+# Part 4: get extra resources:
+if [ ! -e "${out_dir}/why-moulti-name.svg" ]; then
+	curl -sL 'https://xavier.kindwolf.org/p/moulti/doc/img/why-moulti-name.svg' > "${out_dir}/why-moulti-name.svg"
+fi

@@ -44,6 +44,7 @@ plugins:
 repo_name: Moulti Git repository
 repo_url: https://github.com/xavierog/moulti
 site_name: Moulti
+site_description: Moulti is a CLI-driven Terminal User Interface (TUI) displaying arbitrary outputs inside visual, collapsible blocks called steps.
 site_url: https://moulti.run/
 theme:
   features:

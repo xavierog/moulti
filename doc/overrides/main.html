@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block htmltitle %}
+  {% if page.is_homepage and page.meta and page.meta.title %}
+    <title>{{ page.meta.title }}</title>
+  {% else %}
+    {{ super() }}
+  {% endif %}
+{% endblock %}

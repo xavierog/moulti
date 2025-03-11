@@ -1,4 +1,8 @@
-# Overview
+---
+title: "Moulti, CLI-driven Terminal UI displaying arbitrary outputs"
+---
+
+# Moulti: overview
 
 ## What is Moulti?
 

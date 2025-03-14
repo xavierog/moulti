@@ -756,7 +756,7 @@ class Moulti(App):
 				self.reply(connection, raddr, message, done=error is None, error=error)
 
 	@work(thread=True, group='app-network', name='network-loop')
-	async def network_loop(self) -> None:
+	def network_loop(self) -> None:
 		current_worker = get_current_worker()
 		self.server = MoultiServer(
 			instance_name=self.instance_name,

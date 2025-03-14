@@ -13,6 +13,7 @@ from rich.ansi import re_ansi
 from rich.text import Text
 from rich.cells import get_character_cell_size
 from moulti.helpers import ANSI_ESCAPE_SEQUENCE_BYTES, ANSI_RESET_SEQUENCES_BYTES, TAB_SPACES_BYTES, clean_selector
+from moulti.thread_name import thread_name, set_thread_name
 from moulti.search import TextSearch
 from . import MOULTI_PASS_DEFAULT_READ_SIZE
 from ..collapsiblestep.tui import CollapsibleStep, SEARCH_SUBWIDGETS
@@ -209,12 +210,14 @@ class Step(CollapsibleStep):
 			return lambda: True
 
 	@work(thread=True, group='step-ingestion', name='fd-to-queue')
+	@thread_name() # Discard custom thread name after execution
 	def append_from_file_descriptor_to_queue(
 		self,
 		queue: Queue,
 		kwargs: dict[str, Any],
 		helpers: dict[str, Any],
 	) -> None:
+		set_thread_name("|" + self.title_from_id()) # custom thread name
 		current_worker = get_current_worker()
 		error = None
 		original_file_descriptor = None
@@ -361,7 +364,9 @@ class Step(CollapsibleStep):
 		return max_cell_len
 
 	@work(thread=True, group='step-ingestion', name='queue-to-step')
+	@thread_name() # Discard custom thread name after execution
 	def append_from_queue(self, queue: Queue, helpers: dict[str, Any]) -> None:
+		set_thread_name(">" + self.title_from_id()) # custom thread name
 		current_worker = get_current_worker()
 		self.prevent_deletion += 1
 		color = b''

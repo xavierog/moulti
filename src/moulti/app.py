@@ -32,6 +32,7 @@ from .search import TextSearch, MatchSpan
 from .security import MoultiSecurityPolicy
 from .server import Message, FDs, MoultiServer, current_instance
 from .themes import MOULTI_THEMES
+from .thread_name import thread_name, KEEP_THREAD_NAME
 from .widgets import MoultiWidgetException
 from .widgets.tui import MoultiWidgets
 from .widgets.footer import Footer
@@ -260,6 +261,7 @@ class Moulti(App):
 			self.register_theme(theme)
 		self.theme = 'moulti-dark' if self.dark else 'moulti-light'
 
+	@thread_name('moulti:main', end=KEEP_THREAD_NAME)
 	def on_ready(self) -> None:
 		self.logconsole(f'Moulti v{MOULTI_VERSION}, Textual v{TEXTUAL_VERSION}, Python v{sys.version}')
 		self.logconsole(f'instance "{self.instance_name}", PID {os.getpid()}')
@@ -374,6 +376,7 @@ class Moulti(App):
 		step.append_from_file_descriptor_to_queue(queue, {}, helpers)
 
 	@work(thread=True, group='app-exec', name='moulti-run')
+	@thread_name('exec-command')
 	def exec(self, command: list[str]) -> None:
 		"""
 		Launch the given command with the assumption it is meant to drive the current Moulti instance.
@@ -562,6 +565,7 @@ class Moulti(App):
 		self.exit()
 
 	@work(thread=True, group='app-save', name='save')
+	@thread_name('export-to-dir')
 	def action_save(self) -> None:
 		"""
 		Export everything currently shown by the instance as a bunch of files in a directory.
@@ -756,6 +760,7 @@ class Moulti(App):
 				self.reply(connection, raddr, message, done=error is None, error=error)
 
 	@work(thread=True, group='app-network', name='network-loop')
+	@thread_name('network-loop', end=KEEP_THREAD_NAME)
 	def network_loop(self) -> None:
 		current_worker = get_current_worker()
 		self.server = MoultiServer(

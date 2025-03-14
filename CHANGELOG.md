@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for its CLI (Command-Line Interface), i.e. for the `moulti` command.
 Although Moulti's Python packages, modules and functions are obviously available, they do not constitute a public API yet.
 
+## Unreleased
+
+### Changed
+
+- Unless `MOULTI_NAME_THREADS=no` is set, system threads get assigned meaningful names:
+  `moulti:main`, `network-loop`,`exec-command`, `export-to-dir`, `|step_name`, `>step_name`, `thread-pool`.
+
 ## [1.33.0] - 2025-02-26
 
 ### Changed

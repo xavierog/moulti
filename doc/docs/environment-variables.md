@@ -147,6 +147,11 @@ Same as `MOULTI_DIFF_VERBOSE` for `moulti manpage`
 
 `light` to start Moulti in light mode, `dark` to start Moulti in dark mode; defaults to `dark`.
 
+### MOULTI_NAME_THREADS
+
+By default, Moulti assigns names to its [system threads](threads.md).
+Setting `MOULTI_NAME_THREADS=no` disables this behavior.
+
 ### MOULTI_PASS_CONCURRENCY
 
 Define how many concurrent "moulti pass" commands is acceptable; defaults to 20.

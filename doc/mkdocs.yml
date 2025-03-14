@@ -31,6 +31,7 @@ nav:
   - Classes: classes.md
   - Design: design.md
   - Technical requirements: technical-requirements.md
+  - Threads: threads.md
   - Why this name?: why-this-name.md
 - Reference:
   - Commands: commands.md

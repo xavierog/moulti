@@ -1,5 +1,5 @@
 ---
-title: "Moulti, CLI-driven Terminal UI displaying arbitrary outputs"
+title: "Moulti, CLI-driven TUI displaying arbitrary outputs"
 ---
 
 # Moulti: overview

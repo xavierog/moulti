@@ -699,7 +699,7 @@ class Moulti(App):
 						method_name = f'cli_action_{action.replace("-", "_")}'
 						method = getattr(step, method_name, False)
 						if not callable(method):
-							raise MoultiMessageException('unknown action {action}')
+							raise MoultiMessageException(f'unknown action {action}')
 						# Provide the method with helper functions that abstract away app/network-specific stuff:
 						def reply(**kwargs: Any) -> None:
 							self.reply(connection, raddr, message, **kwargs)

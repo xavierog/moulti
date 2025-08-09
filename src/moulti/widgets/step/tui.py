@@ -296,11 +296,11 @@ class Step(CollapsibleStep):
 		leftover: bytes = b''
 		if data:
 			# Deal only with lines ending with a line feed (lf, \n) and return leftover bytes:
-			if data[-1] != b'\n':
-				last_lf_index = data.rfind(b'\n')
-				leftover = data[last_lf_index+1:]
-				data = data[:last_lf_index]
-			if data:
+			last_lf_index = data.rfind(b'\n')
+			if last_lf_index == -1: # No \n in data
+				leftover = data
+			else:
+				data, leftover = data[:last_lf_index], data[last_lf_index+1:]
 				# At this stage, all lines end with \n.
 				for line_bytes in data.split(b'\n'):
 					# Expand tabs into spaces: both Rich and Textual provide frighteningly

@@ -11,6 +11,7 @@ Although Moulti's Python packages, modules and functions are obviously available
 ### Fixed
 
 - Fix rare "unknown action" error message.
+- Fix partial line handling.
 
 ## [1.34.0] - 2025-03-16
 

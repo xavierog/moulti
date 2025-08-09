@@ -51,5 +51,5 @@ moulti buttonquestion update confirmation --collapsed
 # Finally proceed with the upgrade itself:
 STEP_COLLAPSE_ON_SUCCESS=2 moulti_exec apt full-upgrade -y
 STEP_COLLAPSE_ON_SUCCESS=1
-moulti_exec apt autoremove --purge
+moulti_exec apt autoremove --purge -y
 moulti_exec apt clean

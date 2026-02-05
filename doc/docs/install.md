@@ -29,7 +29,7 @@ On macOS, it is available through [Homebrew](https://brew.sh/), i.e. in the wors
 
 #### ArchLinux
 
-Moulti is available on the Arch User Repository (AUR) as [python-moulti](https://aur.archlinux.org/packages/python-moulti).
+Moulti is available on the [Arch User Repository (AUR)](https://aur.archlinux.org/packages/moulti).
 
 Other distribution packages are of course welcome.
 
